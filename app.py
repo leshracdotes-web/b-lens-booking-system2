@@ -64,12 +64,12 @@ def send_confirmation_email(customer_email, customer_name, date, schedule, pkg, 
         msg = MIMEMultipart()
         msg['From'] = SENDER_EMAIL
         msg['To'] = customer_email
-        msg['Subject'] = "Booking Confirmed! - B-Lens Self Portrait Studio"
+        msg['Subject'] = "Booking Submitted! - B-Lens Self Portrait Studio"
 
         body = f"""
         Hi {customer_name},
 
-        Great news! Your reservation at B-Lens Self Portrait Studio has been CONFIRMED.
+        Great news! Your reservation at B-Lens Self Portrait Studio has been SUBMITTED successfully.
 
         Reservation Details:
         - Date: {date}
@@ -156,7 +156,7 @@ def get_slots():
 
         for b in bookings_db:
             if b.get("date") == date_str and b.get("status") != "Cancelled":
-                if b.get("schedule") == s["time"] or b.get("time") == s["time"]:
+                if b.get("schedule"] == s["time"] or b.get("time") == s["time"]:
                     is_disabled = True
                     reason = " (Already Booked)"
 
@@ -194,14 +194,20 @@ def save_booking():
             file_path = f"proofs/{int(time.time())}_{filename}"
 
             try:
-                # I-upload ang file direkta sa Supabase Storage Bucket na 'booking-proofs'
+                # Upload file to Supabase Storage Bucket 'booking-proofs'
                 supabase.storage.from_("booking-proofs").upload(
                     file=payment_file.read(),
                     path=file_path,
                     file_options={"content-type": payment_file.content_type}
                 )
-                # Kunin ang pampublikong URL ng file para ma-access kahit saan
-                screenshot_url = supabase.storage.from_("booking-proofs").get_public_url(file_path)
+
+                # Correctly extract public URL from Supabase response dictionary/object
+                res = supabase.storage.from_("booking-proofs").get_public_url(file_path)
+                if isinstance(res, dict):
+                    screenshot_url = res.get("publicUrl") or res.get("data", {}).get("publicUrl", "")
+                else:
+                    screenshot_url = res
+
             except Exception as storage_err:
                 return jsonify({"success": False, "message": f"Storage Error: {str(storage_err)}"}), 500
         else:
@@ -243,7 +249,7 @@ def save_booking():
             "grand_total": request.form.get("grand_total"),
             "downpayment": downpayment_amount,
             "balance": request.form.get("balance"),
-            "payment_screenshot": screenshot_url,  # Buong URL na ang naka-save
+            "payment_screenshot": screenshot_url,  # Sinasave na ngayon ang tamang URL string
             "status": "Pending"
         }
 
