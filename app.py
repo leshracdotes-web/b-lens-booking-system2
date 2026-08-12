@@ -115,21 +115,39 @@ def get_slots():
     try:
         response = supabase.table("bookings").select("*").execute()
         bookings_db = response.data if response.data else []
-    except:
+    except Exception as e:
+        print("Supabase error:", e)
         bookings_db = []
 
-    slots = []
-    now = datetime.now()
-    today_str = now.strftime('%Y-%m-%d')
+    # Safe Date Parsing para sa iba't ibang format (YYYY-MM-DD o MM/DD/YYYY)
+    selected_date_obj = None
+    if date_str:
+        for fmt in ('%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y'):
+            try:
+                selected_date_obj = datetime.strptime(date_str, fmt).date()
+                break
+            except ValueError:
+                pass
 
-    # Safe calculation para iwasan ang ValueError kapag dis-oras ng gabi
+    now = datetime.now()
+    today_date = now.date()
     current_datetime_with_buffer = now + timedelta(hours=2)
 
     booked_times = set()
     blocked_by_buffer = set()
 
     for b in bookings_db:
-        if b.get("date") == date_str and b.get("status") != "Cancelled":
+        b_date_str = b.get("date")
+        b_date_obj = None
+        if b_date_str:
+            for fmt in ('%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y'):
+                try:
+                    b_date_obj = datetime.strptime(str(b_date_str), fmt).date()
+                    break
+                except ValueError:
+                    pass
+
+        if b_date_obj == selected_date_obj and b.get("status") != "Cancelled":
             b_time = b.get("schedule") or b.get("time")
             if b_time:
                 booked_times.add(b_time)
@@ -141,11 +159,13 @@ def get_slots():
                             blocked_by_buffer.add(default_slots[i + 1]["time"])
                             break
 
+    slots = []
     for s in default_slots:
         is_disabled = False
 
-        if date_str == today_str:
-            slot_datetime = datetime.combine(now.date(), s["time_obj"])
+        # Kung ngayon ang napiling araw, i-disable ang mga lumipas na time slots
+        if selected_date_obj and selected_date_obj == today_date:
+            slot_datetime = datetime.combine(selected_date_obj, s["time_obj"])
             if slot_datetime <= current_datetime_with_buffer:
                 is_disabled = True
 
