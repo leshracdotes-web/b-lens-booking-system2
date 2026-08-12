@@ -460,7 +460,7 @@
                     return;
                 }
 
-                globalBookingsData.forEach((b, index) => {
+                globalBookingsData.forEach((b) => {
                     let statusBgClass = 'bg-secondary';
                     if(b.status === 'Pending') statusBgClass = 'bg-warning text-dark';
                     else if(b.status === 'Confirmed') statusBgClass = 'bg-success text-white';
@@ -468,11 +468,11 @@
                     else if(b.status === 'Done Shoot/Fully Paid') statusBgClass = 'bg-primary text-white';
                     else if(b.status === 'Cancelled') statusBgClass = 'bg-danger text-white';
 
-                    // Dito ginagamit ang Supabase public URL mula sa b.payment_screenshot nang diretso
                     const proofHtml = b.payment_screenshot
                         ? `<img src="${b.payment_screenshot}" class="proof-img" onclick="showImage('${b.payment_screenshot}')">`
                         : 'No Proof';
 
+                    // Ginamit ang b.id mula sa Supabase sa halip na array index
                     const rowHTML = `
                         <td><strong>${b.date}</strong><br><span class="badge bg-dark">${b.schedule}</span></td>
                         <td><strong>${b.customer_name}</strong><br><small class="text-muted">${b.email}</small></td>
@@ -481,7 +481,7 @@
                         <td>Total: <strong>₱${Number(b.grand_total).toLocaleString()}</strong><br><span class="text-danger small">Balance: ₱${Number(b.balance).toLocaleString()}</span></td>
                         <td>${proofHtml}</td>
                         <td>
-                            <select class="form-select form-select-sm status-select ${statusBgClass}" onchange="updateBookingStatus(${index}, this)">
+                            <select class="form-select form-select-sm status-select ${statusBgClass}" onchange="updateBookingStatus(${b.id}, this)">
                                 <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
                                 <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="Reschedule" ${b.status === 'Reschedule' ? 'selected' : ''}>Reschedule</option>
@@ -489,7 +489,7 @@
                                 <option value="Cancelled" ${b.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                         </td>
-                        <td><button class="btn btn-outline-danger btn-sm" onclick="deleteBooking(${index})">🗑️</button></td>
+                        <td><button class="btn btn-outline-danger btn-sm" onclick="deleteBooking(${b.id})">🗑️</button></td>
                     `;
 
                     const tr = document.createElement('tr');
@@ -525,10 +525,10 @@
         const prevTotalDays = new Date(year, month, 0).getDate();
 
         const bookingMap = {};
-        globalBookingsData.forEach((b, originalIndex) => {
+        globalBookingsData.forEach((b) => {
             if(b.status !== 'Done Shoot/Fully Paid' && b.status !== 'Cancelled') {
                 if(!bookingMap[b.date]) bookingMap[b.date] = [];
-                bookingMap[b.date].push({ ...b, originalIndex });
+                bookingMap[b.date].push(b);
             }
         });
 
@@ -545,7 +545,7 @@
             let bookingsHtml = '';
             if(bookingMap[dateStr]) {
                 bookingMap[dateStr].forEach(b => {
-                    bookingsHtml += `<span class="calendar-booking-badge" onclick="showBookingDetails(${b.originalIndex})" title="Click to view details">⏰ ${b.schedule} - ${b.customer_name}</span>`;
+                    bookingsHtml += `<span class="calendar-booking-badge" onclick="showBookingDetails(${b.id})" title="Click to view details">⏰ ${b.schedule} - ${b.customer_name}</span>`;
                 });
             }
 
@@ -567,8 +567,8 @@
         renderCalendar();
     }
 
-    function showBookingDetails(index) {
-        const b = globalBookingsData[index];
+    function showBookingDetails(id) {
+        const b = globalBookingsData.find(item => item.id === id);
         if(!b) return;
 
         const proofSection = b.payment_screenshot
@@ -593,20 +593,20 @@
         new bootstrap.Modal(document.getElementById('bookingDetailModal')).show();
     }
 
-    function updateBookingStatus(index, selectElement) {
+    function updateBookingStatus(id, selectElement) {
         fetch('/api/admin/update-status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ index: index, status: selectElement.value })
+            body: JSON.stringify({ id: id, status: selectElement.value })
         }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
     }
 
-    function deleteBooking(index) {
+    function deleteBooking(id) {
         if(confirm('Delete this reservation?')) {
             fetch('/api/admin/delete-booking', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index: index })
+                body: JSON.stringify({ id: id })
             }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
         }
     }
