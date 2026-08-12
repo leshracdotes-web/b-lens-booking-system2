@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - B-Lens Management</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9f6f0;
+            font-family: 'Poppins', sans-serif;
+            color: #4a4039;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .table-custom th {
+            background-color: #8A7366 !important;
+            color: white !important;
+            font-weight: 500;
+        }
+        .table-archive th {
+            background-color: #6c757d !important;
+            color: white !important;
+            font-weight: 500;
+        }
+        .proof-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .status-select {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #8A7366 !important;
+            color: white !important;
+        }
+        .nav-pills .nav-link {
+            color: #4a4039;
+            font-weight: 500;
+        }
+
+        /* Premium Calendar View Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #8A7366;
+            padding: 12px 0;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+        .calendar-cell {
+            background: #ffffff;
+            border: 1px solid #e6ded5;
+            border-radius: 12px;
+            min-height: 145px;
+            padding: 12px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+        .calendar-cell:hover {
+            border-color: #8A7366;
+            box-shadow: 0 4px 12px rgba(138, 115, 102, 0.1);
+        }
+        .calendar-cell.other-month {
+            background: #f4f0eb;
+            opacity: 0.4;
+        }
+        .calendar-date-num {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #5c5049;
+            margin-bottom: 8px;
+        }
+        .calendar-booking-badge {
+            font-size: 0.8rem;
+            background: #8A7366;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background 0.2s;
+        }
+        .calendar-booking-badge:hover {
+            background: #6d5b50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-4">
+    <!-- TOP HEADER & NAVIGATION TABS -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-5">
+            <h2 class="fw-bold">📸 B-Lens Admin Dashboard</h2>
+            <p class="text-muted mb-0">Manage reservations, point of sales, and studio inventory.</p>
+        </div>
+        <div class="col-md-7">
+            <ul class="nav nav-pills justify-content-md-end gap-2 bg-white p-2 rounded shadow-sm">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#reservationsTab" onclick="switchTab('reservations')">📋 Reservations</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#posTab" onclick="switchTab('pos')">💰 Point of Sales (POS)</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#inventoryTab" onclick="switchTab('inventory')">📦 Inventory</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- TAB CONTENT CONTAINER -->
+    <div class="tab-content">
+
+        <!-- 1. RESERVATIONS TAB -->
+        <div class="tab-pane fade show active" id="reservationsTab">
+
+            <!-- VIEW TOGGLE BUTTONS & HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-secondary mb-0">Active Bookings Management</h4>
+                <div class="btn-group shadow-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active px-4" id="listViewBtn" onclick="toggleReservationView('list')">📋 List View</button>
+                    <button type="button" class="btn btn-outline-secondary px-4" id="calendarViewBtn" onclick="toggleReservationView('calendar')">📅 Calendar View</button>
+                </div>
+            </div>
+
+            <!-- LIST VIEW CONTAINER -->
+            <div id="listViewContainer">
+                <div class="card p-4 shadow-sm mb-5">
+                    <h5 class="text-secondary mb-3">Active Bookings (Pending, Confirmed, Reschedule)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Customer Name</th>
+                                    <th>Contact / Info</th>
+                                    <th>Package</th>
+                                    <th>Total / Balance</th>
+                                    <th>Proof of Payment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeBookingsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALENDAR VIEW CONTAINER -->
+            <div id="calendarViewContainer" class="card p-4 shadow-sm mb-5" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="text-secondary fw-bold mb-0" id="calendarMonthTitle">August 2026</h4>
+                    <div class="btn-group shadow-sm">
+                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(-1)">◀ Prev</button>
+                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(0)">Today</button>
+                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(1)">Next ▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                </div>
+                <div class="calendar-grid mt-2" id="calendarDaysGrid"></div>
+            </div>
+
+            <!-- ARCHIVED / COMPLETED RESERVATIONS TABLE -->
+            <div class="card p-4 shadow-sm border-top border-secondary">
+                <h4 class="text-secondary mb-3">📁 Completed & Cancelled Archive</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-archive">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Customer Name</th>
+                                <th>Contact / Info</th>
+                                <th>Package</th>
+                                <th>Total / Balance</th>
+                                <th>Proof of Payment</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archiveBookingsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. POINT OF SALES (POS) TAB -->
+        <div class="tab-pane fade" id="posTab">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card p-3 bg-success text-white">
+                        <h5>Total Incoming</h5>
+                        <h3 id="totalIncoming">₱0.00</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 bg-danger text-white">
+                        <h5>Total Outgoing / Expenses</h5>
+                        <h3 id="totalOutgoing">₱0.00</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 bg-warning text-dark">
+                        <h5>Current Balance</h5>
+                        <h3 id="currentBalance">₱0.00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4 shadow-sm mb-4">
+                <h4 class="text-secondary mb-3">➕ Add Manual Transaction / Sales (Backdated & Expenses)</h4>
+                <form id="transactionForm" class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" id="txDate" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="txType">
+                            <option value="Incoming">Incoming (Sales)</option>
+                            <option value="Outgoing">Outgoing (Expense)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" id="txCategory" placeholder="e.g. Self Shoot" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Description / Details</label>
+                        <input type="text" class="form-control" id="txDescription" placeholder="Customer name or item info" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Account / Payment</label>
+                        <select class="form-select" id="txAccount" required>
+                            <option value="Cash">Cash</option>
+                            <option value="Gcash">Gcash</option>
+                            <option value="Maya">Maya</option>
+                            <option value="Maribank">Maribank</option>
+                            <option value="BDO">BDO</option>
+                            <option value="Other Banks">Other Banks</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Amount (₱)</label>
+                        <input type="number" step="0.01" class="form-control" id="txAmount" placeholder="0.00" required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">Add Transaction</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card p-4 shadow-sm">
+                <h4 class="text-secondary mb-3">📋 Transactions List (July 18 Onwards Cycle)</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Mode of Payment</th>
+                                <th>Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. INVENTORY TAB -->
+        <div class="tab-pane fade" id="inventoryTab">
+            <div class="card p-4 shadow-sm mb-4">
+                <h4 class="text-secondary mb-3">➕ Add New Inventory Item</h4>
+                <form id="inventoryForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="invCategory">
+                            <option value="Studio Supplies">Studio Supplies</option>
+                            <option value="Daily Supplies">Daily Supplies</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="invName" placeholder="e.g. Ink (Set) or Pink Backdrop" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Initial Quantity</label>
+                        <input type="number" class="form-control" id="invQty" placeholder="0" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Unit</label>
+                        <input type="text" class="form-control" id="invUnit" placeholder="set, roll, sheets, pcs" required>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row">
+                <!-- Studio Supplies Column -->
+                <div class="col-md-6">
+                    <div class="card p-4 shadow-sm">
+                        <h4 class="text-primary mb-3">🖨️ Studio Supplies</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studioSuppliesTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Supplies Column -->
+                <div class="col-md-6">
+                    <div class="card p-4 shadow-sm">
+                        <h4 class="text-success mb-3">🧻 Daily Supplies</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dailySuppliesTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal para sa Proof of Payment -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid rounded" alt="Enlarged Proof">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para sa Booking Details (Clickable Calendar View) -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">📌 Session Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="modalBookingBody">
+                <!-- Details will be loaded here dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS & Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let globalBookingsData = [];
+    let currentCalendarDate = new Date();
+
+    function switchTab(tabName) {
+        if(tabName === 'reservations') loadAdminBookings();
+        if(tabName === 'pos') loadTransactions();
+        if(tabName === 'inventory') loadInventory();
+    }
+
+    function toggleReservationView(viewType) {
+        const listView = document.getElementById('listViewContainer');
+        const calendarView = document.getElementById('calendarViewContainer');
+        const listBtn = document.getElementById('listViewBtn');
+        const calendarBtn = document.getElementById('calendarViewBtn');
+
+        if(viewType === 'list') {
+            listView.style.display = 'block';
+            calendarView.style.display = 'none';
+            listBtn.classList.add('active');
+            calendarBtn.classList.remove('active');
+        } else {
+            listView.style.display = 'none';
+            calendarView.style.display = 'block';
+            calendarBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            renderCalendar();
+        }
+    }
+
+    // --- RESERVATIONS FUNCTIONS ---
+    function loadAdminBookings() {
+        fetch('/api/admin/bookings')
+            .then(res => res.json())
+            .then(data => {
+                globalBookingsData = data.bookings || [];
+                const activeTbody = document.getElementById('activeBookingsTable');
+                const archiveTbody = document.getElementById('archiveBookingsTable');
+                activeTbody.innerHTML = '';
+                archiveTbody.innerHTML = '';
+
+                let activeCount = 0, archiveCount = 0;
+                if(globalBookingsData.length === 0) {
+                    activeTbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No reservations found.</td></tr>`;
+                    archiveTbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No archived reservations found.</td></tr>`;
+                    return;
+                }
+
+                globalBookingsData.forEach((b, index) => {
+                    let statusBgClass = 'bg-secondary';
+                    if(b.status === 'Pending') statusBgClass = 'bg-warning text-dark';
+                    else if(b.status === 'Confirmed') statusBgClass = 'bg-success text-white';
+                    else if(b.status === 'Reschedule') statusBgClass = 'bg-info text-dark';
+                    else if(b.status === 'Done Shoot/Fully Paid') statusBgClass = 'bg-primary text-white';
+                    else if(b.status === 'Cancelled') statusBgClass = 'bg-danger text-white';
+
+                    // Dito ginagamit ang Supabase public URL mula sa b.payment_screenshot nang diretso
+                    const proofHtml = b.payment_screenshot
+                        ? `<img src="${b.payment_screenshot}" class="proof-img" onclick="showImage('${b.payment_screenshot}')">`
+                        : 'No Proof';
+
+                    const rowHTML = `
+                        <td><strong>${b.date}</strong><br><span class="badge bg-dark">${b.schedule}</span></td>
+                        <td><strong>${b.customer_name}</strong><br><small class="text-muted">${b.email}</small></td>
+                        <td>${b.contact_no}<br><small class="text-muted">${b.social_media || ''}</small></td>
+                        <td><span class="fw-bold text-primary">${b.package} (${b.package_type})</span></td>
+                        <td>Total: <strong>₱${Number(b.grand_total).toLocaleString()}</strong><br><span class="text-danger small">Balance: ₱${Number(b.balance).toLocaleString()}</span></td>
+                        <td>${proofHtml}</td>
+                        <td>
+                            <select class="form-select form-select-sm status-select ${statusBgClass}" onchange="updateBookingStatus(${index}, this)">
+                                <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="Reschedule" ${b.status === 'Reschedule' ? 'selected' : ''}>Reschedule</option>
+                                <option value="Done Shoot/Fully Paid" ${b.status === 'Done Shoot/Fully Paid' ? 'selected' : ''}>Done Shoot/Fully Paid</option>
+                                <option value="Cancelled" ${b.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td><button class="btn btn-outline-danger btn-sm" onclick="deleteBooking(${index})">🗑️</button></td>
+                    `;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = rowHTML;
+                    if (b.status === 'Done Shoot/Fully Paid' || b.status === 'Cancelled') {
+                        archiveTbody.appendChild(tr);
+                        archiveCount++;
+                    } else {
+                        activeTbody.appendChild(tr);
+                        activeCount++;
+                    }
+                });
+
+                if(document.getElementById('calendarViewContainer').style.display === 'block') {
+                    renderCalendar();
+                }
+            });
+    }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendarDaysGrid');
+        const title = document.getElementById('calendarMonthTitle');
+        grid.innerHTML = '';
+
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        title.innerText = `${monthNames[month]} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const prevTotalDays = new Date(year, month, 0).getDate();
+
+        const bookingMap = {};
+        globalBookingsData.forEach((b, originalIndex) => {
+            if(b.status !== 'Done Shoot/Fully Paid' && b.status !== 'Cancelled') {
+                if(!bookingMap[b.date]) bookingMap[b.date] = [];
+                bookingMap[b.date].push({ ...b, originalIndex });
+            }
+        });
+
+        for(let i = firstDayIndex; i > 0; i--) {
+            const dayNum = prevTotalDays - i + 1;
+            grid.innerHTML += `<div class="calendar-cell other-month"><div class="calendar-date-num">${dayNum}</div></div>`;
+        }
+
+        for(let day = 1; day <= totalDays; day++) {
+            const formattedMonth = String(month + 1).padStart(2, '0');
+            const formattedDay = String(day).padStart(2, '0');
+            const dateStr = `${year}-${formattedMonth}-${formattedDay}`;
+
+            let bookingsHtml = '';
+            if(bookingMap[dateStr]) {
+                bookingMap[dateStr].forEach(b => {
+                    bookingsHtml += `<span class="calendar-booking-badge" onclick="showBookingDetails(${b.originalIndex})" title="Click to view details">⏰ ${b.schedule} - ${b.customer_name}</span>`;
+                });
+            }
+
+            grid.innerHTML += `
+                <div class="calendar-cell">
+                    <div class="calendar-date-num">${day}</div>
+                    <div class="overflow-auto" style="max-height: 95px;">${bookingsHtml}</div>
+                </div>
+            `;
+        }
+    }
+
+    function changeMonth(direction) {
+        if(direction === 0) {
+            currentCalendarDate = new Date();
+        } else {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+        }
+        renderCalendar();
+    }
+
+    function showBookingDetails(index) {
+        const b = globalBookingsData[index];
+        if(!b) return;
+
+        const proofSection = b.payment_screenshot
+            ? `<div class="text-center"><p class="small text-muted mb-1">Proof of Payment:</p><img src="${b.payment_screenshot}" class="img-fluid rounded border" style="max-height: 180px; cursor: pointer;" onclick="showImage('${b.payment_screenshot}')"></div>`
+            : '';
+
+        const body = document.getElementById('modalBookingBody');
+        body.innerHTML = `
+            <p class="mb-2"><strong>Customer Name:</strong> <span class="text-dark">${b.customer_name}</span></p>
+            <p class="mb-2"><strong>Email:</strong> ${b.email || 'N/A'}</p>
+            <p class="mb-2"><strong>Contact No:</strong> ${b.contact_no}</p>
+            <p class="mb-2"><strong>Social Media:</strong> ${b.social_media || 'N/A'}</p>
+            <hr>
+            <p class="mb-2"><strong>Date & Time:</strong> <span class="text-primary fw-bold">${b.date} (${b.schedule})</span></p>
+            <p class="mb-2"><strong>Package:</strong> ${b.package} (${b.package_type})</p>
+            <p class="mb-2"><strong>Total Amount:</strong> ₱${Number(b.grand_total).toLocaleString()}</p>
+            <p class="mb-2"><strong>Balance:</strong> <span class="text-danger">₱${Number(b.balance).toLocaleString()}</span></p>
+            <p class="mb-3"><strong>Status:</strong> <span class="badge bg-secondary">${b.status}</span></p>
+            ${proofSection}
+        `;
+
+        new bootstrap.Modal(document.getElementById('bookingDetailModal')).show();
+    }
+
+    function updateBookingStatus(index, selectElement) {
+        fetch('/api/admin/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ index: index, status: selectElement.value })
+        }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
+    }
+
+    function deleteBooking(index) {
+        if(confirm('Delete this reservation?')) {
+            fetch('/api/admin/delete-booking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
+        }
+    }
+
+    // --- POS / TRANSACTIONS FUNCTIONS ---
+    function loadTransactions() {
+        fetch('/api/admin/transactions')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('transactionsTable');
+                tbody.innerHTML = '';
+                let totalInc = 0, totalOut = 0;
+
+                data.transactions.forEach(t => {
+                    if(t.type === 'Incoming') totalInc += Number(t.amount);
+                    else totalOut += Number(t.amount);
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${t.date}</td>
+                            <td><span class="badge ${t.type === 'Incoming' ? 'bg-success' : 'bg-danger'}">${t.type}</span></td>
+                            <td>${t.category}</td>
+                            <td>${t.description}</td>
+                            <td><span class="badge bg-light text-dark border">${t.account || 'Cash'}</span></td>
+                            <td>₱${Number(t.amount).toLocaleString()}</td>
+                            <td><button class="btn btn-outline-danger btn-sm" onclick="deleteTransaction(${t.id})">🗑️</button></td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('totalIncoming').innerText = `₱${totalInc.toLocaleString()}`;
+                document.getElementById('totalOutgoing').innerText = `₱${totalOut.toLocaleString()}`;
+                document.getElementById('currentBalance').innerText = `₱${(totalInc - totalOut).toLocaleString()}`;
+            });
+    }
+
+    document.getElementById('transactionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            date: document.getElementById('txDate').value,
+            type: document.getElementById('txType').value,
+            category: document.getElementById('txCategory').value,
+            description: document.getElementById('txDescription').value,
+            account: document.getElementById('txAccount').value,
+            amount: document.getElementById('txAmount').value
+        };
+        fetch('/api/admin/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                document.getElementById('transactionForm').reset();
+                loadTransactions();
+            }
+        });
+    });
+
+    function deleteTransaction(id) {
+        fetch('/api/admin/transactions/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        }).then(res => res.json()).then(data => { if(data.success) loadTransactions(); });
+    }
+
+    // --- INVENTORY FUNCTIONS ---
+    function loadInventory() {
+        fetch('/api/admin/inventory')
+            .then(res => res.json())
+            .then(data => {
+                const studioTbody = document.getElementById('studioSuppliesTable');
+                const dailyTbody = document.getElementById('dailySuppliesTable');
+                studioTbody.innerHTML = '';
+                dailyTbody.innerHTML = '';
+
+                if(data.inventory.length === 0) {
+                    studioTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No studio items found.</td></tr>`;
+                    dailyTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No daily items found.</td></tr>`;
+                    return;
+                }
+
+                data.inventory.forEach(item => {
+                    const itemNameLower = item.name.toLowerCase();
+                    const qty = Number(item.quantity);
+
+                    let isLowStock = false;
+                    if (itemNameLower.includes('backdrop')) {
+                        isLowStock = (qty <= 0);
+                    } else {
+                        isLowStock = (qty <= 5);
+                    }
+
+                    const rowClass = isLowStock ? 'table-warning' : '';
+
+                    const row = `
+                        <tr class="${rowClass}">
+                            <td>
+                                <strong>${item.name}</strong>
+                                ${isLowStock ? '<br><span class="badge bg-danger mt-1">⚠️ Low Stock! Restock needed</span>' : ''}
+                            </td>
+                            <td><span class="${isLowStock ? 'fw-bold text-danger' : ''}">${item.quantity} ${item.unit}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success px-2" onclick="updateStock(${item.id}, 1)">+</button>
+                                <button class="btn btn-sm btn-warning px-2" onclick="updateStock(${item.id}, -1)">-</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteInventory(${item.id})">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                    if(item.category === 'Studio Supplies') studioTbody.innerHTML += row;
+                    else dailyTbody.innerHTML += row;
+                });
+            });
+    }
+
+    document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            category: document.getElementById('invCategory').value,
+            name: document.getElementById('invName').value,
+            quantity: document.getElementById('invQty').value,
+            unit: document.getElementById('invUnit').value
+        };
+        fetch('/api/admin/inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                document.getElementById('inventoryForm').reset();
+                loadInventory();
+            }
+        });
+    });
+
+    function updateStock(id, change) {
+        const qty = prompt(change > 0 ? "Enter quantity to add:" : "Enter quantity to subtract/remove:", "1");
+        if(qty !== null && !isNaN(qty)) {
+            const actualChange = change * parseInt(qty);
+            fetch('/api/admin/inventory/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, quantity_change: actualChange })
+            }).then(res => res.json()).then(data => { if(data.success) loadInventory(); });
+        }
+    }
+
+    function deleteInventory(id) {
+        if(confirm('Remove this item from inventory?')) {
+            fetch('/api/admin/inventory/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            }).then(res => res.json()).then(data => { if(data.success) loadInventory(); });
+        }
+    }
+
+    function showImage(src) {
+        document.getElementById('modalImage').src = src;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+
+    loadAdminBookings();
+</script>
+
+</body>
+</html>

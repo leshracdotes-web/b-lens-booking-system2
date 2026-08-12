@@ -1,0 +1,28 @@
+
+========================================
+             INVOICE RECEIPT            
+========================================
+Timestamp: 2026-07-16 03:32:05
+Date: 2026-07-29
+Schedule Time: 03:00 PM
+----------------------------------------
+CUSTOMER DETAILS:
+Name: Charles Villaruel
+Actual Pax: 8
+----------------------------------------
+TRANSACTION BREAKDOWN:
+Package: Party (Upgraded)
+Session Length: 40 Minutes
+Base Rate: ₱ 1079
+Add-ons Cost: ₱ 2467
+----------------------------------------
+Grand Total: ₱ 3546
+Downpayment: ₱ 500
+Balance Due: ₱ 3046
+----------------------------------------
+Cash Received: ₱ 0
+Change (Sukli): ₱ 0
+Booking Status: Reserved
+========================================
+        Thank you for choosing us!       
+========================================
