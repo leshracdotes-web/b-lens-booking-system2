@@ -18,7 +18,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # SUPABASE CONFIGURATION
 # ==========================================
 SUPABASE_URL = "https://khjbygxczrbrdurcgqtt.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoamJ5Z3hjenJicmR1cmNncXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MDQzMjUsImV4cCI6MjEwMTk4MDMyNX0.EMZvOb4kIJtCKuC5sKdeO7hEp3WCiSDZC6xDARZkzSM"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ItoamJ5Z3hjenJicmR1cmNncXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MDQzMjUsImV4cCI6MjEwMTk4MDMyNX0.EMZvOb4kIJtCKuC5sKdeO7hEp3WCiSDZC6xDARZkzSM"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -92,7 +92,6 @@ def index():
     return render_template('index.html')
 
 
-# IDINAGDAG ANG NAWALANG ADMIN ROUTE DITO:
 @app.route('/admin')
 def admin_dashboard():
     return render_template('admin.html')
@@ -122,7 +121,9 @@ def get_slots():
     slots = []
     now = datetime.now()
     today_str = now.strftime('%Y-%m-%d')
-    current_time_with_buffer = dt_time(now.hour + 2, now.minute) if date_str == today_str else None
+
+    # Safe calculation para iwasan ang ValueError kapag dis-oras ng gabi
+    current_datetime_with_buffer = now + timedelta(hours=2)
 
     booked_times = set()
     blocked_by_buffer = set()
@@ -142,8 +143,12 @@ def get_slots():
 
     for s in default_slots:
         is_disabled = False
-        if date_str == today_str and current_time_with_buffer and s["time_obj"] <= current_time_with_buffer:
-            is_disabled = True
+
+        if date_str == today_str:
+            slot_datetime = datetime.combine(now.date(), s["time_obj"])
+            if slot_datetime <= current_datetime_with_buffer:
+                is_disabled = True
+
         if s["time"] in booked_times or s["time"] in blocked_by_buffer:
             is_disabled = True
 
