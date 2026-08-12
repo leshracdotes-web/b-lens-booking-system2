@@ -296,7 +296,24 @@
 </div>
 
 <script>
-    document.getElementById('bookDate').min = new Date().toISOString().split('T')[0];
+    // Awtomatikong i-set ang minimum date. Kung lampas na sa 7:00 PM (19:00),
+    // ang minimum date ay awtomatikong magiging bukas para maiwasan ang pagpili ng araw na sarado na ang slots.
+    const now = new Date();
+    const currentHour = now.getHours();
+    let minDateObj = new Date();
+
+    if (currentHour >= 19) {
+        minDateObj.setDate(minDateObj.getDate() + 1);
+    }
+
+    const year = minDateObj.getFullYear();
+    const month = String(minDateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(minDateObj.getDate()).padStart(2, '0');
+    const minDateStr = `${year}-${month}-${day}`;
+
+    const bookDateInput = document.getElementById('bookDate');
+    bookDateInput.min = minDateStr;
+    bookDateInput.value = minDateStr;
 
     const RATES = {
         "Solo": {
@@ -323,18 +340,37 @@
 
         if(!date) return;
 
+        slotSelect.innerHTML = '<option value="">Loading available slots...</option>';
+
         fetch(`/get-slots?date=${date}`)
             .then(res => res.json())
             .then(data => {
                 slotSelect.innerHTML = '';
-                data.slots.forEach(slot => {
+                if (data.slots && data.slots.length > 0) {
+                    data.slots.forEach(slot => {
+                        const opt = document.createElement('option');
+                        opt.value = slot.time;
+                        opt.innerText = slot.time + slot.reason;
+                        opt.disabled = slot.disabled;
+                        slotSelect.appendChild(opt);
+                    });
+                } else {
                     const opt = document.createElement('option');
-                    opt.value = slot.time;
-                    opt.innerText = slot.time + (slot.disabled ? ' (Not Available)' : '');
-                    opt.disabled = slot.disabled;
+                    opt.value = "";
+                    opt.innerText = "-- No Available Slots --";
+                    opt.disabled = true;
                     slotSelect.appendChild(opt);
-                });
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching slots:', err);
+                slotSelect.innerHTML = '<option value="">-- Failed to load slots --</option>';
             });
+    }
+
+    // Auto load slots para sa default date pagbukas ng pahina
+    if(bookDateInput.value) {
+        fetchAvailableSlots();
     }
 
     function toggleInfantInput() {
@@ -600,7 +636,7 @@
 
             if(data.success) {
                 Swal.fire({
-                    title: 'Booking Confirmed!',
+                    title: 'Booking Submitted!',
                     text: data.message,
                     icon: 'success',
                     confirmButtonColor: '#8A7366'

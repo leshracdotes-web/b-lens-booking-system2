@@ -137,13 +137,37 @@ def get_slots():
         buffered_hour = min(now.hour + 2, 23)
         current_time_with_buffer = dt_time(buffered_hour, now.minute)
 
+    booked_times = set()
     blocked_by_buffer = set()
+
     for b in bookings_db:
         if b.get("date") == date_str and b.get("status") != "Cancelled":
             b_time = b.get("schedule") or b.get("time")
-            for i, s in enumerate(default_slots):
-                if s["time"] == b_time and i + 1 < len(default_slots):
-                    blocked_by_buffer.add(default_slots[i + 1]["time"])
+            if b_time:
+                booked_times.add(b_time)
+
+                extra_t = b.get("extra_time", 0)
+                try:
+                    if isinstance(extra_t, str):
+                        extra_mins = int(''.join(filter(str.isdigit, extra_t)) or 0)
+                    else:
+                        extra_mins = int(extra_t or 0)
+                except:
+                    extra_mins = 0
+
+                total_duration = 15 + extra_mins
+
+                if total_duration > 30:
+                    for i, s in enumerate(default_slots):
+                        if s["time"] == b_time and i + 1 < len(default_slots):
+                            current_slot_obj = s["time_obj"]
+                            next_slot_obj = default_slots[i + 1]["time_obj"]
+
+                            diff_minutes = (next_slot_obj.hour * 60 + next_slot_obj.minute) - (
+                                        current_slot_obj.hour * 60 + current_slot_obj.minute)
+                            if diff_minutes <= 90:
+                                blocked_by_buffer.add(default_slots[i + 1]["time"])
+                            break
 
     for s in default_slots:
         is_disabled = False
@@ -154,13 +178,10 @@ def get_slots():
                 is_disabled = True
                 reason = " (Too late)"
 
-        for b in bookings_db:
-            if b.get("date") == date_str and b.get("status") != "Cancelled":
-                if b.get("schedule"] == s["time"] or b.get("time") == s["time"]:
-                    is_disabled = True
-                    reason = " (Already Booked)"
-
-        if s["time"] in blocked_by_buffer and not is_disabled:
+        if s["time"] in booked_times:
+            is_disabled = True
+            reason = " (Already Booked)"
+        elif s["time"] in blocked_by_buffer:
             is_disabled = True
             reason = " (Buffer Time)"
 
@@ -194,19 +215,14 @@ def save_booking():
             file_path = f"proofs/{int(time.time())}_{filename}"
 
             try:
-                # Upload file to Supabase Storage Bucket 'booking-proofs'
                 supabase.storage.from_("booking-proofs").upload(
                     file=payment_file.read(),
                     path=file_path,
                     file_options={"content-type": payment_file.content_type}
                 )
 
-                # Correctly extract public URL from Supabase response dictionary/object
-                res = supabase.storage.from_("booking-proofs").get_public_url(file_path)
-                if isinstance(res, dict):
-                    screenshot_url = res.get("publicUrl") or res.get("data", {}).get("publicUrl", "")
-                else:
-                    screenshot_url = res
+                # Manu-manong binuo ang tamang URL para maiwasan ang 404 error sa Admin Dashboard
+                screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/booking-proofs/{file_path}"
 
             except Exception as storage_err:
                 return jsonify({"success": False, "message": f"Storage Error: {str(storage_err)}"}), 500
@@ -249,7 +265,7 @@ def save_booking():
             "grand_total": request.form.get("grand_total"),
             "downpayment": downpayment_amount,
             "balance": request.form.get("balance"),
-            "payment_screenshot": screenshot_url,  # Sinasave na ngayon ang tamang URL string
+            "payment_screenshot": screenshot_url,
             "status": "Pending"
         }
 
