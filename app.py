@@ -92,6 +92,12 @@ def index():
     return render_template('index.html')
 
 
+# IDINAGDAG ANG NAWALANG ADMIN ROUTE DITO:
+@app.route('/admin')
+def admin_dashboard():
+    return render_template('admin.html')
+
+
 @app.route('/get-slots', methods=['GET'])
 def get_slots():
     date_str = request.args.get('date')
@@ -126,7 +132,6 @@ def get_slots():
             b_time = b.get("schedule") or b.get("time")
             if b_time:
                 booked_times.add(b_time)
-                # Logic for buffer time
                 extra_t = b.get("extra_time", 0)
                 extra_mins = int(''.join(filter(str.isdigit, str(extra_t))) or 0)
                 if (15 + extra_mins) > 30:
@@ -135,7 +140,6 @@ def get_slots():
                             blocked_by_buffer.add(default_slots[i + 1]["time"])
                             break
 
-    # FILTERING LOGIC: Isasama lang sa listahan kung HINDI disabled
     for s in default_slots:
         is_disabled = False
         if date_str == today_str and current_time_with_buffer and s["time_obj"] <= current_time_with_buffer:
@@ -151,8 +155,243 @@ def get_slots():
 
 @app.route('/save-booking', methods=['POST'])
 def save_booking():
-    # ... (Iyong existing save_booking logic ay mananatiling pareho)
-    return jsonify({"success": True, "message": "Booking successfully saved!"})
+    try:
+        pkg_type = request.form.get("package_type", "Starter")
+        extra_backdrop = int(request.form.get("extra_backdrop", 0) or 0)
+
+        max_allowed_extra = 1 if pkg_type == 'Starter' else 2
+        if extra_backdrop > max_allowed_extra:
+            return jsonify({
+                "success": False,
+                "message": f"Maximum extra backdrops exceeded! For {pkg_type} packages, you can only add up to {max_allowed_extra} extra backdrop(s)."
+            }), 400
+
+        payment_file = request.files.get('payment_screenshot')
+        screenshot_url = ""
+
+        if payment_file and payment_file.filename != '':
+            filename = secure_filename(payment_file.filename)
+            file_path = f"proofs/{int(time.time())}_{filename}"
+
+            try:
+                supabase.storage.from_("booking-proofs").upload(
+                    file=payment_file.read(),
+                    path=file_path,
+                    file_options={"content-type": payment_file.content_type}
+                )
+                screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/booking-proofs/{file_path}"
+            except Exception as storage_err:
+                return jsonify({"success": False, "message": f"Storage Error: {str(storage_err)}"}), 500
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Please upload your payment screenshot for the downpayment!"
+            }), 400
+
+        downpayment_amount = float(request.form.get("downpayment", 0) or 0)
+        booking_date = request.form.get("date")
+        customer_name = request.form.get("customer_name")
+        pkg_name = request.form.get("package")
+
+        new_booking = {
+            "date": booking_date,
+            "schedule": request.form.get("schedule"),
+            "name": customer_name,
+            "customer_name": customer_name,
+            "contact_no": request.form.get("contact_no"),
+            "email": request.form.get("email"),
+            "social_media": request.form.get("social_media"),
+            "package": pkg_name,
+            "package_type": pkg_type,
+            "is_student": request.form.get("is_student"),
+            "extra_pax": request.form.get("extra_pax"),
+            "extra_pet": request.form.get("extra_pet"),
+            "extra_time": request.form.get("extra_time"),
+            "has_digital_copies": request.form.get("has_digital_copies"),
+            "digital_copies": request.form.get("digital_copies"),
+            "enhanced_copies": request.form.get("enhanced_copies"),
+            "extra_enhanced_qty": request.form.get("extra_enhanced_qty"),
+            "extra_backdrop": extra_backdrop,
+            "backdrop_order": request.form.get("backdrop_order"),
+            "has_infant": request.form.get("has_infant"),
+            "infant_details": request.form.get("infant_details"),
+            "has_balloons": request.form.get("has_balloons"),
+            "balloon_qty": request.form.get("balloon_qty"),
+            "balloon_numbers": request.form.get("balloon_numbers"),
+            "grand_total": request.form.get("grand_total"),
+            "downpayment": downpayment_amount,
+            "balance": request.form.get("balance"),
+            "payment_screenshot": screenshot_url,
+            "status": "Pending"
+        }
+
+        supabase.table("bookings").insert(new_booking).execute()
+
+        transactions_db.append({
+            "id": len(transactions_db) + 1,
+            "date": booking_date,
+            "type": "Incoming",
+            "category": "Booking Downpayment",
+            "description": f"{customer_name} - {pkg_name} ({pkg_type})",
+            "amount": downpayment_amount,
+            "account": "Gcash/Maya/Bank"
+        })
+
+        return jsonify({"success": True, "message": "Booking successfully saved!"})
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
+
+
+@app.route('/api/admin/bookings', methods=['GET'])
+def api_admin_bookings():
+    try:
+        response = supabase.table("bookings").select("*").execute()
+        bookings_data = response.data if response.data else []
+        return jsonify({"bookings": bookings_data})
+    except Exception as e:
+        print("Error fetching bookings:", e)
+        return jsonify({"bookings": []})
+
+
+@app.route('/api/admin/update-status', methods=['POST'])
+def api_admin_update_status():
+    data = request.json
+    booking_id = data.get('id')
+    index = data.get('index')
+    new_status = data.get('status')
+
+    try:
+        response = supabase.table("bookings").select("*").execute()
+        bookings_data = response.data if response.data else []
+
+        target_booking = None
+        if booking_id:
+            for b in bookings_data:
+                if b.get('id') == booking_id:
+                    target_booking = b
+                    break
+        elif index is not None and 0 <= index < len(bookings_data):
+            target_booking = bookings_data[index]
+
+        if target_booking:
+            old_status = target_booking.get('status')
+            row_id = target_booking.get('id')
+
+            supabase.table("bookings").update({"status": new_status}).eq("id", row_id).execute()
+
+            if new_status == 'Confirmed' and old_status != 'Confirmed':
+                send_confirmation_email(
+                    target_booking['email'],
+                    target_booking['customer_name'],
+                    target_booking['date'],
+                    target_booking['schedule'],
+                    f"{target_booking['package']} ({target_booking['package_type']})",
+                    target_booking['grand_total'],
+                    target_booking['balance']
+                )
+
+            return jsonify({"success": True})
+        return jsonify({"success": False, "message": "Booking not found"}), 404
+    except Exception as e:
+        print("Error updating status:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/admin/delete-booking', methods=['POST'])
+def api_admin_delete_booking():
+    data = request.json
+    booking_id = data.get('id')
+    index = data.get('index')
+
+    try:
+        response = supabase.table("bookings").select("*").execute()
+        bookings_data = response.data if response.data else []
+
+        target_id = None
+        if booking_id:
+            target_id = booking_id
+        elif index is not None and 0 <= index < len(bookings_data):
+            target_id = bookings_data[index].get('id')
+
+        if target_id is not None:
+            supabase.table("bookings").delete().eq("id", target_id).execute()
+            return jsonify({"success": True})
+        return jsonify({"success": False, "message": "Booking not found"}), 404
+    except Exception as e:
+        print("Error deleting booking:", e)
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/api/admin/transactions', methods=['GET', 'POST'])
+def api_admin_transactions():
+    if request.method == 'GET':
+        return jsonify({"transactions": transactions_db})
+
+    data = request.json
+    new_tx = {
+        "id": len(transactions_db) + 1,
+        "date": data.get("date"),
+        "type": data.get("type"),
+        "category": data.get("category"),
+        "description": data.get("description"),
+        "amount": float(data.get("amount", 0)),
+        "account": data.get("account")
+    }
+    transactions_db.append(new_tx)
+    return jsonify({"success": True, "transaction": new_tx})
+
+
+@app.route('/api/admin/transactions/delete', methods=['POST'])
+def api_admin_delete_transaction():
+    data = request.json
+    tx_id = data.get("id")
+    global transactions_db
+    transactions_db = [t for t in transactions_db if t["id"] != tx_id]
+    return jsonify({"success": True})
+
+
+@app.route('/api/admin/inventory', methods=['GET', 'POST'])
+def api_admin_inventory():
+    if request.method == 'GET':
+        return jsonify({"inventory": inventory_db})
+
+    data = request.json
+    new_item = {
+        "id": len(inventory_db) + 1,
+        "category": data.get("category"),
+        "name": data.get("name"),
+        "quantity": int(data.get("quantity", 0)),
+        "unit": data.get("unit", "pcs")
+    }
+    inventory_db.append(new_item)
+    return jsonify({"success": True, "item": new_item})
+
+
+@app.route('/api/admin/inventory/update', methods=['POST'])
+def api_admin_update_inventory():
+    data = request.json
+    item_id = data.get("id")
+    qty_change = int(data.get("quantity_change", 0))
+
+    for item in inventory_db:
+        if item["id"] == item_id:
+            item["quantity"] += qty_change
+            if item["quantity"] < 0:
+                item["quantity"] = 0
+            return jsonify({"success": True, "item": item})
+
+    return jsonify({"success": False, "message": "Item not found"}), 404
+
+
+@app.route('/api/admin/inventory/delete', methods=['POST'])
+def api_admin_delete_inventory():
+    data = request.json
+    item_id = data.get("id")
+    global inventory_db
+    inventory_db = [item for item in inventory_db if item["id"] != item_id]
+    return jsonify({"success": True})
 
 
 if __name__ == '__main__':
