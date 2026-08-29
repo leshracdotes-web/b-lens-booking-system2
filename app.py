@@ -3,6 +3,7 @@ import re
 import secrets
 import smtplib
 import sqlite3
+from calendar import monthrange
 from datetime import datetime, date, time as dt_time, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -49,6 +50,10 @@ ACTIVE_STATUSES = {"Pending", "Confirmed", "Reschedule"}
 ALLOWED_STATUSES = ACTIVE_STATUSES | {"Done Shoot/Fully Paid", "Cancelled"}
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
+PET_SIZE_MAX = {"Small": 4, "Medium": 2, "Large": 1}
+BACKDROP_COLORS = {"Beige", "White", "Pink", "Gray"}
+CLOSED_WEEKDAYS = {0}  # Monday = 0
+
 RATES = {
     "Solo": {"Starter": {"reg": 249, "stu": 199, "dur": 10, "baseBd": 1}, "Upgraded": {"reg": 449, "stu": 399, "dur": 20, "baseBd": 1}},
     "Duo": {"Starter": {"reg": 399, "stu": 349, "dur": 15, "baseBd": 1}, "Upgraded": {"reg": 599, "stu": 549, "dur": 25, "baseBd": 1}},
@@ -57,6 +62,16 @@ RATES = {
 }
 TIME_PRICES = {10: 99, 15: 149, 20: 199, 30: 299}
 ENHANCED_PRICES = {"1_2": 49, "3_5": 99, "6_10": 199}
+
+
+def max_booking_date():
+    """One calendar month from today (e.g. Aug 29 -> Sep 29)."""
+    today = date.today()
+    month = today.month + 1
+    year = today.year + (month - 1) // 12
+    month = (month - 1) % 12 + 1
+    day = min(today.day, monthrange(year, month)[1])
+    return date(year, month, day)
 
 
 def db_connection():
@@ -150,13 +165,24 @@ def calculate_totals(form):
     total = package["stu"] if student else package["reg"]
     extra_pax = int(form.get("extra_pax", 0) or 0)
     extra_pet = int(form.get("extra_pet", 0) or 0)
+    pet_size = form.get("pet_size", "").strip()
     extra_backdrop = int(form.get("extra_backdrop", 0) or 0)
     extra_time = int(form.get("extra_time", 0) or 0)
     enhanced = form.get("enhanced_copies", "0")
     enhanced_qty = int(form.get("extra_enhanced_qty", 11) or 11)
     balloon_qty = int(form.get("balloon_qty", 0) or 0)
-    if not 0 <= extra_pax <= 20 or not 0 <= extra_pet <= 5:
-        raise ValueError("Extra pax or pet quantity is outside the allowed range.")
+    preferred_backdrop = form.get("preferred_backdrop", "").strip()
+    if not 0 <= extra_pax <= 20:
+        raise ValueError("Extra pax quantity is outside the allowed range.")
+    if extra_pet > 0:
+        if pet_size not in PET_SIZE_MAX:
+            raise ValueError("Please select a pet size (Small, Medium, or Large).")
+        if extra_pet > PET_SIZE_MAX[pet_size]:
+            raise ValueError(f"{pet_size} breed pets are limited to {PET_SIZE_MAX[pet_size]} per session.")
+    elif pet_size and pet_size not in PET_SIZE_MAX:
+        raise ValueError("Please select a valid pet size.")
+    if preferred_backdrop not in BACKDROP_COLORS:
+        raise ValueError("Please select a preferred backdrop color.")
     max_backdrop = 1 if package_type == "Starter" else 2
     if not 0 <= extra_backdrop <= max_backdrop:
         raise ValueError(f"{package_type} packages allow up to {max_backdrop} extra backdrop(s).")
@@ -309,6 +335,10 @@ def get_slots():
         selected_date = parse_booking_date(request.args.get("date"))
         if selected_date < date.today():
             return jsonify({"slots": []})
+        if selected_date > max_booking_date():
+            return jsonify({"slots": [], "message": "Bookings are only open up to one month ahead."}), 400
+        if selected_date.weekday() in CLOSED_WEEKDAYS:
+            return jsonify({"slots": [], "message": "The studio is closed on Mondays."}), 400
         return jsonify({"slots": slot_rows(selected_date)})
     except Exception as error:
         return jsonify({"slots": [], "message": str(error)}), 500
@@ -328,6 +358,10 @@ def save_booking():
         booking_date = parse_booking_date(request.form["date"])
         if booking_date < date.today():
             return jsonify({"success": False, "message": "Booking date cannot be in the past."}), 400
+        if booking_date > max_booking_date():
+            return jsonify({"success": False, "message": "Bookings are only open up to one month ahead."}), 400
+        if booking_date.weekday() in CLOSED_WEEKDAYS:
+            return jsonify({"success": False, "message": "The studio is closed on Mondays. Please pick another date."}), 400
         totals = calculate_totals(request.form)
         selected_slot = request.form["schedule"]
         allowed = {label for label, _ in DEFAULT_SLOTS}
@@ -355,7 +389,8 @@ def save_booking():
             "contact_no": request.form["contact_no"].strip(), "email": request.form["email"].strip(), "social_media": request.form["social_media"].strip(),
             "package": request.form.get("package"), "package_type": request.form.get("package_type"),
             "is_student": str(as_bool(request.form.get("is_student"))).lower(),
-            "extra_pax": form_int("extra_pax", maximum=20), "extra_pet": form_int("extra_pet", maximum=5),
+            "extra_pax": form_int("extra_pax", maximum=20), "extra_pet": form_int("extra_pet", maximum=4),
+            "pet_size": request.form.get("pet_size", "").strip(), "preferred_backdrop": request.form.get("preferred_backdrop", "").strip(),
             "extra_time": form_int("extra_time"), "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
             "digital_copies": totals["digital_copies"], "enhanced_copies": request.form.get("enhanced_copies", "0"),
             "extra_enhanced_qty": form_int("extra_enhanced_qty", 11, 100), "extra_backdrop": form_int("extra_backdrop", maximum=2),

@@ -121,7 +121,10 @@
     .trust { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
     .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 5px oklch(45% .105 152 / .12); }
     .hero { display: grid; grid-template-columns: minmax(0, 1fr) 310px; align-items: end; gap: 40px; margin-top: 54px; }
-    h1 { max-width: 720px; margin: 10px 0 14px; font-size: clamp(42px, 6vw, 76px); line-height: .98; letter-spacing: -.075em; text-wrap: balance; }
+    h1 { max-width: 720px; margin: 10px 0 14px; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06; letter-spacing: -.065em; text-wrap: balance; }
+    .accent-word { display: inline-block; padding-bottom: .06em; margin-bottom: -.06em; background: linear-gradient(90deg, var(--accent-dark), var(--accent), var(--accent-dark)); background-size: 220% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 4s linear infinite; }
+    @keyframes shimmer { to { background-position: -220% center; } }
+    @media (prefers-reduced-motion: reduce) { .accent-word { animation: none; } }
     .hero-copy { max-width: 62ch; margin: 0; color: var(--muted); font-size: 17px; }
     .hero-note { border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 13px; }
     .hero-note strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: 15px; }
@@ -154,11 +157,12 @@
     .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
     .choice { position: relative; }
     .choice input { position: absolute; inset: 0; width: 1px; height: 1px; opacity: 0; }
-    .choice label { display: block; height: 100%; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); cursor: pointer; transition: transform .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
+    .choice label { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); cursor: pointer; text-align: center; transition: transform .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
     .choice label:hover { transform: translateY(-2px); border-color: oklch(69% .07 35); }
     .choice input:checked + label { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
     .choice-title { display: block; margin-bottom: 3px; font-size: 14px; }
     .choice-meta { display: block; color: var(--muted); font-size: 12px; font-weight: 500; }
+    .swatch { display: block; width: 30px; height: 30px; border-radius: 50%; box-shadow: inset 0 0 0 1px oklch(0% 0 0 / .1); }
     .check-row { display: flex; align-items: flex-start; gap: 11px; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-soft); }
     .check-row input { width: 19px; height: 19px; margin: 1px 0 0; accent-color: var(--accent); }
     .check-row label { font-size: 13px; font-weight: 700; }
@@ -207,13 +211,13 @@
 <body>
   <header class="shell">
     <div class="topbar">
-      <a class="brand" href="/" aria-label="B-Lens home"><span class="brand-mark">✦</span><span>B-Lens</span></a>
+      <a class="brand" href="/" aria-label="B-Lens home"><img src="/static/logo.png" alt="B-Lens self portrait studio logo" style="height:56px;width:auto;display:block"></a>
       <div class="trust"><span class="trust-dot"></span> Reservations are reviewed by the studio</div>
     </div>
     <div class="hero">
       <div>
         <p class="eyebrow">Self-portrait studio</p>
-        <h1>Make the room yours.</h1>
+        <h1><span class="accent-word">B-</span> Yourself in front of our <span class="accent-word">Lens</span></h1>
         <p class="hero-copy">Pick a time, shape your session, and send your payment proof. We will review the details and confirm your reservation.</p>
         <div class="progress" aria-label="Booking steps"><span class="progress-step"><b>01</b> Schedule</span><span class="progress-step"><b>02</b> Build</span><span class="progress-step"><b>03</b> Pay</span></div>
       </div>
@@ -227,7 +231,7 @@
         <section class="section" aria-labelledby="scheduleHeading">
           <div class="section-heading"><div><span class="section-number">01 / schedule</span><h2 id="scheduleHeading">When should we expect you?</h2><p class="section-hint">Choose a date first so we can show open slots.</p></div></div>
           <div class="grid">
-            <div class="field"><label for="bookDate">Shoot date <span class="required">*</span></label><input type="date" id="bookDate" name="date" required></div>
+            <div class="field"><label for="bookDate">Shoot date <span class="required">*</span></label><input type="date" id="bookDate" name="date" required><small class="helper">Open up to 1 month ahead. The studio is closed every Monday.</small></div>
             <div class="field"><label for="bookSlot">Available time <span class="required">*</span></label><select id="bookSlot" name="schedule" required disabled><option value="">Select a date first</option></select></div>
             <div class="field"><label for="custName">Full name <span class="required">*</span></label><input type="text" id="custName" name="customer_name" autocomplete="name" placeholder="Juan Dela Cruz" required minlength="2"></div>
             <div class="field"><label for="contactNo">Contact number <span class="required">*</span></label><input type="tel" id="contactNo" name="contact_no" autocomplete="tel" placeholder="0912 345 6789" required pattern="[0-9+() .-]{7,}"></div>
@@ -242,8 +246,18 @@
             <div class="field"><label for="pkgCategory">Group size</label><select id="pkgCategory" name="package"><option value="Solo">Solo, 1 pax</option><option value="Duo">Duo, 1 to 2 pax</option><option value="Squad">Squad, 3 to 5 pax</option><option value="Party">Party, 6 to 8 pax</option></select></div>
             <div class="field"><label for="pkgType">Package style</label><select id="pkgType" name="package_type"><option value="Starter">Starter</option><option value="Upgraded">Upgraded</option></select></div>
             <div class="field full"><div class="check-row"><input type="checkbox" id="isStudent" name="is_student"><label for="isStudent">Apply student discount<small>All guests must present a valid student ID.</small></label></div></div>
-            <div class="field"><label for="extraPax">Extra pax <span class="helper">₱99 each</span></label><input type="number" id="extraPax" name="extra_pax" min="0" max="20" value="0" inputmode="numeric"></div>
-            <div class="field"><label for="extraPet">Pets <span class="helper">₱99 each</span></label><input type="number" id="extraPet" name="extra_pet" min="0" max="5" value="0" inputmode="numeric"></div>
+            <div class="field full">
+              <label>Preferred backdrop color <span class="required">*</span></label>
+              <div class="choice-grid">
+                <div class="choice"><input type="radio" id="backdropBeige" name="preferred_backdrop" value="Beige" required><label for="backdropBeige"><span class="swatch" style="background:#E3D2B8"></span><span class="choice-title">Beige</span></label></div>
+                <div class="choice"><input type="radio" id="backdropWhite" name="preferred_backdrop" value="White" required><label for="backdropWhite"><span class="swatch" style="background:#FFFFFF"></span><span class="choice-title">White</span></label></div>
+                <div class="choice"><input type="radio" id="backdropPink" name="preferred_backdrop" value="Pink" required><label for="backdropPink"><span class="swatch" style="background:#F0D3DA"></span><span class="choice-title">Pink</span></label></div>
+                <div class="choice"><input type="radio" id="backdropGray" name="preferred_backdrop" value="Gray" required><label for="backdropGray"><span class="swatch" style="background:#C7C7C7"></span><span class="choice-title">Gray</span></label></div>
+              </div>
+            </div>
+            <div class="field"><label for="extraPax">Extra pax <span class="helper">₱99 each</span></label><select id="extraPax" name="extra_pax"></select></div>
+            <div class="field"><label for="petSize">Pet size</label><select id="petSize" name="pet_size"><option value="">No pets</option><option value="Small">Small breed · max 4</option><option value="Medium">Medium breed · max 2</option><option value="Large">Large breed · max 1</option></select></div>
+            <div class="field"><label for="extraPet" id="extraPetLabel">Number of pets <span class="helper">₱99 each</span></label><select id="extraPet" name="extra_pet" disabled><option value="0">0</option></select></div>
             <div class="field"><label for="extraBackdrop" id="extraBackdropLabel">Extra backdrops <span class="helper">₱99 each</span></label><input type="number" id="extraBackdrop" name="extra_backdrop" min="0" value="0" inputmode="numeric"></div>
             <div class="field"><label for="extraTime">Time extension</label><select id="extraTime" name="extra_time"><option value="0">None</option><option value="10">+10 minutes, ₱99</option><option value="15">+15 minutes, ₱149</option><option value="20">+20 minutes, ₱199</option><option value="30">+30 minutes, ₱299</option></select></div>
             <div class="field"><label for="enhancedCopies">Enhanced copies</label><select id="enhancedCopies" name="enhanced_copies"><option value="0">None</option><option value="1_2">1 to 2 photos, ₱49</option><option value="3_5">3 to 5 photos, ₱99</option><option value="6_10">6 to 10 photos, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select><div id="extraEnhancedGroup" class="conditional" hidden><label for="extraEnhancedQty">Total enhanced photos</label><input type="number" id="extraEnhancedQty" name="extra_enhanced_qty" min="11" value="11"></div></div>
@@ -285,6 +299,24 @@
     const localToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
     const showToast = (message, error = false) => { const el = $('toast'); el.textContent = message; el.className = `toast show${error ? ' error' : ''}`; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast', 4200); };
     const formatDate = (date) => date ? new Date(`${date}T00:00:00`).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' }) : 'Not selected';
+    const PET_SIZE_MAX = { Small: 4, Medium: 2, Large: 1 };
+
+    function maxBookingDate() {
+      const d = new Date(); const day = d.getDate();
+      d.setMonth(d.getMonth() + 1);
+      if (d.getDate() !== day) d.setDate(0);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function populateExtraPax() { $('extraPax').innerHTML = Array.from({ length: 21 }, (_, i) => `<option value="${i}">${i}</option>`).join(''); }
+
+    function updatePetOptions() {
+      const size = $('petSize').value, max = PET_SIZE_MAX[size] || 0, current = Number($('extraPet').value) || 0;
+      $('extraPet').innerHTML = Array.from({ length: max + 1 }, (_, i) => `<option value="${i}">${i}</option>`).join('');
+      $('extraPet').value = Math.min(current, max);
+      $('extraPet').disabled = max === 0;
+      $('extraPetLabel').innerHTML = size ? `Number of pets <span class="helper">₱99 each · max ${max}</span>` : `Number of pets <span class="helper">Select a pet size first</span>`;
+    }
 
     function calculateTotal() {
       const cat = $('pkgCategory').value, type = $('pkgType').value, pkg = RATES[cat][type];
@@ -308,17 +340,22 @@
 
     async function fetchSlots() {
       const date = $('bookDate').value, select = $('bookSlot'); select.disabled = true; select.innerHTML = '<option value="">Checking availability…</option>'; if (!date) { select.innerHTML = '<option value="">Select a date first</option>'; return; }
+      if (new Date(`${date}T00:00:00`).getDay() === 1) { select.innerHTML = '<option value="">Studio closed on Mondays</option>'; showToast('The studio is closed on Mondays. Please pick another date.', true); $('bookDate').value = ''; return; }
       try { const res = await fetch(`/get-slots?date=${encodeURIComponent(date)}`); const data = await res.json(); if (!res.ok) throw new Error(data.message || 'Unable to load slots.'); select.innerHTML = '<option value="">Select an open slot</option>'; (data.slots || []).forEach(slot => { const option = document.createElement('option'); option.value = slot.time; option.textContent = slot.disabled ? `${slot.time} · ${slot.reason || 'Unavailable'}` : slot.time; option.disabled = Boolean(slot.disabled); select.appendChild(option); }); if (!(data.slots || []).some(s => !s.disabled)) select.innerHTML = '<option value="">No open slots for this date</option>'; else select.disabled = false; } catch (error) { select.innerHTML = '<option value="">Could not load slots</option>'; showToast(error.message, true); }
     }
 
     function validateBooking() { calculateTotal(); if (!$('bookingForm').reportValidity()) return false; const file = $('paymentScreenshot').files[0]; if (!file) { showToast('Please upload your payment screenshot.', true); return false; } if (file.size > 8 * 1024 * 1024) { showToast('Payment screenshot must be 8 MB or smaller.', true); return false; } if (!['image/png','image/jpeg','image/webp'].includes(file.type)) { showToast('Use a PNG, JPG, or WEBP screenshot.', true); return false; } if ($('hasBalloons').checked && !$('balloonNumbers').value.trim()) { showToast('Please add the balloon digit or number.', true); return false; } return true; }
 
-    function openReview() { if (!validateBooking()) return; const rows = [['Name', $('custName').value.trim()], ['Date', formatDate($('bookDate').value)], ['Time', $('bookSlot').value], ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}`], ['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Payment proof', $('paymentScreenshot').files[0].name], ['Grand total', money(totals.total)], ['Downpayment', money(totals.dp)], ['Remaining balance', money(totals.bal)]]; $('reviewContent').innerHTML = rows.map(([label, value]) => `<div class="review-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join(''); $('reviewModal').showModal(); }
+    function openReview() { if (!validateBooking()) return; const petLine = $('petSize').value ? [`${$('petSize').value} pet(s)`, `${$('extraPet').value} × ₱99`] : null; const rows = [['Name', $('custName').value.trim()], ['Date', formatDate($('bookDate').value)], ['Time', $('bookSlot').value], ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}`], ['Preferred backdrop', document.querySelector('input[name="preferred_backdrop"]:checked')?.value || 'Not selected'], ['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Payment proof', $('paymentScreenshot').files[0].name], ['Grand total', money(totals.total)], ['Downpayment', money(totals.dp)], ['Remaining balance', money(totals.bal)]]; if (petLine) rows.splice(4, 0, petLine); $('reviewContent').innerHTML = rows.map(([label, value]) => `<div class="review-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join(''); $('reviewModal').showModal(); }
 
     async function submitBooking() { const button = $('finalConfirmBtn'); button.disabled = true; button.textContent = 'Sending…'; const formData = new FormData($('bookingForm')); formData.set('is_student', $('isStudent').checked); formData.set('has_digital_copies', $('hasDigitalCopies').checked); formData.set('digital_copies', totals.digitalCopies); formData.set('has_infant', $('hasInfant').checked); formData.set('has_balloons', $('hasBalloons').checked); formData.set('grand_total', totals.total); formData.set('downpayment', totals.dp); formData.set('balance', totals.bal); try { const res = await fetch('/save-booking', { method:'POST', body:formData }); const data = await res.json(); if (!res.ok || !data.success) throw new Error(data.message || 'Booking could not be saved.'); $('reviewModal').close(); $('bookingForm').reset(); $('bookSlot').disabled = true; $('bookSlot').innerHTML = '<option value="">Select a date first</option>'; calculateTotal(); showToast('Booking submitted. The studio will review it shortly.'); window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (error) { showToast(error.message, true); } finally { button.disabled = false; button.textContent = 'Send reservation'; } }
 
+    populateExtraPax();
+    updatePetOptions();
     $('bookDate').min = localToday();
+    $('bookDate').max = maxBookingDate();
     $('bookDate').addEventListener('change', fetchSlots);
+    $('petSize').addEventListener('change', updatePetOptions);
     $('bookingForm').addEventListener('input', calculateTotal);
     $('bookingForm').addEventListener('change', calculateTotal);
     $('bookingForm').addEventListener('submit', (event) => { event.preventDefault(); openReview(); });
