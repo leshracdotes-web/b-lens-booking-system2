@@ -3,3 +3,4 @@ supabase
 werkzeug
 requests
 gunicorn
+python-dotenv

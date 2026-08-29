@@ -1,423 +1,520 @@
-from datetime import datetime, time as dt_time, timedelta
-from flask import Flask, render_template, request, jsonify
 import os
-from werkzeug.utils import secure_filename
-import time
+import re
+import secrets
 import smtplib
-from email.mime.text import MIMEText
+import sqlite3
+from datetime import datetime, date, time as dt_time, timedelta
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from functools import wraps
+from pathlib import Path
+from uuid import uuid4
+from zoneinfo import ZoneInfo
+
+from flask import Flask, jsonify, render_template, request, session
 from supabase import create_client
+from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
+app.config.update(
+    MAX_CONTENT_LENGTH=9 * 1024 * 1024,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "false").lower() == "true",
+)
 
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = Path(os.environ.get("BLENS_DB_PATH", BASE_DIR / "b_lens.sqlite3"))
+BUSINESS_TZ = ZoneInfo(os.environ.get("BUSINESS_TIMEZONE", "Asia/Manila"))
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "booking-proofs")
 
-# ==========================================
-# SUPABASE CONFIGURATION
-# ==========================================
-SUPABASE_URL = "https://khjbygxczrbrdurcgqtt.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ItoamJ5Z3hjenJicmR1cmNncXR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MDQzMjUsImV4cCI6MjEwMTk4MDMyNX0.EMZvOb4kIJtCKuC5sKdeO7hEp3WCiSDZC6xDARZkzSM"
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# ==========================================
-# DATABASES (POS & Inventory)
-# ==========================================
-transactions_db = [
-    {"id": 1, "date": "2026-07-18", "type": "Incoming", "category": "Self Shoot Package",
-     "description": "Samantha Navades - Squad Starter", "amount": 797.00, "account": "Gcash+Cash"},
-    {"id": 2, "date": "2026-07-21", "type": "Outgoing", "category": "Expenses", "description": "3 Days FB Boost",
-     "amount": 250.00, "account": "Maya"}
+DEFAULT_SLOTS = [
+    ("10:00 AM", dt_time(10, 0)), ("11:00 AM", dt_time(11, 0)),
+    ("01:00 PM", dt_time(13, 0)), ("02:00 PM", dt_time(14, 0)),
+    ("03:00 PM", dt_time(15, 0)), ("04:00 PM", dt_time(16, 0)),
+    ("05:00 PM", dt_time(17, 0)), ("06:00 PM", dt_time(18, 0)),
+    ("07:00 PM", dt_time(19, 0)),
 ]
+ACTIVE_STATUSES = {"Pending", "Confirmed", "Reschedule"}
+ALLOWED_STATUSES = ACTIVE_STATUSES | {"Done Shoot/Fully Paid", "Cancelled"}
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
-inventory_db = [
-    {"id": 1, "category": "Studio Supplies", "name": "4R Photo Papers", "quantity": 100, "unit": "sheets"},
-    {"id": 2, "category": "Studio Supplies", "name": "5R Photo Papers", "quantity": 100, "unit": "sheets"},
-    {"id": 3, "category": "Studio Supplies", "name": "A4 Photo Papers", "quantity": 50, "unit": "sheets"},
-    {"id": 4, "category": "Studio Supplies", "name": "Ink (Set)", "quantity": 2, "unit": "bottles"},
-    {"id": 5, "category": "Studio Supplies", "name": "Long Bond Papers", "quantity": 500, "unit": "sheets"},
-    {"id": 6, "category": "Studio Supplies", "name": "Short Bond Papers", "quantity": 500, "unit": "sheets"},
-    {"id": 7, "category": "Studio Supplies", "name": "A4 Bond Papers", "quantity": 500, "unit": "sheets"},
-    {"id": 8, "category": "Studio Supplies", "name": "Photo Paper Plastics", "quantity": 200, "unit": "pcs"},
-    {"id": 9, "category": "Studio Supplies", "name": "Pink Backdrop", "quantity": 1, "unit": "roll"},
-    {"id": 10, "category": "Studio Supplies", "name": "Beige Backdrop", "quantity": 1, "unit": "roll"},
-    {"id": 11, "category": "Studio Supplies", "name": "White Backdrop", "quantity": 1, "unit": "roll"},
-    {"id": 12, "category": "Studio Supplies", "name": "Gray Backdrop", "quantity": 1, "unit": "roll"},
-    {"id": 13, "category": "Studio Supplies", "name": "Laminating Film", "quantity": 50, "unit": "pcs"},
-    {"id": 14, "category": "Daily Supplies", "name": "Room Spray", "quantity": 2, "unit": "bottles"},
-    {"id": 15, "category": "Daily Supplies", "name": "Double A Batteries", "quantity": 4, "unit": "pcs"},
-    {"id": 16, "category": "Daily Supplies", "name": "Trashbags", "quantity": 30, "unit": "pcs"},
-    {"id": 17, "category": "Daily Supplies", "name": "Nano Tapes", "quantity": 2, "unit": "rolls"},
-    {"id": 18, "category": "Daily Supplies", "name": "Masking Tape", "quantity": 3, "unit": "rolls"},
-    {"id": 19, "category": "Daily Supplies", "name": "Scotch Tape", "quantity": 3, "unit": "rolls"},
-]
-
-SENDER_EMAIL = "b.lens.selfportraitstudio@gmail.com"
-SENDER_PASSWORD = "pmanktoycehurtvd"
+RATES = {
+    "Solo": {"Starter": {"reg": 249, "stu": 199, "dur": 10, "baseBd": 1}, "Upgraded": {"reg": 449, "stu": 399, "dur": 20, "baseBd": 1}},
+    "Duo": {"Starter": {"reg": 399, "stu": 349, "dur": 15, "baseBd": 1}, "Upgraded": {"reg": 599, "stu": 549, "dur": 25, "baseBd": 1}},
+    "Squad": {"Starter": {"reg": 599, "stu": 499, "dur": 20, "baseBd": 2}, "Upgraded": {"reg": 799, "stu": 699, "dur": 30, "baseBd": 2}},
+    "Party": {"Starter": {"reg": 999, "stu": 879, "dur": 30, "baseBd": 2}, "Upgraded": {"reg": 1199, "stu": 1079, "dur": 40, "baseBd": 3}},
+}
+TIME_PRICES = {10: 99, 15: 149, 20: 199, 30: 299}
+ENHANCED_PRICES = {"1_2": 49, "3_5": 99, "6_10": 199}
 
 
-def send_confirmation_email(customer_email, customer_name, date, schedule, pkg, total, balance):
+def db_connection():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_local_db():
+    with db_connection() as db:
+        db.executescript("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                type TEXT NOT NULL CHECK(type IN ('Incoming', 'Outgoing')),
+                category TEXT NOT NULL,
+                description TEXT NOT NULL,
+                amount REAL NOT NULL CHECK(amount >= 0),
+                account TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT NOT NULL,
+                name TEXT NOT NULL,
+                quantity INTEGER NOT NULL DEFAULT 0 CHECK(quantity >= 0),
+                unit TEXT NOT NULL
+            );
+        """)
+        if db.execute("SELECT COUNT(*) FROM transactions").fetchone()[0] == 0:
+            db.executemany("INSERT INTO transactions(date,type,category,description,amount,account) VALUES(?,?,?,?,?,?)", [
+                ("2026-07-18", "Incoming", "Self Shoot Package", "Samantha Navades - Squad Starter", 797.00, "Gcash+Cash"),
+                ("2026-07-21", "Outgoing", "Expenses", "3 Days FB Boost", 250.00, "Maya"),
+            ])
+        if db.execute("SELECT COUNT(*) FROM inventory").fetchone()[0] == 0:
+            seed = [
+                ("Studio Supplies", "4R Photo Papers", 100, "sheets"), ("Studio Supplies", "5R Photo Papers", 100, "sheets"),
+                ("Studio Supplies", "A4 Photo Papers", 50, "sheets"), ("Studio Supplies", "Ink (Set)", 2, "bottles"),
+                ("Studio Supplies", "Long Bond Papers", 500, "sheets"), ("Studio Supplies", "Short Bond Papers", 500, "sheets"),
+                ("Studio Supplies", "A4 Bond Papers", 500, "sheets"), ("Studio Supplies", "Photo Paper Plastics", 200, "pcs"),
+                ("Studio Supplies", "Pink Backdrop", 1, "roll"), ("Studio Supplies", "Beige Backdrop", 1, "roll"),
+                ("Studio Supplies", "White Backdrop", 1, "roll"), ("Studio Supplies", "Gray Backdrop", 1, "roll"),
+                ("Studio Supplies", "Laminating Film", 50, "pcs"), ("Daily Supplies", "Room Spray", 2, "bottles"),
+                ("Daily Supplies", "Double A Batteries", 4, "pcs"), ("Daily Supplies", "Trashbags", 30, "pcs"),
+                ("Daily Supplies", "Nano Tapes", 2, "rolls"), ("Daily Supplies", "Masking Tape", 3, "rolls"),
+                ("Daily Supplies", "Scotch Tape", 3, "rolls"),
+            ]
+            db.executemany("INSERT INTO inventory(category,name,quantity,unit) VALUES(?,?,?,?)", seed)
+
+
+init_local_db()
+
+
+def require_supabase():
+    if supabase is None:
+        raise RuntimeError("Supabase is not configured. Set SUPABASE_URL and SUPABASE_KEY.")
+    return supabase
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("admin_authenticated"):
+            return jsonify({"success": False, "message": "Admin login required."}), 401
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def form_int(name, default=0, maximum=None):
+    raw = request.form.get(name, default)
     try:
-        msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = customer_email
-        msg['Subject'] = "Booking Submitted! - B-Lens Self Portrait Studio"
-        body = f"""
-        Hi {customer_name},
-        Great news! Your reservation at B-Lens Self Portrait Studio has been SUBMITTED successfully.
-        Reservation Details:
-        - Date: {date}
-        - Time Slot: {schedule}
-        - Package: {pkg}
-        - Grand Total: ₱{total}
-        - Remaining Balance: ₱{balance}
-        We look forward to seeing you! Please arrive 5-10 minutes before your scheduled time.
-        Best regards,
-        B-Lens Self Portrait Studio
-        """
-        msg.attach(MIMEText(body, 'plain'))
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        value = int(raw or default)
+    except (TypeError, ValueError):
+        raise ValueError(f"{name} must be a whole number.")
+    if value < 0 or (maximum is not None and value > maximum):
+        raise ValueError(f"{name} is outside the allowed range.")
+    return value
+
+
+def as_bool(value):
+    return str(value).lower() in {"true", "1", "yes", "on"}
+
+
+def calculate_totals(form):
+    category = form.get("package", "")
+    package_type = form.get("package_type", "")
+    if category not in RATES or package_type not in RATES[category]:
+        raise ValueError("Please select a valid package.")
+    package = RATES[category][package_type]
+    student = as_bool(form.get("is_student", False))
+    total = package["stu"] if student else package["reg"]
+    extra_pax = int(form.get("extra_pax", 0) or 0)
+    extra_pet = int(form.get("extra_pet", 0) or 0)
+    extra_backdrop = int(form.get("extra_backdrop", 0) or 0)
+    extra_time = int(form.get("extra_time", 0) or 0)
+    enhanced = form.get("enhanced_copies", "0")
+    enhanced_qty = int(form.get("extra_enhanced_qty", 11) or 11)
+    balloon_qty = int(form.get("balloon_qty", 0) or 0)
+    if not 0 <= extra_pax <= 20 or not 0 <= extra_pet <= 5:
+        raise ValueError("Extra pax or pet quantity is outside the allowed range.")
+    max_backdrop = 1 if package_type == "Starter" else 2
+    if not 0 <= extra_backdrop <= max_backdrop:
+        raise ValueError(f"{package_type} packages allow up to {max_backdrop} extra backdrop(s).")
+    if extra_time not in {0, 10, 15, 20, 30}:
+        raise ValueError("Please select a valid time extension.")
+    total += extra_pax * 99 + extra_pet * 99 + TIME_PRICES.get(extra_time, 0) + extra_backdrop * 99
+    session_minutes = package["dur"] + extra_time
+    digital_copies = "0"
+    if as_bool(form.get("has_digital_copies", False)):
+        digital_price = 99 if session_minutes <= 15 else 149 if session_minutes <= 25 else 199
+        digital_copies = "10_15" if session_minutes <= 15 else "20_25" if session_minutes <= 25 else "30_40"
+        total += digital_price
+    if enhanced in ENHANCED_PRICES:
+        total += ENHANCED_PRICES[enhanced]
+    elif enhanced == "more_10":
+        if enhanced_qty < 11 or enhanced_qty > 100:
+            raise ValueError("Enhanced photo quantity must be between 11 and 100.")
+        total += enhanced_qty * 25
+    elif enhanced != "0":
+        raise ValueError("Please select a valid enhanced copy option.")
+    if as_bool(form.get("has_balloons", False)):
+        if not 1 <= balloon_qty <= 30:
+            raise ValueError("Balloon quantity must be between 1 and 30.")
+        total += balloon_qty * 39
+    elif balloon_qty != 0:
+        balloon_qty = 0
+    downpayment = (total + 1) // 2
+    return {"total": total, "downpayment": downpayment, "balance": total - downpayment, "digital_copies": digital_copies}
+
+
+def parse_booking_date(value):
+    try:
+        return date.fromisoformat(value)
+    except (TypeError, ValueError):
+        raise ValueError("Please choose a valid booking date.")
+
+
+def supabase_bookings():
+    response = require_supabase().table("bookings").select("*").execute()
+    return response.data or []
+
+
+def slot_rows(selected_date):
+    bookings = supabase_bookings()
+    booked = set()
+    blocked = set()
+    for booking in bookings:
+        if str(booking.get("date", ""))[:10] != selected_date.isoformat() or booking.get("status") == "Cancelled":
+            continue
+        booked_time = booking.get("schedule") or booking.get("time")
+        if booked_time:
+            booked.add(booked_time)
+            try:
+                extra = int(booking.get("extra_time", 0) or 0)
+            except (TypeError, ValueError):
+                extra = 0
+            if 15 + extra > 30:
+                for index, (label, _) in enumerate(DEFAULT_SLOTS):
+                    if label == booked_time and index + 1 < len(DEFAULT_SLOTS):
+                        blocked.add(DEFAULT_SLOTS[index + 1][0])
+    now = datetime.now(BUSINESS_TZ)
+    rows = []
+    for label, slot_time in DEFAULT_SLOTS:
+        disabled = label in booked or label in blocked
+        reason = "Already booked" if label in booked else "Buffer after a long session" if label in blocked else ""
+        if selected_date == now.date() and datetime.combine(selected_date, slot_time, BUSINESS_TZ) <= now + timedelta(hours=2):
+            disabled, reason = True, "Too close to start time"
+        rows.append({"time": label, "disabled": disabled, "reason": reason})
+    return rows
+
+
+def send_confirmation_email(booking):
+    sender = os.environ.get("SENDER_EMAIL", "").strip()
+    password = os.environ.get("SENDER_PASSWORD", "").strip()
+    if not sender or not password or not booking.get("email"):
+        return
+    message = MIMEMultipart()
+    message["From"], message["To"] = sender, booking["email"]
+    message["Subject"] = "Booking confirmed | B-Lens Self Portrait Studio"
+    body = (f"Hi {booking.get('customer_name', 'there')},\n\nYour B-Lens reservation is confirmed.\n\n"
+            f"Date: {booking.get('date')}\nTime: {booking.get('schedule')}\n"
+            f"Package: {booking.get('package')} ({booking.get('package_type')})\n"
+            f"Grand total: ₱{booking.get('grand_total')}\nRemaining balance: ₱{booking.get('balance')}\n\n"
+            "Please arrive 5 to 10 minutes early.\n\nB-Lens Self Portrait Studio")
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
         server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, customer_email, msg.as_string())
-        server.quit()
-    except Exception as e:
-        print(f"Failed to send email: {str(e)}")
+        server.login(sender, password)
+        server.sendmail(sender, booking["email"], message.as_string())
 
 
-@app.route('/')
+def record_transaction(values):
+    with db_connection() as db:
+        db.execute("INSERT INTO transactions(date,type,category,description,amount,account) VALUES(?,?,?,?,?,?)", values)
+
+
+@app.after_request
+def security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    return response
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def too_large(_error):
+    return jsonify({"success": False, "message": "Uploaded file is too large. Maximum is 8 MB."}), 413
+
+
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@app.route('/admin')
+@app.route("/admin")
 def admin_dashboard():
-    return render_template('admin.html')
+    return render_template("admin.html")
 
 
-@app.route('/get-slots', methods=['GET'])
+@app.get("/api/admin/session")
+def admin_session():
+    if not ADMIN_PASSWORD:
+        return jsonify({"authenticated": False, "message": "ADMIN_PASSWORD is not configured."}), 503
+    if not session.get("admin_authenticated"):
+        return jsonify({"authenticated": False}), 401
+    return jsonify({"authenticated": True})
+
+
+@app.post("/api/admin/login")
+def admin_login():
+    if not ADMIN_PASSWORD:
+        return jsonify({"success": False, "message": "Set ADMIN_PASSWORD before using the admin dashboard."}), 503
+    data = request.get_json(silent=True) or {}
+    if not secrets.compare_digest(str(data.get("password", "")), ADMIN_PASSWORD):
+        return jsonify({"success": False, "message": "Incorrect admin password."}), 401
+    session.clear()
+    session["admin_authenticated"] = True
+    return jsonify({"success": True})
+
+
+@app.post("/api/admin/logout")
+def admin_logout():
+    session.clear()
+    return jsonify({"success": True})
+
+
+@app.get("/get-slots")
 def get_slots():
-    date_str = request.args.get('date')
-    default_slots = [
-        {"time": "10:00 AM", "time_obj": dt_time(10, 0)},
-        {"time": "11:00 AM", "time_obj": dt_time(11, 0)},
-        {"time": "01:00 PM", "time_obj": dt_time(13, 0)},
-        {"time": "02:00 PM", "time_obj": dt_time(14, 0)},
-        {"time": "03:00 PM", "time_obj": dt_time(15, 0)},
-        {"time": "04:00 PM", "time_obj": dt_time(16, 0)},
-        {"time": "05:00 PM", "time_obj": dt_time(17, 0)},
-        {"time": "06:00 PM", "time_obj": dt_time(18, 0)},
-        {"time": "07:00 PM", "time_obj": dt_time(19, 0)},
-    ]
-
     try:
-        response = supabase.table("bookings").select("*").execute()
-        bookings_db = response.data if response.data else []
-    except Exception as e:
-        print("Supabase error:", e)
-        bookings_db = []
-
-    # Safe Date Parsing para sa iba't ibang format (YYYY-MM-DD o MM/DD/YYYY)
-    selected_date_obj = None
-    if date_str:
-        for fmt in ('%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y'):
-            try:
-                selected_date_obj = datetime.strptime(date_str, fmt).date()
-                break
-            except ValueError:
-                pass
-
-    now = datetime.now()
-    today_date = now.date()
-    current_datetime_with_buffer = now + timedelta(hours=2)
-
-    booked_times = set()
-    blocked_by_buffer = set()
-
-    for b in bookings_db:
-        b_date_str = b.get("date")
-        b_date_obj = None
-        if b_date_str:
-            for fmt in ('%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y'):
-                try:
-                    b_date_obj = datetime.strptime(str(b_date_str), fmt).date()
-                    break
-                except ValueError:
-                    pass
-
-        if b_date_obj == selected_date_obj and b.get("status") != "Cancelled":
-            b_time = b.get("schedule") or b.get("time")
-            if b_time:
-                booked_times.add(b_time)
-                extra_t = b.get("extra_time", 0)
-                extra_mins = int(''.join(filter(str.isdigit, str(extra_t))) or 0)
-                if (15 + extra_mins) > 30:
-                    for i, s in enumerate(default_slots):
-                        if s["time"] == b_time and i + 1 < len(default_slots):
-                            blocked_by_buffer.add(default_slots[i + 1]["time"])
-                            break
-
-    slots = []
-    for s in default_slots:
-        is_disabled = False
-
-        # Kung ngayon ang napiling araw, i-disable ang mga lumipas na time slots
-        if selected_date_obj and selected_date_obj == today_date:
-            slot_datetime = datetime.combine(selected_date_obj, s["time_obj"])
-            if slot_datetime <= current_datetime_with_buffer:
-                is_disabled = True
-
-        if s["time"] in booked_times or s["time"] in blocked_by_buffer:
-            is_disabled = True
-
-        if not is_disabled:
-            slots.append({"time": s["time"], "disabled": False, "reason": ""})
-
-    return jsonify({"slots": slots})
+        selected_date = parse_booking_date(request.args.get("date"))
+        if selected_date < date.today():
+            return jsonify({"slots": []})
+        return jsonify({"slots": slot_rows(selected_date)})
+    except Exception as error:
+        return jsonify({"slots": [], "message": str(error)}), 500
 
 
-@app.route('/save-booking', methods=['POST'])
+@app.post("/save-booking")
 def save_booking():
+    uploaded_path = None
     try:
-        pkg_type = request.form.get("package_type", "Starter")
-        extra_backdrop = int(request.form.get("extra_backdrop", 0) or 0)
-
-        max_allowed_extra = 1 if pkg_type == 'Starter' else 2
-        if extra_backdrop > max_allowed_extra:
-            return jsonify({
-                "success": False,
-                "message": f"Maximum extra backdrops exceeded! For {pkg_type} packages, you can only add up to {max_allowed_extra} extra backdrop(s)."
-            }), 400
-
-        payment_file = request.files.get('payment_screenshot')
-        screenshot_url = ""
-
-        if payment_file and payment_file.filename != '':
-            filename = secure_filename(payment_file.filename)
-            file_path = f"proofs/{int(time.time())}_{filename}"
-
-            try:
-                supabase.storage.from_("booking-proofs").upload(
-                    file=payment_file.read(),
-                    path=file_path,
-                    file_options={"content-type": payment_file.content_type}
-                )
-                screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/booking-proofs/{file_path}"
-            except Exception as storage_err:
-                return jsonify({"success": False, "message": f"Storage Error: {str(storage_err)}"}), 500
-        else:
-            return jsonify({
-                "success": False,
-                "message": "Please upload your payment screenshot for the downpayment!"
-            }), 400
-
-        downpayment_amount = float(request.form.get("downpayment", 0) or 0)
-        booking_date = request.form.get("date")
-        customer_name = request.form.get("customer_name")
-        pkg_name = request.form.get("package")
-
+        require_supabase()
+        required = {"customer_name": "full name", "contact_no": "contact number", "email": "email", "social_media": "social media", "date": "date", "schedule": "time slot"}
+        missing = [label for field, label in required.items() if not request.form.get(field, "").strip()]
+        if missing:
+            return jsonify({"success": False, "message": f"Please provide: {', '.join(missing)}."}), 400
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", request.form["email"].strip()):
+            return jsonify({"success": False, "message": "Please provide a valid email address."}), 400
+        booking_date = parse_booking_date(request.form["date"])
+        if booking_date < date.today():
+            return jsonify({"success": False, "message": "Booking date cannot be in the past."}), 400
+        totals = calculate_totals(request.form)
+        selected_slot = request.form["schedule"]
+        allowed = {label for label, _ in DEFAULT_SLOTS}
+        if selected_slot not in allowed:
+            return jsonify({"success": False, "message": "Please select a valid time slot."}), 400
+        current_slots = slot_rows(booking_date)
+        slot = next(row for row in current_slots if row["time"] == selected_slot)
+        if slot["disabled"]:
+            return jsonify({"success": False, "message": f"That slot is no longer available: {slot['reason']}."}), 409
+        payment_file = request.files.get("payment_screenshot")
+        if not payment_file or not payment_file.filename:
+            return jsonify({"success": False, "message": "Payment screenshot is required."}), 400
+        if payment_file.content_type not in ALLOWED_IMAGE_TYPES:
+            return jsonify({"success": False, "message": "Payment proof must be a PNG, JPG, or WEBP image."}), 400
+        file_bytes = payment_file.read()
+        if not file_bytes or len(file_bytes) > 8 * 1024 * 1024:
+            return jsonify({"success": False, "message": "Payment screenshot must be 8 MB or smaller."}), 400
+        extension = Path(secure_filename(payment_file.filename)).suffix.lower() or ".jpg"
+        uploaded_path = f"proofs/{uuid4().hex}{extension}"
+        require_supabase().storage.from_(SUPABASE_BUCKET).upload(file=file_bytes, path=uploaded_path, file_options={"content-type": payment_file.content_type})
+        screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{uploaded_path}"
         new_booking = {
-            "date": booking_date,
-            "schedule": request.form.get("schedule"),
-            "name": customer_name,
-            "customer_name": customer_name,
-            "contact_no": request.form.get("contact_no"),
-            "email": request.form.get("email"),
-            "social_media": request.form.get("social_media"),
-            "package": pkg_name,
-            "package_type": pkg_type,
-            "is_student": request.form.get("is_student"),
-            "extra_pax": request.form.get("extra_pax"),
-            "extra_pet": request.form.get("extra_pet"),
-            "extra_time": request.form.get("extra_time"),
-            "has_digital_copies": request.form.get("has_digital_copies"),
-            "digital_copies": request.form.get("digital_copies"),
-            "enhanced_copies": request.form.get("enhanced_copies"),
-            "extra_enhanced_qty": request.form.get("extra_enhanced_qty"),
-            "extra_backdrop": extra_backdrop,
-            "backdrop_order": request.form.get("backdrop_order"),
-            "has_infant": request.form.get("has_infant"),
-            "infant_details": request.form.get("infant_details"),
-            "has_balloons": request.form.get("has_balloons"),
-            "balloon_qty": request.form.get("balloon_qty"),
-            "balloon_numbers": request.form.get("balloon_numbers"),
-            "grand_total": request.form.get("grand_total"),
-            "downpayment": downpayment_amount,
-            "balance": request.form.get("balance"),
-            "payment_screenshot": screenshot_url,
-            "status": "Pending"
+            "date": booking_date.isoformat(), "schedule": selected_slot,
+            "name": request.form["customer_name"].strip(), "customer_name": request.form["customer_name"].strip(),
+            "contact_no": request.form["contact_no"].strip(), "email": request.form["email"].strip(), "social_media": request.form["social_media"].strip(),
+            "package": request.form.get("package"), "package_type": request.form.get("package_type"),
+            "is_student": str(as_bool(request.form.get("is_student"))).lower(),
+            "extra_pax": form_int("extra_pax", maximum=20), "extra_pet": form_int("extra_pet", maximum=5),
+            "extra_time": form_int("extra_time"), "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
+            "digital_copies": totals["digital_copies"], "enhanced_copies": request.form.get("enhanced_copies", "0"),
+            "extra_enhanced_qty": form_int("extra_enhanced_qty", 11, 100), "extra_backdrop": form_int("extra_backdrop", maximum=2),
+            "backdrop_order": request.form.get("backdrop_order", "").strip(), "has_infant": str(as_bool(request.form.get("has_infant"))).lower(),
+            "infant_details": request.form.get("infant_details", "").strip(), "has_balloons": str(as_bool(request.form.get("has_balloons"))).lower(),
+            "balloon_qty": form_int("balloon_qty"), "balloon_numbers": request.form.get("balloon_numbers", "").strip(),
+            "grand_total": totals["total"], "downpayment": totals["downpayment"], "balance": totals["balance"],
+            "payment_screenshot": screenshot_url, "status": "Pending",
         }
-
-        supabase.table("bookings").insert(new_booking).execute()
-
-        transactions_db.append({
-            "id": len(transactions_db) + 1,
-            "date": booking_date,
-            "type": "Incoming",
-            "category": "Booking Downpayment",
-            "description": f"{customer_name} - {pkg_name} ({pkg_type})",
-            "amount": downpayment_amount,
-            "account": "Gcash/Maya/Bank"
-        })
-
-        return jsonify({"success": True, "message": "Booking successfully saved!"})
-
-    except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
+        inserted = require_supabase().table("bookings").insert(new_booking).execute()
+        created = (inserted.data or [new_booking])[0]
+        record_transaction((booking_date.isoformat(), "Incoming", "Booking Downpayment", f"{new_booking['customer_name']} - {new_booking['package']} ({new_booking['package_type']})", totals["downpayment"], "Gcash/Maya/Bank"))
+        return jsonify({"success": True, "message": "Booking submitted successfully.", "booking_id": created.get("id")})
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+    except Exception as error:
+        if uploaded_path and supabase is not None:
+            try:
+                supabase.storage.from_(SUPABASE_BUCKET).remove([uploaded_path])
+            except Exception:
+                pass
+        app.logger.exception("Booking save failed")
+        return jsonify({"success": False, "message": "We could not save the booking right now. Please try again."}), 500
 
 
-@app.route('/api/admin/bookings', methods=['GET'])
+@app.get("/api/admin/bookings")
+@admin_required
 def api_admin_bookings():
     try:
-        response = supabase.table("bookings").select("*").execute()
-        bookings_data = response.data if response.data else []
-        return jsonify({"bookings": bookings_data})
-    except Exception as e:
-        print("Error fetching bookings:", e)
-        return jsonify({"bookings": []})
+        bookings = supabase_bookings()
+        bookings.sort(key=lambda booking: (str(booking.get("date", "")), str(booking.get("schedule", ""))))
+        return jsonify({"bookings": bookings})
+    except Exception:
+        app.logger.exception("Booking fetch failed")
+        return jsonify({"bookings": [], "message": "Unable to load bookings."}), 503
 
 
-@app.route('/api/admin/update-status', methods=['POST'])
+@app.post("/api/admin/update-status")
+@admin_required
 def api_admin_update_status():
-    data = request.json
-    booking_id = data.get('id')
-    index = data.get('index')
-    new_status = data.get('status')
-
+    data = request.get_json(silent=True) or {}
+    booking_id, new_status = data.get("id"), data.get("status")
+    if not booking_id or new_status not in ALLOWED_STATUSES:
+        return jsonify({"success": False, "message": "Invalid booking status update."}), 400
     try:
-        response = supabase.table("bookings").select("*").execute()
-        bookings_data = response.data if response.data else []
-
-        target_booking = None
-        if booking_id:
-            for b in bookings_data:
-                if b.get('id') == booking_id:
-                    target_booking = b
-                    break
-        elif index is not None and 0 <= index < len(bookings_data):
-            target_booking = bookings_data[index]
-
-        if target_booking:
-            old_status = target_booking.get('status')
-            row_id = target_booking.get('id')
-
-            supabase.table("bookings").update({"status": new_status}).eq("id", row_id).execute()
-
-            if new_status == 'Confirmed' and old_status != 'Confirmed':
-                send_confirmation_email(
-                    target_booking['email'],
-                    target_booking['customer_name'],
-                    target_booking['date'],
-                    target_booking['schedule'],
-                    f"{target_booking['package']} ({target_booking['package_type']})",
-                    target_booking['grand_total'],
-                    target_booking['balance']
-                )
-
-            return jsonify({"success": True})
-        return jsonify({"success": False, "message": "Booking not found"}), 404
-    except Exception as e:
-        print("Error updating status:", e)
-        return jsonify({"success": False, "message": str(e)}), 500
+        existing = next((booking for booking in supabase_bookings() if str(booking.get("id")) == str(booking_id)), None)
+        if not existing:
+            return jsonify({"success": False, "message": "Booking not found."}), 404
+        require_supabase().table("bookings").update({"status": new_status}).eq("id", booking_id).execute()
+        if new_status == "Confirmed" and existing.get("status") != "Confirmed":
+            try:
+                send_confirmation_email({**existing, "status": new_status})
+            except Exception:
+                app.logger.exception("Confirmation email failed")
+        return jsonify({"success": True})
+    except Exception:
+        app.logger.exception("Status update failed")
+        return jsonify({"success": False, "message": "Unable to update booking status."}), 500
 
 
-@app.route('/api/admin/delete-booking', methods=['POST'])
+@app.post("/api/admin/delete-booking")
+@admin_required
 def api_admin_delete_booking():
-    data = request.json
-    booking_id = data.get('id')
-    index = data.get('index')
-
+    data = request.get_json(silent=True) or {}
+    if not data.get("id"):
+        return jsonify({"success": False, "message": "Booking id is required."}), 400
     try:
-        response = supabase.table("bookings").select("*").execute()
-        bookings_data = response.data if response.data else []
-
-        target_id = None
-        if booking_id:
-            target_id = booking_id
-        elif index is not None and 0 <= index < len(bookings_data):
-            target_id = bookings_data[index].get('id')
-
-        if target_id is not None:
-            supabase.table("bookings").delete().eq("id", target_id).execute()
-            return jsonify({"success": True})
-        return jsonify({"success": False, "message": "Booking not found"}), 404
-    except Exception as e:
-        print("Error deleting booking:", e)
-        return jsonify({"success": False, "message": str(e)}), 500
+        require_supabase().table("bookings").delete().eq("id", data["id"]).execute()
+        return jsonify({"success": True})
+    except Exception:
+        app.logger.exception("Booking delete failed")
+        return jsonify({"success": False, "message": "Unable to delete booking."}), 500
 
 
-@app.route('/api/admin/transactions', methods=['GET', 'POST'])
-def api_admin_transactions():
-    if request.method == 'GET':
-        return jsonify({"transactions": transactions_db})
-
-    data = request.json
-    new_tx = {
-        "id": len(transactions_db) + 1,
-        "date": data.get("date"),
-        "type": data.get("type"),
-        "category": data.get("category"),
-        "description": data.get("description"),
-        "amount": float(data.get("amount", 0)),
-        "account": data.get("account")
-    }
-    transactions_db.append(new_tx)
-    return jsonify({"success": True, "transaction": new_tx})
+@app.get("/api/admin/transactions")
+@admin_required
+def api_admin_transactions_get():
+    with db_connection() as db:
+        rows = db.execute("SELECT * FROM transactions ORDER BY date DESC, id DESC").fetchall()
+    return jsonify({"transactions": [dict(row) for row in rows]})
 
 
-@app.route('/api/admin/transactions/delete', methods=['POST'])
-def api_admin_delete_transaction():
-    data = request.json
-    tx_id = data.get("id")
-    global transactions_db
-    transactions_db = [t for t in transactions_db if t["id"] != tx_id]
+@app.post("/api/admin/transactions")
+@admin_required
+def api_admin_transactions_create():
+    data = request.get_json(silent=True) or {}
+    if data.get("type") not in {"Incoming", "Outgoing"} or not data.get("date") or not data.get("category", "").strip() or not data.get("description", "").strip():
+        return jsonify({"success": False, "message": "Complete the transaction fields."}), 400
+    try:
+        amount = float(data.get("amount", 0))
+        if amount <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "Amount must be greater than zero."}), 400
+    with db_connection() as db:
+        cursor = db.execute("INSERT INTO transactions(date,type,category,description,amount,account) VALUES(?,?,?,?,?,?)", (data["date"], data["type"], data["category"].strip(), data["description"].strip(), amount, data.get("account", "Cash")))
+        item = db.execute("SELECT * FROM transactions WHERE id=?", (cursor.lastrowid,)).fetchone()
+    return jsonify({"success": True, "transaction": dict(item)})
+
+
+@app.post("/api/admin/transactions/delete")
+@admin_required
+def api_admin_transactions_delete():
+    data = request.get_json(silent=True) or {}
+    with db_connection() as db:
+        db.execute("DELETE FROM transactions WHERE id=?", (data.get("id"),))
     return jsonify({"success": True})
 
 
-@app.route('/api/admin/inventory', methods=['GET', 'POST'])
-def api_admin_inventory():
-    if request.method == 'GET':
-        return jsonify({"inventory": inventory_db})
-
-    data = request.json
-    new_item = {
-        "id": len(inventory_db) + 1,
-        "category": data.get("category"),
-        "name": data.get("name"),
-        "quantity": int(data.get("quantity", 0)),
-        "unit": data.get("unit", "pcs")
-    }
-    inventory_db.append(new_item)
-    return jsonify({"success": True, "item": new_item})
+@app.get("/api/admin/inventory")
+@admin_required
+def api_admin_inventory_get():
+    with db_connection() as db:
+        rows = db.execute("SELECT * FROM inventory ORDER BY category, name").fetchall()
+    return jsonify({"inventory": [dict(row) for row in rows]})
 
 
-@app.route('/api/admin/inventory/update', methods=['POST'])
-def api_admin_update_inventory():
-    data = request.json
-    item_id = data.get("id")
-    qty_change = int(data.get("quantity_change", 0))
+@app.post("/api/admin/inventory")
+@admin_required
+def api_admin_inventory_create():
+    data = request.get_json(silent=True) or {}
+    try:
+        quantity = int(data.get("quantity", 0))
+        if quantity < 0 or not data.get("name", "").strip() or not data.get("unit", "").strip() or data.get("category") not in {"Studio Supplies", "Daily Supplies"}:
+            raise ValueError
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "Complete the inventory fields."}), 400
+    with db_connection() as db:
+        cursor = db.execute("INSERT INTO inventory(category,name,quantity,unit) VALUES(?,?,?,?)", (data["category"], data["name"].strip(), quantity, data["unit"].strip()))
+        item = db.execute("SELECT * FROM inventory WHERE id=?", (cursor.lastrowid,)).fetchone()
+    return jsonify({"success": True, "item": dict(item)})
 
-    for item in inventory_db:
-        if item["id"] == item_id:
-            item["quantity"] += qty_change
-            if item["quantity"] < 0:
-                item["quantity"] = 0
-            return jsonify({"success": True, "item": item})
 
-    return jsonify({"success": False, "message": "Item not found"}), 404
+@app.post("/api/admin/inventory/update")
+@admin_required
+def api_admin_inventory_update():
+    data = request.get_json(silent=True) or {}
+    try:
+        item_id, change = int(data.get("id")), int(data.get("quantity_change"))
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "Invalid stock update."}), 400
+    with db_connection() as db:
+        item = db.execute("SELECT * FROM inventory WHERE id=?", (item_id,)).fetchone()
+        if not item:
+            return jsonify({"success": False, "message": "Item not found."}), 404
+        new_quantity = max(0, item["quantity"] + change)
+        db.execute("UPDATE inventory SET quantity=? WHERE id=?", (new_quantity, item_id))
+        updated = db.execute("SELECT * FROM inventory WHERE id=?", (item_id,)).fetchone()
+    return jsonify({"success": True, "item": dict(updated)})
 
 
-@app.route('/api/admin/inventory/delete', methods=['POST'])
-def api_admin_delete_inventory():
-    data = request.json
-    item_id = data.get("id")
-    global inventory_db
-    inventory_db = [item for item in inventory_db if item["id"] != item_id]
+@app.post("/api/admin/inventory/delete")
+@admin_required
+def api_admin_inventory_delete():
+    data = request.get_json(silent=True) or {}
+    with db_connection() as db:
+        db.execute("DELETE FROM inventory WHERE id=?", (data.get("id"),))
     return jsonify({"success": True})
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)

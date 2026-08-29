@@ -1,776 +1,168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - B-Lens Management</title>
-    <!-- Bootstrap CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts: Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f9f6f0;
-            font-family: 'Poppins', sans-serif;
-            color: #4a4039;
-        }
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .table-custom th {
-            background-color: #8A7366 !important;
-            color: white !important;
-            font-weight: 500;
-        }
-        .table-archive th {
-            background-color: #6c757d !important;
-            color: white !important;
-            font-weight: 500;
-        }
-        .proof-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 6px;
-            cursor: pointer;
-            border: 1px solid #ddd;
-        }
-        .status-select {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.25rem 0.4rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .nav-pills .nav-link.active {
-            background-color: #8A7366 !important;
-            color: white !important;
-        }
-        .nav-pills .nav-link {
-            color: #4a4039;
-            font-weight: 500;
-        }
+<!-- skill:chrome -->
+<style>
+/* Credit line — bottom-right */
+.design-ui-credit {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font: 11px/1 system-ui, sans-serif;
+  color: rgba(128,128,128,0.5);
+  pointer-events: none;
+  z-index: 2147483647;
+  transition: opacity 0.4s ease;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
 
-        /* Premium Calendar View Styles */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-        }
-        .calendar-day-header {
-            text-align: center;
-            font-weight: 600;
-            color: #8A7366;
-            padding: 12px 0;
-            font-size: 1.05rem;
-            letter-spacing: 0.5px;
-        }
-        .calendar-cell {
-            background: #ffffff;
-            border: 1px solid #e6ded5;
-            border-radius: 12px;
-            min-height: 145px;
-            padding: 12px;
-            position: relative;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
-        }
-        .calendar-cell:hover {
-            border-color: #8A7366;
-            box-shadow: 0 4px 12px rgba(138, 115, 102, 0.1);
-        }
-        .calendar-cell.other-month {
-            background: #f4f0eb;
-            opacity: 0.4;
-        }
-        .calendar-date-num {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #5c5049;
-            margin-bottom: 8px;
-        }
-        .calendar-booking-badge {
-            font-size: 0.8rem;
-            background: #8A7366;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: background 0.2s;
-        }
-        .calendar-booking-badge:hover {
-            background: #6d5b50;
-        }
-    </style>
+/* Hide chrome on touch devices */
+@media (hover: none) {
+  .design-ui-credit { display: none; }
+}
+
+/* Print fixes */
+@media print {
+  * {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .design-ui-credit { display: none !important; }
+}
+
+</style>
+<script>
+(function () {
+    // Design-ui pages are single compositions, so the whole body is editable.
+    function markEditable() {
+        document.body.classList.add('artifact-editable');
+    }
+
+    // Credit badge with idle-fade. Hover devices only.
+    function initChromeUI() {
+        if (!matchMedia('(hover: hover)').matches) return;
+
+        var credit = document.createElement('div');
+        credit.className = 'design-ui-credit';
+        credit.setAttribute('aria-hidden', 'true');
+        credit.innerHTML = '\u{1F49C} by ClickUp Brain';
+        document.body.appendChild(credit);
+
+        var timer = null;
+        var fade = function (out) { credit.style.opacity = out ? '0' : ''; };
+        fade(true);
+        var show = function () {
+            fade(false);
+            clearTimeout(timer);
+            timer = setTimeout(function () { fade(true); }, 3000);
+        };
+        document.addEventListener('mousemove', show);
+        show();
+    }
+
+    function init() {
+        markEditable();
+        initChromeUI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+</script>
+<!-- /skill:chrome -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>B-Lens | Studio control room</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:oklch(96.5% .014 68); --surface:oklch(99% .008 70); --surface-soft:oklch(93.8% .022 68); --ink:oklch(25% .035 45); --muted:oklch(52% .03 50); --line:oklch(87% .035 62); --accent:oklch(53% .115 25); --accent-dark:oklch(38% .085 25); --success:oklch(45% .105 152); --warning:oklch(67% .13 82); --danger:oklch(51% .16 28); --shadow:0 18px 55px oklch(35% .04 45 / .09); --ease:cubic-bezier(.16,1,.3,1); }
+    * { box-sizing:border-box; } body { margin:0; min-width:320px; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,sans-serif; line-height:1.5; } button,input,select { font:inherit; } button { cursor:pointer; } button:disabled { opacity:.55; cursor:not-allowed; } :focus-visible { outline:3px solid oklch(65% .14 230); outline-offset:3px; }
+    .shell { width:min(1380px,calc(100% - 40px)); margin:0 auto; } .topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:28px 0 34px; } .brand { display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font-weight:800; letter-spacing:-.04em; } .mark { display:grid; place-items:center; width:40px; height:40px; border-radius:13px; background:var(--accent); color:var(--surface); box-shadow:0 8px 20px oklch(53% .115 25 / .22); } .header-actions { display:flex; align-items:center; gap:10px; } .user-chip { padding:9px 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px; }
+    .login-shell { display:grid; place-items:center; min-height:100vh; padding:24px; } .login-box { width:min(430px,100%); padding:34px; border-radius:24px; background:var(--surface); box-shadow:var(--shadow); } .login-box h1 { margin:15px 0 8px; font-size:32px; letter-spacing:-.06em; } .login-box p { margin:0 0 24px; color:var(--muted); font-size:14px; } .field { display:grid; gap:7px; margin-bottom:15px; } label { font-size:12px; font-weight:800; } input,select { width:100%; min-height:43px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); } input:focus,select:focus { outline:0; border-color:var(--accent); box-shadow:0 0 0 4px oklch(90% .045 25); } .btn { min-height:42px; padding:0 15px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font-weight:800; } .btn:hover { background:var(--surface-soft); } .btn.primary { border-color:var(--accent); background:var(--accent); color:var(--surface); } .btn.primary:hover { background:var(--accent-dark); } .btn.danger { color:var(--danger); } .error-text { min-height:20px; margin:0 0 10px; color:var(--danger); font-size:12px; }
+    #appShell[hidden], #loginShell[hidden] { display:none; } .intro { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:26px; } .eyebrow { margin:0 0 8px; color:var(--accent); font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; } h1,h2,h3 { text-wrap:balance; } .intro h1 { margin:0; font-size:clamp(32px,4vw,54px); line-height:1; letter-spacing:-.07em; } .intro p { max-width:55ch; margin:12px 0 0; color:var(--muted); font-size:14px; } .tabbar { display:flex; gap:5px; margin-bottom:25px; padding:5px; border-bottom:1px solid var(--line); } .tab { padding:10px 13px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:800; } .tab.active { background:var(--accent); color:var(--surface); }
+    .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:25px; } .stat { padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); } .stat-label { color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; } .stat-value { margin-top:6px; font-size:27px; font-weight:800; letter-spacing:-.055em; font-variant-numeric:tabular-nums; } .stat-note { margin-top:4px; color:var(--muted); font-size:12px; }
+    .panel { margin-bottom:22px; padding:22px; border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:0 8px 28px oklch(35% .04 45 / .045); } .panel-head { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:17px; } h2 { margin:0; font-size:21px; letter-spacing:-.045em; } h3 { margin:0; font-size:16px; letter-spacing:-.03em; } .muted { color:var(--muted); font-size:13px; } .toolbar { display:flex; flex-wrap:wrap; gap:9px; } .toolbar input,.toolbar select { width:auto; min-width:175px; }
+    .table-wrap { overflow:auto; } table { width:100%; border-collapse:collapse; font-size:13px; } th { padding:12px 10px; border-bottom:1px solid var(--line); color:var(--muted); font-size:11px; letter-spacing:.08em; text-align:left; text-transform:uppercase; white-space:nowrap; } td { padding:14px 10px; border-bottom:1px solid var(--line); vertical-align:top; } tbody tr:hover { background:var(--surface-soft); } .primary-text { font-weight:800; } .secondary-text { display:block; margin-top:3px; color:var(--muted); font-size:11px; } .badge { display:inline-flex; align-items:center; padding:5px 8px; border-radius:999px; background:var(--surface-soft); color:var(--muted); font-size:11px; font-weight:800; white-space:nowrap; } .badge.pending { background:oklch(93% .08 88); color:oklch(42% .09 78); } .badge.confirmed { background:oklch(91% .075 150); color:oklch(35% .08 150); } .badge.reschedule { background:oklch(91% .045 230); color:oklch(38% .08 230); } .badge.cancelled { background:oklch(92% .065 28); color:var(--danger); } .badge.done { background:oklch(91% .04 280); color:oklch(38% .08 280); } .status-select { min-height:33px; padding:5px 8px; font-size:11px; font-weight:800; }
+    .actions { display:flex; flex-wrap:wrap; gap:6px; } .icon-btn { min-width:34px; min-height:34px; padding:0 8px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font-weight:800; } .icon-btn:hover { background:var(--surface-soft); } .icon-btn.danger { color:var(--danger); } .proof { width:48px; height:48px; border:1px solid var(--line); border-radius:8px; object-fit:cover; cursor:pointer; }
+    .calendar-head { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:18px; } .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(92px,1fr)); gap:8px; overflow:auto; } .day-name { padding:7px; color:var(--accent); font-size:11px; font-weight:800; text-align:center; text-transform:uppercase; } .calendar-cell { min-height:128px; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--surface); } .calendar-cell.other { opacity:.42; background:var(--surface-soft); } .date-num { margin-bottom:8px; color:var(--muted); font-size:12px; font-weight:800; } .calendar-booking { display:block; width:100%; margin-bottom:5px; padding:6px 7px; overflow:hidden; border:0; border-radius:7px; background:var(--accent-soft); color:var(--accent-dark); font-size:11px; font-weight:800; text-align:left; text-overflow:ellipsis; white-space:nowrap; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:22px; } .form-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:11px; align-items:end; } .form-grid .field { grid-column:span 1; margin:0; } .form-grid .wide { grid-column:span 2; } .empty { padding:28px 10px; color:var(--muted); text-align:center; } .low { background:oklch(95% .05 80); } .amount-in { color:var(--success); font-weight:800; } .amount-out { color:var(--danger); font-weight:800; }
+    dialog { width:min(560px,calc(100% - 28px)); padding:0; border:0; border-radius:18px; box-shadow:0 25px 90px oklch(20% .04 45 / .28); color:var(--ink); } dialog::backdrop { background:oklch(22% .03 45 / .55); } .dialog-body { padding:25px; } .dialog-body h2 { margin-bottom:15px; } .detail-list { display:grid; gap:9px; } .detail-row { display:flex; justify-content:space-between; gap:20px; padding-bottom:9px; border-bottom:1px solid var(--line); font-size:13px; } .detail-row span { color:var(--muted); } .dialog-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:20px; }
+    .toast { position:fixed; right:20px; bottom:20px; z-index:10; max-width:360px; padding:13px 16px; border:1px solid var(--line); border-radius:11px; background:var(--surface); box-shadow:var(--shadow); transform:translateY(20px); opacity:0; pointer-events:none; transition:transform .25s var(--ease),opacity .25s var(--ease); font-size:13px; } .toast.show { transform:translateY(0); opacity:1; } .toast.error { color:var(--danger); border-color:oklch(75% .12 28); }
+    @media (max-width:900px) { .stats { grid-template-columns:repeat(2,1fr); } .split { grid-template-columns:1fr; } .form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .form-grid .field,.form-grid .wide { grid-column:span 1; } }
+    @media (max-width:600px) { .shell { width:min(100% - 24px,560px); } .topbar,.intro { align-items:flex-start; flex-direction:column; } .header-actions { width:100%; justify-content:space-between; } .tabbar { overflow:auto; } .tab { white-space:nowrap; } .stats { gap:9px; } .stat { padding:14px; } .stat-value { font-size:22px; } .panel { padding:16px 12px; } .toolbar input,.toolbar select { width:100%; } .form-grid { grid-template-columns:1fr; } .form-grid .field,.form-grid .wide { grid-column:auto; } }
+  </style>
 </head>
 <body>
+  <section id="loginShell" class="login-shell">
+    <div class="login-box"><a class="brand" href="/"><span class="mark">✦</span><span>B-Lens control room</span></a><h1>Backstage access.</h1><p>Manage reservations, money in the door, and the supplies that keep the studio moving.</p><form id="loginForm"><div class="field"><label for="adminPassword">Admin password</label><input id="adminPassword" type="password" autocomplete="current-password" required></div><p id="loginError" class="error-text"></p><button class="btn primary" style="width:100%" type="submit">Enter dashboard</button></form></div>
+  </section>
 
-<div class="container-fluid py-4">
-    <!-- TOP HEADER & NAVIGATION TABS -->
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-5">
-            <h2 class="fw-bold">📸 B-Lens Admin Dashboard</h2>
-            <p class="text-muted mb-0">Manage reservations, point of sales, and studio inventory.</p>
+  <div id="appShell" hidden>
+    <header class="shell topbar"><a class="brand" href="/"><span class="mark">✦</span><span>B-Lens control room</span></a><div class="header-actions"><span class="user-chip">Studio admin</span><button class="btn" id="logoutButton">Log out</button></div></header>
+    <main class="shell">
+      <div class="intro"><div><p class="eyebrow">Studio operations</p><h1>Keep the room ready.</h1><p>One clean view for bookings, cash movement, and inventory. The boring stuff, finally under control.</p></div><button class="btn" id="refreshButton">↻ Refresh</button></div>
+      <nav class="tabbar" aria-label="Dashboard sections"><button class="tab active" data-tab="reservations">Reservations</button><button class="tab" data-tab="pos">Point of sale</button><button class="tab" data-tab="inventory">Inventory</button></nav>
+      <section id="reservationsTab" class="tab-content">
+        <div class="stats"><div class="stat"><div class="stat-label">Active bookings</div><div class="stat-value" id="activeCount">0</div><div class="stat-note">Pending, confirmed, reschedule</div></div><div class="stat"><div class="stat-label">Today</div><div class="stat-value" id="todayCount">0</div><div class="stat-note">Sessions on the calendar</div></div><div class="stat"><div class="stat-label">Awaiting review</div><div class="stat-value" id="pendingCount">0</div><div class="stat-note">Payment proof to check</div></div><div class="stat"><div class="stat-label">Open balance</div><div class="stat-value" id="balanceTotal">₱0</div><div class="stat-note">Across active reservations</div></div></div>
+        <div class="panel"><div class="panel-head"><div><h2>Reservations</h2><span class="muted">Review each submission before confirming.</span></div><div class="toolbar"><input id="bookingSearch" type="search" placeholder="Search name, package…" aria-label="Search bookings"><select id="bookingFilter" aria-label="Filter bookings"><option value="active">Active only</option><option value="all">All reservations</option><option value="Pending">Pending</option><option value="Confirmed">Confirmed</option><option value="Reschedule">Reschedule</option><option value="Done Shoot/Fully Paid">Completed</option><option value="Cancelled">Cancelled</option></select><button class="btn" id="calendarToggle">Calendar</button></div></div><div id="listView"><div class="table-wrap"><table><thead><tr><th>Date / time</th><th>Customer</th><th>Package</th><th>Money</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead><tbody id="bookingsBody"></tbody></table></div></div><div id="calendarView" hidden><div class="calendar-head"><h3 id="calendarTitle">Month</h3><div class="actions"><button class="icon-btn" data-calendar="prev" aria-label="Previous month">‹</button><button class="icon-btn" data-calendar="today">Today</button><button class="icon-btn" data-calendar="next" aria-label="Next month">›</button></div></div><div class="calendar-grid"><div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div><div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div></div><div id="calendarGrid" class="calendar-grid"></div></div></div>
         </div>
-        <div class="col-md-7">
-            <ul class="nav nav-pills justify-content-md-end gap-2 bg-white p-2 rounded shadow-sm">
-                <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#reservationsTab" onclick="switchTab('reservations')">📋 Reservations</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#posTab" onclick="switchTab('pos')">💰 Point of Sales (POS)</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#inventoryTab" onclick="switchTab('inventory')">📦 Inventory</button>
-                </li>
-            </ul>
-        </div>
-    </div>
+      </section>
 
-    <!-- TAB CONTENT CONTAINER -->
-    <div class="tab-content">
+      <section id="posTab" class="tab-content" hidden><div class="stats"><div class="stat"><div class="stat-label">Incoming</div><div class="stat-value" id="totalIncoming">₱0</div><div class="stat-note">Recorded sales and deposits</div></div><div class="stat"><div class="stat-label">Outgoing</div><div class="stat-value" id="totalOutgoing">₱0</div><div class="stat-note">Recorded expenses</div></div><div class="stat"><div class="stat-label">Current balance</div><div class="stat-value" id="currentBalance">₱0</div><div class="stat-note">Incoming less outgoing</div></div><div class="stat"><div class="stat-label">Transactions</div><div class="stat-value" id="transactionCount">0</div><div class="stat-note">All recorded entries</div></div></div><div class="panel"><div class="panel-head"><div><h2>Add transaction</h2><span class="muted">Backdated sales and expenses are supported.</span></div></div><form id="transactionForm" class="form-grid"><div class="field"><label for="txDate">Date</label><input id="txDate" type="date" required></div><div class="field"><label for="txType">Type</label><select id="txType"><option>Incoming</option><option>Outgoing</option></select></div><div class="field"><label for="txCategory">Category</label><input id="txCategory" placeholder="Self shoot" required></div><div class="field wide"><label for="txDescription">Description</label><input id="txDescription" placeholder="Customer or item details" required></div><div class="field"><label for="txAccount">Account</label><select id="txAccount"><option>Cash</option><option>Gcash</option><option>Maya</option><option>Maribank</option><option>BDO</option><option>Other Banks</option></select></div><div class="field"><label for="txAmount">Amount</label><input id="txAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div><button class="btn primary" type="submit">Add</button></form></div><div class="panel"><div class="panel-head"><div><h2>Transactions</h2><span class="muted">Newest entries first.</span></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Account</th><th>Amount</th><th></th></tr></thead><tbody id="transactionsBody"></tbody></table></div></div></section>
 
-        <!-- 1. RESERVATIONS TAB -->
-        <div class="tab-pane fade show active" id="reservationsTab">
+      <section id="inventoryTab" class="tab-content" hidden><div class="stats"><div class="stat"><div class="stat-label">Items tracked</div><div class="stat-value" id="inventoryCount">0</div><div class="stat-note">Studio and daily supplies</div></div><div class="stat"><div class="stat-label">Low stock</div><div class="stat-value" id="lowStockCount">0</div><div class="stat-note">Needs a restock check</div></div><div class="stat"><div class="stat-label">Studio supplies</div><div class="stat-value" id="studioCount">0</div><div class="stat-note">Paper, ink, backdrops</div></div><div class="stat"><div class="stat-label">Daily supplies</div><div class="stat-value" id="dailyCount">0</div><div class="stat-note">Room essentials</div></div></div><div class="panel"><div class="panel-head"><div><h2>Add inventory item</h2><span class="muted">Quantities persist between restarts.</span></div></div><form id="inventoryForm" class="form-grid"><div class="field"><label for="invCategory">Category</label><select id="invCategory"><option>Studio Supplies</option><option>Daily Supplies</option></select></div><div class="field wide"><label for="invName">Item name</label><input id="invName" placeholder="Pink backdrop" required></div><div class="field"><label for="invQty">Quantity</label><input id="invQty" type="number" min="0" step="1" required></div><div class="field"><label for="invUnit">Unit</label><input id="invUnit" placeholder="pcs" required></div><button class="btn primary" type="submit">Save item</button></form></div><div class="split"><div class="panel"><div class="panel-head"><h2>Studio supplies</h2></div><div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="studioBody"></tbody></table></div></div><div class="panel"><div class="panel-head"><h2>Daily supplies</h2></div><div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="dailyBody"></tbody></table></div></div></div></section>
+    </main>
+  </div>
 
-            <!-- VIEW TOGGLE BUTTONS & HEADER -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="text-secondary mb-0">Active Bookings Management</h4>
-                <div class="btn-group shadow-sm" role="group">
-                    <button type="button" class="btn btn-outline-secondary active px-4" id="listViewBtn" onclick="toggleReservationView('list')">📋 List View</button>
-                    <button type="button" class="btn btn-outline-secondary px-4" id="calendarViewBtn" onclick="toggleReservationView('calendar')">📅 Calendar View</button>
-                </div>
-            </div>
+  <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+  <dialog id="imageDialog"><div class="dialog-body"><img id="proofImage" src="" alt="Payment proof" style="display:block;max-width:100%;max-height:70vh;margin:auto;border-radius:10px"><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-            <!-- LIST VIEW CONTAINER -->
-            <div id="listViewContainer">
-                <div class="card p-4 shadow-sm mb-5">
-                    <h5 class="text-secondary mb-3">Active Bookings (Pending, Confirmed, Reschedule)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle table-custom">
-                            <thead>
-                                <tr>
-                                    <th>Date & Time</th>
-                                    <th>Customer Name</th>
-                                    <th>Contact / Info</th>
-                                    <th>Package</th>
-                                    <th>Total / Balance</th>
-                                    <th>Proof of Payment</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="activeBookingsTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CALENDAR VIEW CONTAINER -->
-            <div id="calendarViewContainer" class="card p-4 shadow-sm mb-5" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="text-secondary fw-bold mb-0" id="calendarMonthTitle">August 2026</h4>
-                    <div class="btn-group shadow-sm">
-                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(-1)">◀ Prev</button>
-                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(0)">Today</button>
-                        <button class="btn btn-outline-secondary px-3" onclick="changeMonth(1)">Next ▶</button>
-                    </div>
-                </div>
-                <div class="calendar-grid">
-                    <div class="calendar-day-header">Sun</div>
-                    <div class="calendar-day-header">Mon</div>
-                    <div class="calendar-day-header">Tue</div>
-                    <div class="calendar-day-header">Wed</div>
-                    <div class="calendar-day-header">Thu</div>
-                    <div class="calendar-day-header">Fri</div>
-                    <div class="calendar-day-header">Sat</div>
-                </div>
-                <div class="calendar-grid mt-2" id="calendarDaysGrid"></div>
-            </div>
-
-            <!-- ARCHIVED / COMPLETED RESERVATIONS TABLE -->
-            <div class="card p-4 shadow-sm border-top border-secondary">
-                <h4 class="text-secondary mb-3">📁 Completed & Cancelled Archive</h4>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle table-archive">
-                        <thead>
-                            <tr>
-                                <th>Date & Time</th>
-                                <th>Customer Name</th>
-                                <th>Contact / Info</th>
-                                <th>Package</th>
-                                <th>Total / Balance</th>
-                                <th>Proof of Payment</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="archiveBookingsTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. POINT OF SALES (POS) TAB -->
-        <div class="tab-pane fade" id="posTab">
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card p-3 bg-success text-white">
-                        <h5>Total Incoming</h5>
-                        <h3 id="totalIncoming">₱0.00</h3>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card p-3 bg-danger text-white">
-                        <h5>Total Outgoing / Expenses</h5>
-                        <h3 id="totalOutgoing">₱0.00</h3>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card p-3 bg-warning text-dark">
-                        <h5>Current Balance</h5>
-                        <h3 id="currentBalance">₱0.00</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card p-4 shadow-sm mb-4">
-                <h4 class="text-secondary mb-3">➕ Add Manual Transaction / Sales (Backdated & Expenses)</h4>
-                <form id="transactionForm" class="row g-3">
-                    <div class="col-md-2">
-                        <label class="form-label">Date</label>
-                        <input type="date" class="form-control" id="txDate" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Type</label>
-                        <select class="form-select" id="txType">
-                            <option value="Incoming">Incoming (Sales)</option>
-                            <option value="Outgoing">Outgoing (Expense)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Category</label>
-                        <input type="text" class="form-control" id="txCategory" placeholder="e.g. Self Shoot" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Description / Details</label>
-                        <input type="text" class="form-control" id="txDescription" placeholder="Customer name or item info" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Account / Payment</label>
-                        <select class="form-select" id="txAccount" required>
-                            <option value="Cash">Cash</option>
-                            <option value="Gcash">Gcash</option>
-                            <option value="Maya">Maya</option>
-                            <option value="Maribank">Maribank</option>
-                            <option value="BDO">BDO</option>
-                            <option value="Other Banks">Other Banks</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Amount (₱)</label>
-                        <input type="number" step="0.01" class="form-control" id="txAmount" placeholder="0.00" required>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">Add Transaction</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="card p-4 shadow-sm">
-                <h4 class="text-secondary mb-3">📋 Transactions List (July 18 Onwards Cycle)</h4>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th>Mode of Payment</th>
-                                <th>Amount</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionsTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. INVENTORY TAB -->
-        <div class="tab-pane fade" id="inventoryTab">
-            <div class="card p-4 shadow-sm mb-4">
-                <h4 class="text-secondary mb-3">➕ Add New Inventory Item</h4>
-                <form id="inventoryForm" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Category</label>
-                        <select class="form-select" id="invCategory">
-                            <option value="Studio Supplies">Studio Supplies</option>
-                            <option value="Daily Supplies">Daily Supplies</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-control" id="invName" placeholder="e.g. Ink (Set) or Pink Backdrop" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Initial Quantity</label>
-                        <input type="number" class="form-control" id="invQty" placeholder="0" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Unit</label>
-                        <input type="text" class="form-control" id="invUnit" placeholder="set, roll, sheets, pcs" required>
-                    </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Save</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="row">
-                <!-- Studio Supplies Column -->
-                <div class="col-md-6">
-                    <div class="card p-4 shadow-sm">
-                        <h4 class="text-primary mb-3">🖨️ Studio Supplies</h4>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th>Item Name</th>
-                                        <th>Quantity</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="studioSuppliesTable"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Daily Supplies Column -->
-                <div class="col-md-6">
-                    <div class="card p-4 shadow-sm">
-                        <h4 class="text-success mb-3">🧻 Daily Supplies</h4>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th>Item Name</th>
-                                        <th>Quantity</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dailySuppliesTable"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<!-- Modal para sa Proof of Payment -->
-<div class="modal fade" id="imageModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <img id="modalImage" src="" class="img-fluid rounded" alt="Enlarged Proof">
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para sa Booking Details (Clickable Calendar View) -->
-<div class="modal fade" id="bookingDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title">📌 Session Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4" id="modalBookingBody">
-                <!-- Details will be loaded here dynamically -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bootstrap JS & Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let globalBookingsData = [];
-    let currentCalendarDate = new Date();
-
-    function switchTab(tabName) {
-        if(tabName === 'reservations') loadAdminBookings();
-        if(tabName === 'pos') loadTransactions();
-        if(tabName === 'inventory') loadInventory();
-    }
-
-    function toggleReservationView(viewType) {
-        const listView = document.getElementById('listViewContainer');
-        const calendarView = document.getElementById('calendarViewContainer');
-        const listBtn = document.getElementById('listViewBtn');
-        const calendarBtn = document.getElementById('calendarViewBtn');
-
-        if(viewType === 'list') {
-            listView.style.display = 'block';
-            calendarView.style.display = 'none';
-            listBtn.classList.add('active');
-            calendarBtn.classList.remove('active');
-        } else {
-            listView.style.display = 'none';
-            calendarView.style.display = 'block';
-            calendarBtn.classList.add('active');
-            listBtn.classList.remove('active');
-            renderCalendar();
-        }
-    }
-
-    // --- RESERVATIONS FUNCTIONS ---
-    function loadAdminBookings() {
-        fetch('/api/admin/bookings')
-            .then(res => res.json())
-            .then(data => {
-                globalBookingsData = data.bookings || [];
-                const activeTbody = document.getElementById('activeBookingsTable');
-                const archiveTbody = document.getElementById('archiveBookingsTable');
-                activeTbody.innerHTML = '';
-                archiveTbody.innerHTML = '';
-
-                let activeCount = 0, archiveCount = 0;
-                if(globalBookingsData.length === 0) {
-                    activeTbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No reservations found.</td></tr>`;
-                    archiveTbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No archived reservations found.</td></tr>`;
-                    return;
-                }
-
-                globalBookingsData.forEach((b) => {
-                    let statusBgClass = 'bg-secondary';
-                    if(b.status === 'Pending') statusBgClass = 'bg-warning text-dark';
-                    else if(b.status === 'Confirmed') statusBgClass = 'bg-success text-white';
-                    else if(b.status === 'Reschedule') statusBgClass = 'bg-info text-dark';
-                    else if(b.status === 'Done Shoot/Fully Paid') statusBgClass = 'bg-primary text-white';
-                    else if(b.status === 'Cancelled') statusBgClass = 'bg-danger text-white';
-
-                    const proofHtml = b.payment_screenshot
-                        ? `<img src="${b.payment_screenshot}" class="proof-img" onclick="showImage('${b.payment_screenshot}')">`
-                        : 'No Proof';
-
-                    // Ginamit ang b.id mula sa Supabase sa halip na array index
-                    const rowHTML = `
-                        <td><strong>${b.date}</strong><br><span class="badge bg-dark">${b.schedule}</span></td>
-                        <td><strong>${b.customer_name}</strong><br><small class="text-muted">${b.email}</small></td>
-                        <td>${b.contact_no}<br><small class="text-muted">${b.social_media || ''}</small></td>
-                        <td><span class="fw-bold text-primary">${b.package} (${b.package_type})</span></td>
-                        <td>Total: <strong>₱${Number(b.grand_total).toLocaleString()}</strong><br><span class="text-danger small">Balance: ₱${Number(b.balance).toLocaleString()}</span></td>
-                        <td>${proofHtml}</td>
-                        <td>
-                            <select class="form-select form-select-sm status-select ${statusBgClass}" onchange="updateBookingStatus(${b.id}, this)">
-                                <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="Reschedule" ${b.status === 'Reschedule' ? 'selected' : ''}>Reschedule</option>
-                                <option value="Done Shoot/Fully Paid" ${b.status === 'Done Shoot/Fully Paid' ? 'selected' : ''}>Done Shoot/Fully Paid</option>
-                                <option value="Cancelled" ${b.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                        </td>
-                        <td><button class="btn btn-outline-danger btn-sm" onclick="deleteBooking(${b.id})">🗑️</button></td>
-                    `;
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = rowHTML;
-                    if (b.status === 'Done Shoot/Fully Paid' || b.status === 'Cancelled') {
-                        archiveTbody.appendChild(tr);
-                        archiveCount++;
-                    } else {
-                        activeTbody.appendChild(tr);
-                        activeCount++;
-                    }
-                });
-
-                if(document.getElementById('calendarViewContainer').style.display === 'block') {
-                    renderCalendar();
-                }
-            });
-    }
-
-    function renderCalendar() {
-        const grid = document.getElementById('calendarDaysGrid');
-        const title = document.getElementById('calendarMonthTitle');
-        grid.innerHTML = '';
-
-        const year = currentCalendarDate.getFullYear();
-        const month = currentCalendarDate.getMonth();
-
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        title.innerText = `${monthNames[month]} ${year}`;
-
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const prevTotalDays = new Date(year, month, 0).getDate();
-
-        const bookingMap = {};
-        globalBookingsData.forEach((b) => {
-            if(b.status !== 'Done Shoot/Fully Paid' && b.status !== 'Cancelled') {
-                if(!bookingMap[b.date]) bookingMap[b.date] = [];
-                bookingMap[b.date].push(b);
-            }
-        });
-
-        for(let i = firstDayIndex; i > 0; i--) {
-            const dayNum = prevTotalDays - i + 1;
-            grid.innerHTML += `<div class="calendar-cell other-month"><div class="calendar-date-num">${dayNum}</div></div>`;
-        }
-
-        for(let day = 1; day <= totalDays; day++) {
-            const formattedMonth = String(month + 1).padStart(2, '0');
-            const formattedDay = String(day).padStart(2, '0');
-            const dateStr = `${year}-${formattedMonth}-${formattedDay}`;
-
-            let bookingsHtml = '';
-            if(bookingMap[dateStr]) {
-                bookingMap[dateStr].forEach(b => {
-                    bookingsHtml += `<span class="calendar-booking-badge" onclick="showBookingDetails(${b.id})" title="Click to view details">⏰ ${b.schedule} - ${b.customer_name}</span>`;
-                });
-            }
-
-            grid.innerHTML += `
-                <div class="calendar-cell">
-                    <div class="calendar-date-num">${day}</div>
-                    <div class="overflow-auto" style="max-height: 95px;">${bookingsHtml}</div>
-                </div>
-            `;
-        }
-    }
-
-    function changeMonth(direction) {
-        if(direction === 0) {
-            currentCalendarDate = new Date();
-        } else {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
-        }
-        renderCalendar();
-    }
-
-    function showBookingDetails(id) {
-        const b = globalBookingsData.find(item => item.id === id);
-        if(!b) return;
-
-        const proofSection = b.payment_screenshot
-            ? `<div class="text-center"><p class="small text-muted mb-1">Proof of Payment:</p><img src="${b.payment_screenshot}" class="img-fluid rounded border" style="max-height: 180px; cursor: pointer;" onclick="showImage('${b.payment_screenshot}')"></div>`
-            : '';
-
-        const body = document.getElementById('modalBookingBody');
-        body.innerHTML = `
-            <p class="mb-2"><strong>Customer Name:</strong> <span class="text-dark">${b.customer_name}</span></p>
-            <p class="mb-2"><strong>Email:</strong> ${b.email || 'N/A'}</p>
-            <p class="mb-2"><strong>Contact No:</strong> ${b.contact_no}</p>
-            <p class="mb-2"><strong>Social Media:</strong> ${b.social_media || 'N/A'}</p>
-            <hr>
-            <p class="mb-2"><strong>Date & Time:</strong> <span class="text-primary fw-bold">${b.date} (${b.schedule})</span></p>
-            <p class="mb-2"><strong>Package:</strong> ${b.package} (${b.package_type})</p>
-            <p class="mb-2"><strong>Total Amount:</strong> ₱${Number(b.grand_total).toLocaleString()}</p>
-            <p class="mb-2"><strong>Balance:</strong> <span class="text-danger">₱${Number(b.balance).toLocaleString()}</span></p>
-            <p class="mb-3"><strong>Status:</strong> <span class="badge bg-secondary">${b.status}</span></p>
-            ${proofSection}
-        `;
-
-        new bootstrap.Modal(document.getElementById('bookingDetailModal')).show();
-    }
-
-    function updateBookingStatus(id, selectElement) {
-        fetch('/api/admin/update-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id, status: selectElement.value })
-        }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
-    }
-
-    function deleteBooking(id) {
-        if(confirm('Delete this reservation?')) {
-            fetch('/api/admin/delete-booking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            }).then(res => res.json()).then(data => { if(data.success) loadAdminBookings(); });
-        }
-    }
-
-    // --- POS / TRANSACTIONS FUNCTIONS ---
-    function loadTransactions() {
-        fetch('/api/admin/transactions')
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById('transactionsTable');
-                tbody.innerHTML = '';
-                let totalInc = 0, totalOut = 0;
-
-                data.transactions.forEach(t => {
-                    if(t.type === 'Incoming') totalInc += Number(t.amount);
-                    else totalOut += Number(t.amount);
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${t.date}</td>
-                            <td><span class="badge ${t.type === 'Incoming' ? 'bg-success' : 'bg-danger'}">${t.type}</span></td>
-                            <td>${t.category}</td>
-                            <td>${t.description}</td>
-                            <td><span class="badge bg-light text-dark border">${t.account || 'Cash'}</span></td>
-                            <td>₱${Number(t.amount).toLocaleString()}</td>
-                            <td><button class="btn btn-outline-danger btn-sm" onclick="deleteTransaction(${t.id})">🗑️</button></td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('totalIncoming').innerText = `₱${totalInc.toLocaleString()}`;
-                document.getElementById('totalOutgoing').innerText = `₱${totalOut.toLocaleString()}`;
-                document.getElementById('currentBalance').innerText = `₱${(totalInc - totalOut).toLocaleString()}`;
-            });
-    }
-
-    document.getElementById('transactionForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const data = {
-            date: document.getElementById('txDate').value,
-            type: document.getElementById('txType').value,
-            category: document.getElementById('txCategory').value,
-            description: document.getElementById('txDescription').value,
-            account: document.getElementById('txAccount').value,
-            amount: document.getElementById('txAmount').value
-        };
-        fetch('/api/admin/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()).then(data => {
-            if(data.success) {
-                document.getElementById('transactionForm').reset();
-                loadTransactions();
-            }
-        });
-    });
-
-    function deleteTransaction(id) {
-        fetch('/api/admin/transactions/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id })
-        }).then(res => res.json()).then(data => { if(data.success) loadTransactions(); });
-    }
-
-    // --- INVENTORY FUNCTIONS ---
-    function loadInventory() {
-        fetch('/api/admin/inventory')
-            .then(res => res.json())
-            .then(data => {
-                const studioTbody = document.getElementById('studioSuppliesTable');
-                const dailyTbody = document.getElementById('dailySuppliesTable');
-                studioTbody.innerHTML = '';
-                dailyTbody.innerHTML = '';
-
-                if(data.inventory.length === 0) {
-                    studioTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No studio items found.</td></tr>`;
-                    dailyTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No daily items found.</td></tr>`;
-                    return;
-                }
-
-                data.inventory.forEach(item => {
-                    const itemNameLower = item.name.toLowerCase();
-                    const qty = Number(item.quantity);
-
-                    let isLowStock = false;
-                    if (itemNameLower.includes('backdrop')) {
-                        isLowStock = (qty <= 0);
-                    } else {
-                        isLowStock = (qty <= 5);
-                    }
-
-                    const rowClass = isLowStock ? 'table-warning' : '';
-
-                    const row = `
-                        <tr class="${rowClass}">
-                            <td>
-                                <strong>${item.name}</strong>
-                                ${isLowStock ? '<br><span class="badge bg-danger mt-1">⚠️ Low Stock! Restock needed</span>' : ''}
-                            </td>
-                            <td><span class="${isLowStock ? 'fw-bold text-danger' : ''}">${item.quantity} ${item.unit}</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-success px-2" onclick="updateStock(${item.id}, 1)">+</button>
-                                <button class="btn btn-sm btn-warning px-2" onclick="updateStock(${item.id}, -1)">-</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteInventory(${item.id})">🗑️</button>
-                            </td>
-                        </tr>
-                    `;
-                    if(item.category === 'Studio Supplies') studioTbody.innerHTML += row;
-                    else dailyTbody.innerHTML += row;
-                });
-            });
-    }
-
-    document.getElementById('inventoryForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const data = {
-            category: document.getElementById('invCategory').value,
-            name: document.getElementById('invName').value,
-            quantity: document.getElementById('invQty').value,
-            unit: document.getElementById('invUnit').value
-        };
-        fetch('/api/admin/inventory', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(res => res.json()).then(data => {
-            if(data.success) {
-                document.getElementById('inventoryForm').reset();
-                loadInventory();
-            }
-        });
-    });
-
-    function updateStock(id, change) {
-        const qty = prompt(change > 0 ? "Enter quantity to add:" : "Enter quantity to subtract/remove:", "1");
-        if(qty !== null && !isNaN(qty)) {
-            const actualChange = change * parseInt(qty);
-            fetch('/api/admin/inventory/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, quantity_change: actualChange })
-            }).then(res => res.json()).then(data => { if(data.success) loadInventory(); });
-        }
-    }
-
-    function deleteInventory(id) {
-        if(confirm('Remove this item from inventory?')) {
-            fetch('/api/admin/inventory/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            }).then(res => res.json()).then(data => { if(data.success) loadInventory(); });
-        }
-    }
-
-    function showImage(src) {
-        document.getElementById('modalImage').src = src;
-        new bootstrap.Modal(document.getElementById('imageModal')).show();
-    }
-
-    loadAdminBookings();
-</script>
-
+  <script>
+    const $ = (id) => document.getElementById(id); const state = { bookings:[], transactions:[], inventory:[], calendarDate:new Date(), activeTab:'reservations' }; let toastTimer;
+    const money = (n) => `₱${Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits:2 })}`;
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+    const safeUrl = (value) => /^https?:\/\//i.test(String(value || '')) ? escapeHtml(value) : '';
+    const showToast = (message, error=false) => { const el=$('toast'); el.textContent=message; el.className=`toast show${error?' error':''}`; clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.className='toast',4000); };
+    async function api(url, options={}) { const response=await fetch(url, options); let data={}; try { data=await response.json(); } catch {} if (response.status===401) { showLogin(); throw new Error('Session expired.'); } if (!response.ok) throw new Error(data.message || 'Something went wrong.'); return data; }
+    function showLogin(message='') { $('appShell').hidden=true; $('loginShell').hidden=false; $('loginError').textContent=message; }
+    function showApp() { $('loginShell').hidden=true; $('appShell').hidden=false; }
+    async function checkSession() { try { const res=await fetch('/api/admin/session'); if(res.ok) { showApp(); await loadAll(); } else showLogin(); } catch { showLogin('Unable to reach the server.'); } }
+    async function login(event) { event.preventDefault(); $('loginError').textContent=''; const button=event.submitter; button.disabled=true; try { await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('adminPassword').value})}); $('adminPassword').value=''; showApp(); await loadAll(); } catch(error) { $('loginError').textContent=error.message; } finally { button.disabled=false; } }
+    async function loadAll() { await Promise.all([loadBookings(),loadTransactions(),loadInventory()]); }
+    async function loadBookings() { const data=await api('/api/admin/bookings'); state.bookings=data.bookings||[]; renderBookingStats(); renderBookings(); renderCalendar(); }
+    function statusClass(status) { return status==='Pending'?'pending':status==='Confirmed'?'confirmed':status==='Reschedule'?'reschedule':status==='Cancelled'?'cancelled':status==='Done Shoot/Fully Paid'?'done':''; }
+    function activeBooking(b) { return !['Done Shoot/Fully Paid','Cancelled'].includes(b.status); }
+    function renderBookingStats() { const active=state.bookings.filter(activeBooking), today=new Date().toISOString().slice(0,10); $('activeCount').textContent=active.length; $('todayCount').textContent=active.filter(b=>b.date===today).length; $('pendingCount').textContent=state.bookings.filter(b=>b.status==='Pending').length; $('balanceTotal').textContent=money(active.reduce((sum,b)=>sum+Number(b.balance||0),0)); }
+    function filteredBookings() { const query=$('bookingSearch').value.trim().toLowerCase(), filter=$('bookingFilter').value; return state.bookings.filter(b => { const hay=[b.customer_name,b.email,b.package,b.package_type,b.date,b.schedule].join(' ').toLowerCase(); const matchesQuery=!query||hay.includes(query); const matchesFilter=filter==='all'||filter==='active'?filter==='all'?true:activeBooking(b):b.status===filter; return matchesQuery&&matchesFilter; }).sort((a,b)=>`${a.date} ${a.schedule}`.localeCompare(`${b.date} ${b.schedule}`)); }
+    function renderBookings() { const body=$('bookingsBody'), rows=filteredBookings(); if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="empty">No reservations match this view.</td></tr>'; return; } body.innerHTML=rows.map(b=>{ const proof=safeUrl(b.payment_screenshot); return `<tr><td><span class="primary-text">${escapeHtml(b.date)}</span><span class="secondary-text">${escapeHtml(b.schedule)}</span></td><td><span class="primary-text">${escapeHtml(b.customer_name||b.name)}</span><span class="secondary-text">${escapeHtml(b.email||'No email')}<br>${escapeHtml(b.contact_no||'')}</span></td><td><span class="primary-text">${escapeHtml(b.package)} · ${escapeHtml(b.package_type)}</span><span class="secondary-text">Student: ${b.is_student==='true'||b.is_student===true?'Yes':'No'}</span></td><td><span class="primary-text">${money(b.grand_total)}</span><span class="secondary-text">Balance: ${money(b.balance)}</span></td><td>${proof?`<img class="proof" data-action="image" data-src="${proof}" src="${proof}" alt="Payment proof">`:'<span class="muted">None</span>'}</td><td><select class="status-select" data-action="status" data-id="${escapeHtml(b.id)}" aria-label="Booking status"><option ${b.status==='Pending'?'selected':''}>Pending</option><option ${b.status==='Confirmed'?'selected':''}>Confirmed</option><option ${b.status==='Reschedule'?'selected':''}>Reschedule</option><option ${b.status==='Done Shoot/Fully Paid'?'selected':''}>Done Shoot/Fully Paid</option><option ${b.status==='Cancelled'?'selected':''}>Cancelled</option></select><span class="badge ${statusClass(b.status)}" style="margin-top:6px">${escapeHtml(b.status||'Pending')}</span></td><td><div class="actions"><button class="icon-btn" data-action="details" data-id="${escapeHtml(b.id)}" title="View details">View</button><button class="icon-btn danger" data-action="delete-booking" data-id="${escapeHtml(b.id)}" title="Delete reservation">×</button></div></td></tr>`; }).join(''); }
+    function renderCalendar() { const date=state.calendarDate, year=date.getFullYear(), month=date.getMonth(); $('calendarTitle').textContent=date.toLocaleDateString('en-US',{month:'long',year:'numeric'}); const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate(); const cells=[]; for(let i=first-1;i>=0;i--) cells.push(`<div class="calendar-cell other"><div class="date-num">${prevDays-i}</div></div>`); for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const bs=state.bookings.filter(b=>b.date===key&&activeBooking(b)); cells.push(`<div class="calendar-cell"><div class="date-num">${day}</div>${bs.map(b=>`<button class="calendar-booking" data-action="details" data-id="${escapeHtml(b.id)}">${escapeHtml(b.schedule)} · ${escapeHtml(b.customer_name||b.name)}</button>`).join('')}</div>`);} $('calendarGrid').innerHTML=cells.join(''); }
+    function showBooking(id) { const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b)return; const rows=[['Customer',b.customer_name||b.name],['Email',b.email],['Contact',b.contact_no],['Social',b.social_media],['Date',`${b.date} · ${b.schedule}`],['Package',`${b.package} · ${b.package_type}`],['Total',money(b.grand_total)],['Downpayment',money(b.downpayment)],['Balance',money(b.balance)],['Status',b.status],['Extras',`Pax ${b.extra_pax||0}, Pet ${b.extra_pet||0}, Backdrop ${b.extra_backdrop||0}`]]; $('bookingDetails').innerHTML=rows.map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join(''); $('bookingDialog').showModal(); }
+    async function updateStatus(id,status,select) { select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})}); showToast('Booking status updated.'); await loadBookings(); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { select.disabled=false; } }
+    async function deleteBooking(id) { if(!confirm('Delete this reservation permanently?'))return; try { await api('/api/admin/delete-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Reservation deleted.'); await loadBookings(); } catch(error){showToast(error.message,true);} }
+    async function loadTransactions() { const data=await api('/api/admin/transactions'); state.transactions=data.transactions||[]; const inc=state.transactions.filter(t=>t.type==='Incoming').reduce((s,t)=>s+Number(t.amount||0),0), out=state.transactions.filter(t=>t.type!=='Incoming').reduce((s,t)=>s+Number(t.amount||0),0); $('totalIncoming').textContent=money(inc); $('totalOutgoing').textContent=money(out); $('currentBalance').textContent=money(inc-out); $('transactionCount').textContent=state.transactions.length; $('transactionsBody').innerHTML=state.transactions.length?state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>`<tr><td>${escapeHtml(t.date)}</td><td><span class="badge ${t.type==='Incoming'?'confirmed':'cancelled'}">${escapeHtml(t.type)}</span></td><td>${escapeHtml(t.category)}</td><td>${escapeHtml(t.description)}</td><td>${escapeHtml(t.account||'Cash')}</td><td class="${t.type==='Incoming'?'amount-in':'amount-out'}">${money(t.amount)}</td><td><button class="icon-btn danger" data-action="delete-transaction" data-id="${escapeHtml(t.id)}">×</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No transactions yet.</td></tr>'; }
+    async function addTransaction(event) { event.preventDefault(); const payload={date:$('txDate').value,type:$('txType').value,category:$('txCategory').value.trim(),description:$('txDescription').value.trim(),account:$('txAccount').value,amount:$('txAmount').value}; try { await api('/api/admin/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); event.target.reset(); $('txDate').value=new Date().toISOString().slice(0,10); showToast('Transaction added.'); await loadTransactions(); } catch(error){showToast(error.message,true);} }
+    async function deleteTransaction(id) { if(!confirm('Delete this transaction?'))return; try { await api('/api/admin/transactions/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Transaction deleted.'); await loadTransactions(); } catch(error){showToast(error.message,true);} }
+    async function loadInventory() { const data=await api('/api/admin/inventory'); state.inventory=data.inventory||[]; const low=state.inventory.filter(i=>Number(i.quantity)<=((i.name||'').toLowerCase().includes('backdrop')?0:5)); $('inventoryCount').textContent=state.inventory.length; $('lowStockCount').textContent=low.length; $('studioCount').textContent=state.inventory.filter(i=>i.category==='Studio Supplies').length; $('dailyCount').textContent=state.inventory.filter(i=>i.category==='Daily Supplies').length; const render=(category)=>{const items=state.inventory.filter(i=>i.category===category); return items.length?items.map(i=>{const isLow=Number(i.quantity)<=((i.name||'').toLowerCase().includes('backdrop')?0:5);return `<tr class="${isLow?'low':''}"><td><span class="primary-text">${escapeHtml(i.name)}</span>${isLow?'<span class="secondary-text">Restock check</span>':''}</td><td><span class="${isLow?'amount-out':''}">${escapeHtml(i.quantity)} ${escapeHtml(i.unit)}</span></td><td><div class="actions"><button class="icon-btn" data-action="stock" data-change="1" data-id="${escapeHtml(i.id)}">+</button><button class="icon-btn" data-action="stock" data-change="-1" data-id="${escapeHtml(i.id)}">−</button><button class="icon-btn danger" data-action="delete-inventory" data-id="${escapeHtml(i.id)}">×</button></div></td></tr>`}).join(''):'<tr><td colspan="3" class="empty">No items yet.</td></tr>';}; $('studioBody').innerHTML=render('Studio Supplies'); $('dailyBody').innerHTML=render('Daily Supplies'); }
+    async function addInventory(event) { event.preventDefault(); const payload={category:$('invCategory').value,name:$('invName').value.trim(),quantity:$('invQty').value,unit:$('invUnit').value.trim()}; try { await api('/api/admin/inventory',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); event.target.reset(); showToast('Inventory item saved.'); await loadInventory(); } catch(error){showToast(error.message,true);} }
+    async function updateStock(id,change) { const qty=prompt(change>0?'How many to add?':'How many to subtract?','1'); if(qty===null||!/^\d+$/.test(qty)||Number(qty)<1)return; try { await api('/api/admin/inventory/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,quantity_change:change*Number(qty)})}); showToast('Stock updated.'); await loadInventory(); } catch(error){showToast(error.message,true);} }
+    async function deleteInventory(id) { if(!confirm('Remove this inventory item?'))return; try { await api('/api/admin/inventory/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Inventory item removed.'); await loadInventory(); } catch(error){showToast(error.message,true);} }
+    function setTab(tab) { state.activeTab=tab; document.querySelectorAll('.tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab)); document.querySelectorAll('.tab-content').forEach(section=>section.hidden=!section.id.startsWith(tab)); if(tab==='reservations')loadBookings(); if(tab==='pos')loadTransactions(); if(tab==='inventory')loadInventory(); }
+    document.addEventListener('click',(event)=>{ const action=event.target.closest('[data-action]')?.dataset.action; if(action==='details')showBooking(event.target.closest('[data-action]').dataset.id); if(action==='image'){ $('proofImage').src=event.target.closest('[data-action]').dataset.src; $('imageDialog').showModal(); } if(action==='delete-booking')deleteBooking(event.target.closest('[data-action]').dataset.id); if(action==='delete-transaction')deleteTransaction(event.target.closest('[data-action]').dataset.id); if(action==='delete-inventory')deleteInventory(event.target.closest('[data-action]').dataset.id); if(action==='stock')updateStock(event.target.closest('[data-action]').dataset.id,Number(event.target.closest('[data-action]').dataset.change)); if(event.target.matches('[data-close-dialog]'))event.target.closest('dialog').close(); });
+    document.addEventListener('change',(event)=>{ if(event.target.matches('[data-action="status"]'))updateStatus(event.target.dataset.id,event.target.value,event.target); });
+    document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab))); $('bookingSearch').addEventListener('input',renderBookings); $('bookingFilter').addEventListener('change',renderBookings); $('calendarToggle').addEventListener('click',()=>{const calendar=$('calendarView');calendar.hidden=!calendar.hidden;$('listView').hidden=!calendar.hidden;$('calendarToggle').textContent=calendar.hidden?'Calendar':'List';}); document.querySelectorAll('[data-calendar]').forEach(btn=>btn.addEventListener('click',()=>{const action=btn.dataset.calendar;if(action==='today')state.calendarDate=new Date();else state.calendarDate.setMonth(state.calendarDate.getMonth()+(action==='next'?1:-1));renderCalendar();})); $('transactionForm').addEventListener('submit',addTransaction); $('inventoryForm').addEventListener('submit',addInventory); $('refreshButton').addEventListener('click',()=>loadAll().catch(e=>showToast(e.message,true))); $('logoutButton').addEventListener('click',async()=>{await fetch('/api/admin/logout',{method:'POST'});showLogin();}); $('loginForm').addEventListener('submit',login); $('txDate').value=new Date().toISOString().slice(0,10); checkSession();
+  </script>
 </body>
 </html>
