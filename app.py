@@ -216,6 +216,11 @@ def calculate_totals(form):
     if as_bool(form.get("has_balloons", False)):
         if not 1 <= balloon_qty <= 30:
             raise ValueError("Balloon quantity must be between 1 and 30.")
+        balloon_numbers = [n.strip() for n in form.get("balloon_numbers", "").split(",") if n.strip()]
+        if not balloon_numbers:
+            raise ValueError("Please provide the balloon digit(s) or number(s).")
+        if len(balloon_numbers) != balloon_qty:
+            raise ValueError(f"Please provide exactly {balloon_qty} number(s) for the balloon quantity, separated by commas.")
         total += balloon_qty * 39
     elif balloon_qty != 0:
         balloon_qty = 0
@@ -289,6 +294,37 @@ def send_confirmation_email(booking):
         server.starttls()
         server.login(sender, password)
         server.sendmail(sender, booking["email"], message.as_string())
+
+
+def send_admin_notification(booking):
+    """Alerts the studio owner as soon as a new booking comes in, using the
+    same Gmail account that sends client confirmations."""
+    sender = os.environ.get("SENDER_EMAIL", "").strip()
+    password = os.environ.get("SENDER_PASSWORD", "").strip()
+    recipient = os.environ.get("ADMIN_NOTIFICATION_EMAIL", "").strip() or sender
+    if not sender or not password or not recipient:
+        return
+    message = MIMEMultipart()
+    message["From"], message["To"] = sender, recipient
+    message["Subject"] = f"New booking: {booking.get('customer_name', 'Unknown')} — {booking.get('date')}"
+    body = (
+        f"New booking received.\n\n"
+        f"Customer: {booking.get('customer_name')}\n"
+        f"Contact no.: {booking.get('contact_no')}\n"
+        f"Email: {booking.get('email')}\n"
+        f"Social media: {booking.get('social_media')}\n\n"
+        f"Date: {booking.get('date')}\nTime: {booking.get('schedule')}\n"
+        f"Package: {booking.get('package')} ({booking.get('package_type')})\n"
+        f"Grand total: ₱{booking.get('grand_total')}\n"
+        f"Downpayment: ₱{booking.get('downpayment')}\nBalance: ₱{booking.get('balance')}\n\n"
+        f"Status: {booking.get('status', 'Pending')}\n\n"
+        "Open the admin dashboard to review and confirm."
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
+        server.starttls()
+        server.login(sender, password)
+        server.sendmail(sender, recipient, message.as_string())
 
 
 def record_transaction(values):
@@ -428,6 +464,10 @@ def save_booking():
         inserted = require_supabase().table("bookings").insert(new_booking).execute()
         created = (inserted.data or [new_booking])[0]
         record_transaction((booking_date.isoformat(), "Incoming", "Booking Downpayment", f"{new_booking['customer_name']} - {new_booking['package']} ({new_booking['package_type']})", totals["downpayment"], "Gcash/Maya/Bank"))
+        try:
+            send_admin_notification({**new_booking, "id": created.get("id")})
+        except Exception:
+            app.logger.exception("Admin notification email failed")
         return jsonify({"success": True, "message": "Booking submitted successfully.", "booking_id": created.get("id")})
     except ValueError as error:
         return jsonify({"success": False, "message": str(error)}), 400

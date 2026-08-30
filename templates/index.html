@@ -84,6 +84,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Reserve a self-portrait studio session at B-Lens.">
   <title>B-Lens | Reserve your session</title>
+
+  <!-- Link preview thumbnail (Messenger, Facebook, Viber, etc.) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="B-Lens | Reserve your session">
+  <meta property="og:description" content="Reserve a self-portrait studio session at B-Lens.">
+  <meta property="og:url" content="https://b-lens-booking-system2-1.onrender.com/">
+  <meta property="og:image" content="https://b-lens-booking-system2-1.onrender.com/static/logo.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="B-Lens | Reserve your session">
+  <meta name="twitter:description" content="Reserve a self-portrait studio session at B-Lens.">
+  <meta name="twitter:image" content="https://b-lens-booking-system2-1.onrender.com/static/logo.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -121,8 +135,8 @@
     .trust { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
     .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 5px oklch(45% .105 152 / .12); }
     .hero { display: grid; grid-template-columns: minmax(0, 1fr) 310px; align-items: end; gap: 40px; margin-top: 54px; }
-    h1 { max-width: 720px; margin: 10px 0 14px; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06; letter-spacing: -.065em; text-wrap: balance; }
-    .accent-word { display: inline-block; padding-bottom: .06em; margin-bottom: -.06em; background: linear-gradient(90deg, var(--accent-dark), var(--accent), var(--accent-dark)); background-size: 220% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 4s linear infinite; }
+    h1 { max-width: 720px; margin: 10px 0 14px; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.12; letter-spacing: -.02em; text-wrap: balance; }
+    .accent-word { display: inline-block; padding: .02em .07em .06em 0; margin: -.02em -.07em -.06em 0; background: linear-gradient(90deg, var(--accent-dark), var(--accent), var(--accent-dark)); background-size: 220% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 4s linear infinite; }
     @keyframes shimmer { to { background-position: -220% center; } }
     @media (prefers-reduced-motion: reduce) { .accent-word { animation: none; } }
     .hero-copy { max-width: 62ch; margin: 0; color: var(--muted); font-size: 17px; }
@@ -148,6 +162,10 @@
     label { color: var(--ink); font-size: 13px; font-weight: 800; }
     .required { color: var(--accent); }
     input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); color: var(--ink); padding: 13px 14px; transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease); }
+    select { appearance: none; -webkit-appearance: none; -moz-appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%236b5d52' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 13px 8px; }
+    select:disabled { opacity: .58; cursor: not-allowed; }
+    input[type=number] { -moz-appearance: textfield; }
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input::placeholder, textarea::placeholder { color: oklch(62% .025 55); }
     input:hover, select:hover, textarea:hover { border-color: oklch(69% .07 35); }
     input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); outline: 0; }
@@ -367,7 +385,7 @@
       if ($('hasDigitalCopies').checked) { const price = sessionMinutes <= 15 ? 99 : sessionMinutes <= 25 ? 149 : 199; digitalCopies = sessionMinutes <= 15 ? '10_15' : sessionMinutes <= 25 ? '20_25' : '30_40'; total += price; lines.push({ label: `Complete digital copies · ${sessionMinutes} min`, value: price }); $('digitalCopiesText').textContent = `${sessionMinutes} minute session · ${money(price)}`; } else $('digitalCopiesText').textContent = 'Rate based on your session length.';
       const enhanced = $('enhancedCopies').value; const enhancedPrices = { '1_2': 49, '3_5': 99, '6_10': 199 }; if (enhancedPrices[enhanced]) { total += enhancedPrices[enhanced]; lines.push({ label: 'Enhanced copies', value: enhancedPrices[enhanced] }); } if (enhanced === 'more_10') { $('extraEnhancedGroup').hidden = false; const qty = Math.max(11, number('extraEnhancedQty', 11)); total += qty * 25; lines.push({ label: `Enhanced copies · ${qty}`, value: qty * 25 }); } else $('extraEnhancedGroup').hidden = true;
       if ($('hasAdditionalBackdrop').checked && $('additionalBackdropColor').value) add(`Additional backdrop (${$('additionalBackdropColor').value})`, 1, 99);
-      const balloonQty = $('hasBalloons').checked ? Math.max(1, number('balloonQty', 1)) : 0; if ($('hasBalloons').checked) { $('balloonInputsGroup').hidden = false; total += balloonQty * 39; lines.push({ label: `Number balloons × ${balloonQty}`, value: balloonQty * 39 }); } else $('balloonInputsGroup').hidden = true;
+      const balloonQty = $('hasBalloons').checked ? Math.max(1, number('balloonQty', 1)) : 0; if ($('hasBalloons').checked) { $('balloonInputsGroup').hidden = false; total += balloonQty * 39; lines.push({ label: `Number balloons × ${balloonQty}`, value: balloonQty * 39 }); $('balloonNumbers').placeholder = balloonQty === 1 ? 'e.g. 18' : Array.from({ length: balloonQty }, (_, i) => [18, 7, 25, 4, 30][i % 5]).join(', '); } else $('balloonInputsGroup').hidden = true;
       totals = { total, dp: Math.ceil(total * .5), bal: total - Math.ceil(total * .5), digitalCopies };
       $('grandTotalDisplay').textContent = money(totals.total); $('downpaymentDisplay').textContent = money(totals.dp); $('balanceDisplay').textContent = money(totals.bal);
       $('summaryLines').innerHTML = lines.map(line => `<div class="summary-line"><span>${escapeHtml(line.label)}</span><span>${money(line.value)}</span></div>`).join('');
@@ -396,7 +414,12 @@
         if (!childTypesChecked.length) { showToast('Please select at least one child age group.', true); return false; }
         if (!$('totalChildren').value || Number($('totalChildren').value) < 1) { showToast('Please enter the total number of children.', true); return false; }
       }
-      if ($('hasBalloons').checked && !$('balloonNumbers').value.trim()) { showToast('Please add the balloon digit or number.', true); return false; }
+      if ($('hasBalloons').checked) {
+        const balloonQtyValue = Math.max(1, number('balloonQty', 1));
+        const enteredNumbers = $('balloonNumbers').value.split(',').map(n => n.trim()).filter(n => n.length > 0);
+        if (!enteredNumbers.length) { showToast('Please add the balloon digit or number.', true); return false; }
+        if (enteredNumbers.length !== balloonQtyValue) { showToast(`Please enter exactly ${balloonQtyValue} number${balloonQtyValue > 1 ? 's' : ''} (separated by commas) to match the quantity.`, true); return false; }
+      }
       return true;
     }
 
