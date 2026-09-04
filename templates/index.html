@@ -230,7 +230,7 @@
 <body>
   <header class="shell">
     <div class="topbar">
-      <a class="brand" href="/" aria-label="B-Lens home"><img src="/static/logo.png" alt="B-Lens self portrait studio logo" style="height:56px;width:auto;display:block"></a>
+      <a class="brand" href="/" aria-label="B-Lens home"><img src="/static/logo.png" alt="B-Lens self portrait studio logo" style="height:72px;width:auto;display:block"></a>
       <div class="trust"><span class="trust-dot"></span> Reservations are reviewed by the studio</div>
     </div>
     <div class="hero">
@@ -280,7 +280,7 @@
             <div class="field full"><div class="check-row"><input type="checkbox" id="hasPet" name="has_pet"><label for="hasPet">Add pet?<small>₱99 per pet, limits depend on breed size.</small></label></div><div id="petDetailsGroup" class="conditional" hidden><div class="grid"><div class="field"><label for="petSize">Pet size</label><select id="petSize" name="pet_size"><option value="Small">Small breed · max 4</option><option value="Medium">Medium breed · max 2</option><option value="Large">Large breed · max 1</option></select></div><div class="field"><label for="extraPet" id="extraPetLabel">Number of pets <span class="helper">₱99 each</span></label><select id="extraPet" name="extra_pet"><option value="1">1</option></select></div></div></div></div>
             <div class="field"><label for="extraTime">Time extension</label><select id="extraTime" name="extra_time"><option value="0">None</option><option value="10">+10 minutes, ₱99</option><option value="15">+15 minutes, ₱149</option><option value="20">+20 minutes, ₱199</option><option value="30">+30 minutes, ₱299</option></select></div>
             <div class="field"><label for="enhancedCopies">Enhanced copies</label><select id="enhancedCopies" name="enhanced_copies"><option value="0">None</option><option value="1_2">1 to 2 photos, ₱49</option><option value="3_5">3 to 5 photos, ₱99</option><option value="6_10">6 to 10 photos, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select><div id="extraEnhancedGroup" class="conditional" hidden><label for="extraEnhancedQty">Total enhanced photos</label><input type="number" id="extraEnhancedQty" name="extra_enhanced_qty" min="11" value="11"></div></div>
-            <div class="field"><div class="check-row"><input type="checkbox" id="hasDigitalCopies" name="has_digital_copies"><label for="hasDigitalCopies">Complete digital copies<small id="digitalCopiesText">Rate based on your session length.</small></label></div></div>
+            <div class="field"><div class="check-row"><input type="checkbox" id="hasDigitalCopies" name="has_digital_copies"><label for="hasDigitalCopies">Get Digital Copies<small id="digitalCopiesText">Rate based on your session length.</small></label></div></div>
             <div class="field full"><div class="check-row"><input type="checkbox" id="hasChildren" name="has_children"><label for="hasChildren">Will there be any children joining the session?<small>Helps us prepare the room and props.</small></label></div><div id="childrenDetailsGroup" class="conditional" hidden><div class="choice-grid"><div class="choice"><input type="checkbox" id="childInfant" name="children_types" value="Infant"><label for="childInfant"><span class="choice-title">Infant</span><span class="choice-meta">0 – 11 months old</span></label></div><div class="choice"><input type="checkbox" id="childToddler" name="children_types" value="Toddler"><label for="childToddler"><span class="choice-title">Toddler</span><span class="choice-meta">1 – 3 years old</span></label></div><div class="choice"><input type="checkbox" id="childKid" name="children_types" value="Kid"><label for="childKid"><span class="choice-title">Kid</span><span class="choice-meta">4 – 12 years old</span></label></div></div><label for="totalChildren">Total number of children</label><input type="number" id="totalChildren" name="total_children" min="1" max="20" value="1"></div></div>
             <div class="field full"><div class="check-row"><input type="checkbox" id="hasBalloons" name="has_balloons"><label for="hasBalloons">Number balloons, cream white 32&quot;<small>₱39 each. Add the digit or number below.</small></label></div><div id="balloonInputsGroup" class="conditional" hidden><div class="grid"><div class="field"><label for="balloonQty">Quantity</label><input type="number" id="balloonQty" name="balloon_qty" min="1" value="1"></div><div class="field"><label for="balloonNumbers">Digits / numbers</label><input type="text" id="balloonNumbers" name="balloon_numbers" placeholder="18, 7, 25"></div></div></div></div>
             <div class="field full"><label for="backdropOrder">Notes</label><textarea id="backdropOrder" name="backdrop_order" placeholder="Anything else the studio should know."></textarea></div>
@@ -295,6 +295,7 @@
         <div id="summaryLines" class="summary-lines" aria-live="polite"></div>
         <div class="total-block"><div class="total-label">Grand total</div><div id="grandTotalDisplay" class="total">₱0</div></div>
         <div class="payment-note"><strong>50% downpayment required</strong><span>Downpayment: <b id="downpaymentDisplay">₱0</b></span><span>Remaining balance: <b id="balanceDisplay">₱0</b></span></div>
+        <div class="field full"><label for="actualAmountSent">Actual amount sent <span class="helper">Optional — fill this in if you sent more or less than the required downpayment</span></label><input type="number" id="actualAmountSent" name="actual_amount_sent" min="0" step="1" placeholder="Leave blank if exact"></div>
         <div class="qr-wrap"><img src="/static/uploads/mode_of_payment.jpg" alt="Mode of payment QR code" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span class=\"empty\">Payment QR is unavailable. Please contact the studio.</span>');"></div>
         <label class="file-label" for="paymentScreenshot"><span>Payment screenshot <span class="required">*</span></span><input type="file" id="paymentScreenshot" name="payment_screenshot" accept="image/png,image/jpeg,image/webp" required><small class="helper">PNG, JPG, or WEBP, maximum 8 MB.</small></label>
         <button class="primary" type="submit" id="reviewButton">Review booking</button>
@@ -308,13 +309,14 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const RATES = { Solo: { Starter: { reg: 249, stu: 199, dur: 10, baseBd: 1 }, Upgraded: { reg: 449, stu: 399, dur: 20, baseBd: 1 } }, Duo: { Starter: { reg: 399, stu: 349, dur: 15, baseBd: 1 }, Upgraded: { reg: 599, stu: 549, dur: 25, baseBd: 1 } }, Squad: { Starter: { reg: 599, stu: 499, dur: 20, baseBd: 2 }, Upgraded: { reg: 799, stu: 699, dur: 30, baseBd: 2 } }, Party: { Starter: { reg: 999, stu: 879, dur: 30, baseBd: 2 }, Upgraded: { reg: 1199, stu: 1079, dur: 40, baseBd: 3 } } };
+    const RATES = { Solo: { Starter: { reg: 249, stu: 199, dur: 10, baseBd: 1 }, Upgraded: { reg: 449, stu: 399, dur: 20, baseBd: 1 } }, Duo: { Starter: { reg: 399, stu: 349, dur: 15, baseBd: 1 }, Upgraded: { reg: 599, stu: 549, dur: 25, baseBd: 1 } }, Squad: { Starter: { reg: 599, stu: 499, dur: 20, baseBd: 2 }, Upgraded: { reg: 799, stu: 699, dur: 30, baseBd: 2 } }, Party: { Starter: { reg: 899, stu: 799, dur: 30, baseBd: 2 }, Upgraded: { reg: 1099, stu: 999, dur: 40, baseBd: 3 } } };
     const TIME_PRICES = { 10: 99, 15: 149, 20: 199, 30: 299 };
     const PAX_MAX = { Solo: 9, Duo: 8, Squad: 5, Party: 2 };
     const PET_SIZE_MAX = { Small: 4, Medium: 2, Large: 1 };
     const ALL_COLORS = ['Beige', 'White', 'Pink', 'Gray'];
     const PACKAGE_IMAGES = { Solo: '/static/packages/solo.png', Duo: '/static/packages/duo.jpg', Squad: '/static/packages/squad.jpg', Party: '/static/packages/party.jpg' };
     let totals = { total: 0, dp: 0, bal: 0, digitalCopies: '0' };
+    let summaryLineItems = [];
     let toastTimer;
     const money = (n) => `₱${Number(n || 0).toLocaleString('en-PH')}`;
     const number = (id, fallback = 0) => Math.max(0, parseInt($(id).value, 10) || fallback);
@@ -382,12 +384,15 @@
       if ($('hasPet').checked) add(`Pet (${$('petSize').value})`, number('extraPet', 1), 99);
       const extraTime = number('extraTime'); if (extraTime) { total += TIME_PRICES[extraTime] || 0; lines.push({ label: `Time extension · ${extraTime} min`, value: TIME_PRICES[extraTime] || 0 }); }
       let digitalCopies = '0'; const sessionMinutes = pkg.dur + extraTime;
-      if ($('hasDigitalCopies').checked) { const price = sessionMinutes <= 15 ? 99 : sessionMinutes <= 25 ? 149 : 199; digitalCopies = sessionMinutes <= 15 ? '10_15' : sessionMinutes <= 25 ? '20_25' : '30_40'; total += price; lines.push({ label: `Complete digital copies · ${sessionMinutes} min`, value: price }); $('digitalCopiesText').textContent = `${sessionMinutes} minute session · ${money(price)}`; } else $('digitalCopiesText').textContent = 'Rate based on your session length.';
+      if ($('hasDigitalCopies').checked) { const price = sessionMinutes <= 15 ? 99 : sessionMinutes <= 25 ? 149 : 199; digitalCopies = sessionMinutes <= 15 ? '10_15' : sessionMinutes <= 25 ? '20_25' : '30_40'; total += price; lines.push({ label: `Get Digital Copies · ${sessionMinutes} min`, value: price }); $('digitalCopiesText').textContent = `${sessionMinutes} minute session · ${money(price)}`; } else $('digitalCopiesText').textContent = 'Rate based on your session length.';
       const enhanced = $('enhancedCopies').value; const enhancedPrices = { '1_2': 49, '3_5': 99, '6_10': 199 }; if (enhancedPrices[enhanced]) { total += enhancedPrices[enhanced]; lines.push({ label: 'Enhanced copies', value: enhancedPrices[enhanced] }); } if (enhanced === 'more_10') { $('extraEnhancedGroup').hidden = false; const qty = Math.max(11, number('extraEnhancedQty', 11)); total += qty * 25; lines.push({ label: `Enhanced copies · ${qty}`, value: qty * 25 }); } else $('extraEnhancedGroup').hidden = true;
       if ($('hasAdditionalBackdrop').checked && $('additionalBackdropColor').value) add(`Additional backdrop (${$('additionalBackdropColor').value})`, 1, 99);
       const balloonQty = $('hasBalloons').checked ? Math.max(1, number('balloonQty', 1)) : 0; if ($('hasBalloons').checked) { $('balloonInputsGroup').hidden = false; total += balloonQty * 39; lines.push({ label: `Number balloons × ${balloonQty}`, value: balloonQty * 39 }); $('balloonNumbers').placeholder = balloonQty === 1 ? 'e.g. 18' : Array.from({ length: balloonQty }, (_, i) => [18, 7, 25, 4, 30][i % 5]).join(', '); } else $('balloonInputsGroup').hidden = true;
       totals = { total, dp: Math.ceil(total * .5), bal: total - Math.ceil(total * .5), digitalCopies };
-      $('grandTotalDisplay').textContent = money(totals.total); $('downpaymentDisplay').textContent = money(totals.dp); $('balanceDisplay').textContent = money(totals.bal);
+      summaryLineItems = lines;
+      const actualSent = parseFloat($('actualAmountSent').value);
+      const displayBalance = actualSent > 0 ? Math.max(0, total - actualSent) : totals.bal;
+      $('grandTotalDisplay').textContent = money(totals.total); $('downpaymentDisplay').textContent = money(totals.dp); $('balanceDisplay').textContent = money(displayBalance);
       $('summaryLines').innerHTML = lines.map(line => `<div class="summary-line"><span>${escapeHtml(line.label)}</span><span>${money(line.value)}</span></div>`).join('');
       return totals;
     }
@@ -426,11 +431,18 @@
     function openReview() {
       if (!validateBooking()) return;
       const preferredColors = backdropCheckboxes().filter(b => b.checked).map(b => b.value).join(', ');
-      const rows = [['Name', $('custName').value.trim()], ['Date', formatDate($('bookDate').value)], ['Time', $('bookSlot').value], ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}`], ['Preferred backdrop', preferredColors || 'Not selected']];
-      if ($('hasAdditionalBackdrop').checked && $('additionalBackdropColor').value) rows.push(['Additional backdrop', $('additionalBackdropColor').value]);
-      if ($('hasPet').checked) rows.push(['Pet', `${$('petSize').value} · ${$('extraPet').value} pet(s)`]);
-      if ($('hasChildren').checked) { const types = Array.from(document.querySelectorAll('input[name="children_types"]:checked')).map(c => c.value).join(', '); rows.push(['Children', `${types || 'Not specified'} · total ${$('totalChildren').value}`]); }
-      rows.push(['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Payment proof', $('paymentScreenshot').files[0].name], ['Grand total', money(totals.total)], ['Downpayment', money(totals.dp)], ['Remaining balance', money(totals.bal)]);
+      const rows = [['Name', $('custName').value.trim()], ['Date', formatDate($('bookDate').value)], ['Time', $('bookSlot').value], ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}${$('isStudent').checked ? ' (Student rate)' : ''}`], ['Preferred backdrop', preferredColors || 'Not selected']];
+      summaryLineItems.slice(1).forEach(line => rows.push([line.label, money(line.value)]));
+      if ($('hasChildren').checked) { const types = Array.from(document.querySelectorAll('input[name="children_types"]:checked')).map(c => c.value).join(', '); rows.push(['Children', `${types || 'Not specified'} · total ${$('totalChildren').value} (no extra charge)`]); }
+      rows.push(['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Payment proof', $('paymentScreenshot').files[0].name], ['Grand total', money(totals.total)], ['Required downpayment', money(totals.dp)]);
+      const actualSentValue = parseFloat($('actualAmountSent').value);
+      if (actualSentValue > 0) {
+        rows.push(['Actual amount sent', money(actualSentValue)]);
+        const adjustedBalance = Math.max(0, totals.total - actualSentValue);
+        rows.push(['Remaining balance', money(adjustedBalance)]);
+      } else {
+        rows.push(['Remaining balance', money(totals.bal)]);
+      }
       $('reviewContent').innerHTML = rows.map(([label, value]) => `<div class="review-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
       $('reviewModal').showModal();
     }

@@ -1,12 +1,9 @@
 import os
 import re
 import secrets
-import smtplib
 import sqlite3
 from calendar import monthrange
 from datetime import datetime, date, time as dt_time, timedelta
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from functools import wraps
 from pathlib import Path
 from uuid import uuid4
@@ -60,7 +57,7 @@ RATES = {
     "Solo": {"Starter": {"reg": 249, "stu": 199, "dur": 10, "baseBd": 1}, "Upgraded": {"reg": 449, "stu": 399, "dur": 20, "baseBd": 1}},
     "Duo": {"Starter": {"reg": 399, "stu": 349, "dur": 15, "baseBd": 1}, "Upgraded": {"reg": 599, "stu": 549, "dur": 25, "baseBd": 1}},
     "Squad": {"Starter": {"reg": 599, "stu": 499, "dur": 20, "baseBd": 2}, "Upgraded": {"reg": 799, "stu": 699, "dur": 30, "baseBd": 2}},
-    "Party": {"Starter": {"reg": 999, "stu": 879, "dur": 30, "baseBd": 2}, "Upgraded": {"reg": 1199, "stu": 1079, "dur": 40, "baseBd": 3}},
+    "Party": {"Starter": {"reg": 899, "stu": 799, "dur": 30, "baseBd": 2}, "Upgraded": {"reg": 1099, "stu": 999, "dur": 40, "baseBd": 3}},
 }
 TIME_PRICES = {10: 99, 15: 149, 20: 199, 30: 299}
 ENHANCED_PRICES = {"1_2": 49, "3_5": 99, "6_10": 199}
@@ -247,7 +244,15 @@ def supabase_bookings():
     return response.data or []
 
 
-def slot_rows(selected_date):
+def get_blocked_dates():
+    try:
+        response = require_supabase().table("blocked_dates").select("*").execute()
+        return {str(row.get("date", ""))[:10]: row.get("reason", "") for row in (response.data or [])}
+    except Exception:
+        return {}
+
+
+def slot_rows(selected_date, bypass_cutoff=False):
     bookings = supabase_bookings()
     booked = set()
     blocked = set()
@@ -270,61 +275,10 @@ def slot_rows(selected_date):
     for label, slot_time in DEFAULT_SLOTS:
         disabled = label in booked or label in blocked
         reason = "Already booked" if label in booked else "Buffer after a long session" if label in blocked else ""
-        if selected_date == now.date() and datetime.combine(selected_date, slot_time, BUSINESS_TZ) <= now + timedelta(hours=2):
+        if selected_date == now.date() and not bypass_cutoff and datetime.combine(selected_date, slot_time, BUSINESS_TZ) <= now + timedelta(hours=2):
             disabled, reason = True, "Too close to start time"
         rows.append({"time": label, "disabled": disabled, "reason": reason})
     return rows
-
-
-def send_confirmation_email(booking):
-    sender = os.environ.get("SENDER_EMAIL", "").strip()
-    password = os.environ.get("SENDER_PASSWORD", "").strip()
-    if not sender or not password or not booking.get("email"):
-        return
-    message = MIMEMultipart()
-    message["From"], message["To"] = sender, booking["email"]
-    message["Subject"] = "Booking confirmed | B-Lens Self Portrait Studio"
-    body = (f"Hi {booking.get('customer_name', 'there')},\n\nYour B-Lens reservation is confirmed.\n\n"
-            f"Date: {booking.get('date')}\nTime: {booking.get('schedule')}\n"
-            f"Package: {booking.get('package')} ({booking.get('package_type')})\n"
-            f"Grand total: ₱{booking.get('grand_total')}\nRemaining balance: ₱{booking.get('balance')}\n\n"
-            "Please arrive 5 to 10 minutes early.\n\nB-Lens Self Portrait Studio")
-    message.attach(MIMEText(body, "plain", "utf-8"))
-    with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
-        server.starttls()
-        server.login(sender, password)
-        server.sendmail(sender, booking["email"], message.as_string())
-
-
-def send_admin_notification(booking):
-    """Alerts the studio owner as soon as a new booking comes in, using the
-    same Gmail account that sends client confirmations."""
-    sender = os.environ.get("SENDER_EMAIL", "").strip()
-    password = os.environ.get("SENDER_PASSWORD", "").strip()
-    recipient = os.environ.get("ADMIN_NOTIFICATION_EMAIL", "").strip() or sender
-    if not sender or not password or not recipient:
-        return
-    message = MIMEMultipart()
-    message["From"], message["To"] = sender, recipient
-    message["Subject"] = f"New booking: {booking.get('customer_name', 'Unknown')} — {booking.get('date')}"
-    body = (
-        f"New booking received.\n\n"
-        f"Customer: {booking.get('customer_name')}\n"
-        f"Contact no.: {booking.get('contact_no')}\n"
-        f"Email: {booking.get('email')}\n"
-        f"Social media: {booking.get('social_media')}\n\n"
-        f"Date: {booking.get('date')}\nTime: {booking.get('schedule')}\n"
-        f"Package: {booking.get('package')} ({booking.get('package_type')})\n"
-        f"Grand total: ₱{booking.get('grand_total')}\n"
-        f"Downpayment: ₱{booking.get('downpayment')}\nBalance: ₱{booking.get('balance')}\n\n"
-        f"Status: {booking.get('status', 'Pending')}\n\n"
-        "Open the admin dashboard to review and confirm."
-    )
-    message.attach(MIMEText(body, "plain", "utf-8"))
-    with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as server:
-        server.starttls()
-        server.login(sender, password)
-        server.sendmail(sender, recipient, message.as_string())
 
 
 def record_transaction(values):
@@ -392,50 +346,59 @@ def get_slots():
             return jsonify({"slots": [], "message": "Bookings are only open up to one month ahead."}), 400
         if selected_date.weekday() in CLOSED_WEEKDAYS:
             return jsonify({"slots": [], "message": "The studio is closed on Mondays."}), 400
+        blocked = get_blocked_dates()
+        if selected_date.isoformat() in blocked:
+            reason = blocked[selected_date.isoformat()]
+            return jsonify({"slots": [], "message": f"The studio is closed on this date{f': {reason}' if reason else '.'}"}), 400
         return jsonify({"slots": slot_rows(selected_date)})
     except Exception as error:
         return jsonify({"slots": [], "message": str(error)}), 500
 
 
-@app.post("/save-booking")
-def save_booking():
+def create_booking_record(bypass_cutoff=False, require_proof=True, default_status="Pending", source="Website"):
     uploaded_path = None
+    required = {"customer_name": "full name", "contact_no": "contact number", "email": "email", "social_media": "social media", "date": "date", "schedule": "time slot"}
+    missing = [label for field, label in required.items() if not request.form.get(field, "").strip()]
+    if missing:
+        return {"success": False, "message": f"Please provide: {', '.join(missing)}."}, 400
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", request.form["email"].strip()):
+        return {"success": False, "message": "Please provide a valid email address."}, 400
+    booking_date = parse_booking_date(request.form["date"])
+    if booking_date < date.today():
+        return {"success": False, "message": "Booking date cannot be in the past."}, 400
+    if booking_date > max_booking_date():
+        return {"success": False, "message": "Bookings are only open up to one month ahead."}, 400
+    if booking_date.weekday() in CLOSED_WEEKDAYS:
+        return {"success": False, "message": "The studio is closed on Mondays. Please pick another date."}, 400
+    blocked = get_blocked_dates()
+    if booking_date.isoformat() in blocked:
+        reason = blocked[booking_date.isoformat()]
+        return {"success": False, "message": f"The studio is closed on this date{f': {reason}' if reason else '.'}"}, 400
+    totals = calculate_totals(request.form)
+    selected_slot = request.form["schedule"]
+    allowed = {label for label, _ in DEFAULT_SLOTS}
+    if selected_slot not in allowed:
+        return {"success": False, "message": "Please select a valid time slot."}, 400
+    current_slots = slot_rows(booking_date, bypass_cutoff=bypass_cutoff)
+    slot = next(row for row in current_slots if row["time"] == selected_slot)
+    if slot["disabled"]:
+        return {"success": False, "message": f"That slot is no longer available: {slot['reason']}."}, 409
     try:
-        require_supabase()
-        required = {"customer_name": "full name", "contact_no": "contact number", "email": "email", "social_media": "social media", "date": "date", "schedule": "time slot"}
-        missing = [label for field, label in required.items() if not request.form.get(field, "").strip()]
-        if missing:
-            return jsonify({"success": False, "message": f"Please provide: {', '.join(missing)}."}), 400
-        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", request.form["email"].strip()):
-            return jsonify({"success": False, "message": "Please provide a valid email address."}), 400
-        booking_date = parse_booking_date(request.form["date"])
-        if booking_date < date.today():
-            return jsonify({"success": False, "message": "Booking date cannot be in the past."}), 400
-        if booking_date > max_booking_date():
-            return jsonify({"success": False, "message": "Bookings are only open up to one month ahead."}), 400
-        if booking_date.weekday() in CLOSED_WEEKDAYS:
-            return jsonify({"success": False, "message": "The studio is closed on Mondays. Please pick another date."}), 400
-        totals = calculate_totals(request.form)
-        selected_slot = request.form["schedule"]
-        allowed = {label for label, _ in DEFAULT_SLOTS}
-        if selected_slot not in allowed:
-            return jsonify({"success": False, "message": "Please select a valid time slot."}), 400
-        current_slots = slot_rows(booking_date)
-        slot = next(row for row in current_slots if row["time"] == selected_slot)
-        if slot["disabled"]:
-            return jsonify({"success": False, "message": f"That slot is no longer available: {slot['reason']}."}), 409
+        screenshot_url = ""
         payment_file = request.files.get("payment_screenshot")
-        if not payment_file or not payment_file.filename:
-            return jsonify({"success": False, "message": "Payment screenshot is required."}), 400
-        if payment_file.content_type not in ALLOWED_IMAGE_TYPES:
-            return jsonify({"success": False, "message": "Payment proof must be a PNG, JPG, or WEBP image."}), 400
-        file_bytes = payment_file.read()
-        if not file_bytes or len(file_bytes) > 8 * 1024 * 1024:
-            return jsonify({"success": False, "message": "Payment screenshot must be 8 MB or smaller."}), 400
-        extension = Path(secure_filename(payment_file.filename)).suffix.lower() or ".jpg"
-        uploaded_path = f"proofs/{uuid4().hex}{extension}"
-        require_supabase().storage.from_(SUPABASE_BUCKET).upload(file=file_bytes, path=uploaded_path, file_options={"content-type": payment_file.content_type})
-        screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{uploaded_path}"
+        if payment_file and payment_file.filename:
+            if payment_file.content_type not in ALLOWED_IMAGE_TYPES:
+                return {"success": False, "message": "Payment proof must be a PNG, JPG, or WEBP image."}, 400
+            file_bytes = payment_file.read()
+            if not file_bytes or len(file_bytes) > 8 * 1024 * 1024:
+                return {"success": False, "message": "Payment screenshot must be 8 MB or smaller."}, 400
+            extension = Path(secure_filename(payment_file.filename)).suffix.lower() or ".jpg"
+            uploaded_path = f"proofs/{uuid4().hex}{extension}"
+            require_supabase().storage.from_(SUPABASE_BUCKET).upload(file=file_bytes, path=uploaded_path, file_options={"content-type": payment_file.content_type})
+            screenshot_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{uploaded_path}"
+        elif require_proof:
+            return {"success": False, "message": "Payment screenshot is required."}, 400
+        actual_amount_sent = form_int("actual_amount_sent", default=0, maximum=1_000_000) or totals["downpayment"]
         new_booking = {
             "date": booking_date.isoformat(), "schedule": selected_slot,
             "name": request.form["customer_name"].strip(), "customer_name": request.form["customer_name"].strip(),
@@ -459,26 +422,117 @@ def save_booking():
             "has_balloons": str(as_bool(request.form.get("has_balloons"))).lower(),
             "balloon_qty": form_int("balloon_qty"), "balloon_numbers": request.form.get("balloon_numbers", "").strip(),
             "grand_total": totals["total"], "downpayment": totals["downpayment"], "balance": totals["balance"],
-            "payment_screenshot": screenshot_url, "status": "Pending",
+            "actual_amount_sent": actual_amount_sent, "source": source,
+            "payment_screenshot": screenshot_url, "status": default_status,
         }
         inserted = require_supabase().table("bookings").insert(new_booking).execute()
         created = (inserted.data or [new_booking])[0]
-        record_transaction((booking_date.isoformat(), "Incoming", "Booking Downpayment", f"{new_booking['customer_name']} - {new_booking['package']} ({new_booking['package_type']})", totals["downpayment"], "Gcash/Maya/Bank"))
-        try:
-            send_admin_notification({**new_booking, "id": created.get("id")})
-        except Exception:
-            app.logger.exception("Admin notification email failed")
-        return jsonify({"success": True, "message": "Booking submitted successfully.", "booking_id": created.get("id")})
+        record_transaction((booking_date.isoformat(), "Incoming", "Booking Downpayment", f"{new_booking['customer_name']} - {new_booking['package']} ({new_booking['package_type']})", actual_amount_sent, "Gcash/Maya/Bank"))
+        return {"success": True, "message": "Booking submitted successfully.", "booking_id": created.get("id")}, 200
     except ValueError as error:
-        return jsonify({"success": False, "message": str(error)}), 400
-    except Exception as error:
+        return {"success": False, "message": str(error)}, 400
+    except Exception:
         if uploaded_path and supabase is not None:
             try:
                 supabase.storage.from_(SUPABASE_BUCKET).remove([uploaded_path])
             except Exception:
                 pass
         app.logger.exception("Booking save failed")
+        return {"success": False, "message": "We could not save the booking right now. Please try again."}, 500
+
+
+@app.post("/save-booking")
+def save_booking():
+    try:
+        require_supabase()
+        result, status_code = create_booking_record(bypass_cutoff=False, require_proof=True, default_status="Pending", source="Website")
+        return jsonify(result), status_code
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+    except Exception:
+        app.logger.exception("Booking save failed")
         return jsonify({"success": False, "message": "We could not save the booking right now. Please try again."}), 500
+
+
+@app.get("/api/admin/walkin-slots")
+@admin_required
+def api_admin_walkin_slots():
+    try:
+        selected_date = parse_booking_date(request.args.get("date"))
+        if selected_date.weekday() in CLOSED_WEEKDAYS:
+            return jsonify({"slots": [], "message": "The studio is closed on Mondays."}), 400
+        blocked = get_blocked_dates()
+        if selected_date.isoformat() in blocked:
+            reason = blocked[selected_date.isoformat()]
+            return jsonify({"slots": [], "message": f"This date is blocked{f': {reason}' if reason else '.'}"}), 400
+        return jsonify({"slots": slot_rows(selected_date, bypass_cutoff=True)})
+    except Exception as error:
+        return jsonify({"slots": [], "message": str(error)}), 500
+
+
+@app.post("/api/admin/walkin-booking")
+@admin_required
+def api_admin_walkin_booking():
+    try:
+        require_supabase()
+        result, status_code = create_booking_record(bypass_cutoff=True, require_proof=False, default_status="Pending", source="Walk-in")
+        return jsonify(result), status_code
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+    except Exception:
+        app.logger.exception("Walk-in booking save failed")
+        return jsonify({"success": False, "message": "We could not save the walk-in booking right now. Please try again."}), 500
+
+
+@app.get("/api/admin/blocked-dates")
+@admin_required
+def api_admin_blocked_dates():
+    try:
+        response = require_supabase().table("blocked_dates").select("*").order("date").execute()
+        return jsonify({"blocked_dates": response.data or []})
+    except Exception:
+        app.logger.exception("Blocked dates fetch failed")
+        return jsonify({"blocked_dates": [], "message": "Unable to load blocked dates."}), 503
+
+
+@app.post("/api/admin/blocked-dates")
+@admin_required
+def api_admin_add_blocked_date():
+    data = request.get_json(silent=True) or {}
+    try:
+        blocked_date = parse_booking_date(data.get("date"))
+    except ValueError as error:
+        return jsonify({"success": False, "message": str(error)}), 400
+    reason = str(data.get("reason", "")).strip()
+    try:
+        client = require_supabase()
+        # Manual check-then-write instead of upsert(on_conflict="date"): upsert requires a
+        # unique/exclusion constraint on the "date" column in Supabase, and fails silently
+        # from the UI's perspective if that constraint isn't set up on the table.
+        existing = client.table("blocked_dates").select("date").eq("date", blocked_date.isoformat()).execute()
+        if existing.data:
+            client.table("blocked_dates").update({"reason": reason}).eq("date", blocked_date.isoformat()).execute()
+        else:
+            client.table("blocked_dates").insert({"date": blocked_date.isoformat(), "reason": reason}).execute()
+        return jsonify({"success": True})
+    except Exception:
+        app.logger.exception("Blocking date failed")
+        return jsonify({"success": False, "message": "Unable to block that date. Make sure the 'blocked_dates' table exists in Supabase with 'date' and 'reason' columns."}), 500
+
+
+@app.post("/api/admin/blocked-dates/delete")
+@admin_required
+def api_admin_delete_blocked_date():
+    data = request.get_json(silent=True) or {}
+    target_date = str(data.get("date", "")).strip()
+    if not target_date:
+        return jsonify({"success": False, "message": "Date is required."}), 400
+    try:
+        require_supabase().table("blocked_dates").delete().eq("date", target_date).execute()
+        return jsonify({"success": True})
+    except Exception:
+        app.logger.exception("Unblocking date failed")
+        return jsonify({"success": False, "message": "Unable to unblock that date."}), 500
 
 
 @app.get("/api/admin/bookings")
@@ -505,11 +559,6 @@ def api_admin_update_status():
         if not existing:
             return jsonify({"success": False, "message": "Booking not found."}), 404
         require_supabase().table("bookings").update({"status": new_status}).eq("id", booking_id).execute()
-        if new_status == "Confirmed" and existing.get("status") != "Confirmed":
-            try:
-                send_confirmation_email({**existing, "status": new_status})
-            except Exception:
-                app.logger.exception("Confirmation email failed")
         return jsonify({"success": True})
     except Exception:
         app.logger.exception("Status update failed")

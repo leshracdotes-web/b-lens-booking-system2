@@ -90,7 +90,7 @@
     :root { --bg:oklch(96.5% .014 68); --surface:oklch(99% .008 70); --surface-soft:oklch(93.8% .022 68); --ink:oklch(25% .035 45); --muted:oklch(52% .03 50); --line:oklch(87% .035 62); --accent:oklch(53% .115 25); --accent-dark:oklch(38% .085 25); --success:oklch(45% .105 152); --warning:oklch(67% .13 82); --danger:oklch(51% .16 28); --shadow:0 18px 55px oklch(35% .04 45 / .09); --ease:cubic-bezier(.16,1,.3,1); }
     * { box-sizing:border-box; } body { margin:0; min-width:320px; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,sans-serif; line-height:1.5; } button,input,select { font:inherit; } button { cursor:pointer; } button:disabled { opacity:.55; cursor:not-allowed; } :focus-visible { outline:3px solid oklch(65% .14 230); outline-offset:3px; }
     .shell { width:min(1380px,calc(100% - 40px)); margin:0 auto; } .topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:28px 0 34px; } .brand { display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font-weight:800; letter-spacing:-.04em; } .mark { display:grid; place-items:center; width:40px; height:40px; border-radius:13px; background:var(--accent); color:var(--surface); box-shadow:0 8px 20px oklch(53% .115 25 / .22); } .header-actions { display:flex; align-items:center; gap:10px; } .user-chip { padding:9px 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px; }
-    .login-shell { display:grid; place-items:center; min-height:100vh; padding:24px; } .login-box { width:min(430px,100%); padding:34px; border-radius:24px; background:var(--surface); box-shadow:var(--shadow); } .login-box h1 { margin:15px 0 8px; font-size:32px; letter-spacing:-.06em; } .login-box p { margin:0 0 24px; color:var(--muted); font-size:14px; } .field { display:grid; gap:7px; margin-bottom:15px; } label { font-size:12px; font-weight:800; } input,select { width:100%; min-height:43px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); } input:focus,select:focus { outline:0; border-color:var(--accent); box-shadow:0 0 0 4px oklch(90% .045 25); } .btn { min-height:42px; padding:0 15px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font-weight:800; } .btn:hover { background:var(--surface-soft); } .btn.primary { border-color:var(--accent); background:var(--accent); color:var(--surface); } .btn.primary:hover { background:var(--accent-dark); } .btn.danger { color:var(--danger); } .error-text { min-height:20px; margin:0 0 10px; color:var(--danger); font-size:12px; }
+    .login-shell { display:grid; place-items:center; min-height:100vh; padding:24px; } .login-box { width:min(430px,100%); padding:34px; border-radius:24px; background:var(--surface); box-shadow:var(--shadow); } .login-box h1 { margin:15px 0 8px; font-size:32px; letter-spacing:-.06em; } .login-box p { margin:0 0 24px; color:var(--muted); font-size:14px; } .field { display:grid; gap:7px; margin-bottom:15px; } label { font-size:12px; font-weight:800; } input,select { width:100%; min-height:43px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); } input:focus,select:focus { outline:0; border-color:var(--accent); box-shadow:0 0 0 4px oklch(90% .045 25); } input[type=checkbox],input[type=radio] { width:17px; height:17px; min-height:auto; flex:0 0 auto; padding:0; margin:0; accent-color:var(--accent); cursor:pointer; } label:has(>input[type=checkbox]),label:has(>input[type=radio]) { display:inline-flex; align-items:flex-start; gap:9px; font-size:13px; font-weight:700; cursor:pointer; line-height:1.35; } .btn { min-height:42px; padding:0 15px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font-weight:800; } .btn:hover { background:var(--surface-soft); } .btn.primary { border-color:var(--accent); background:var(--accent); color:var(--surface); } .btn.primary:hover { background:var(--accent-dark); } .btn.danger { color:var(--danger); } .error-text { min-height:20px; margin:0 0 10px; color:var(--danger); font-size:12px; }
     #appShell[hidden], #loginShell[hidden] { display:none; } .intro { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:26px; } .eyebrow { margin:0 0 8px; color:var(--accent); font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; } h1,h2,h3 { text-wrap:balance; } .intro h1 { margin:0; font-size:clamp(32px,4vw,54px); line-height:1; letter-spacing:-.07em; } .intro p { max-width:55ch; margin:12px 0 0; color:var(--muted); font-size:14px; } .tabbar { display:flex; gap:5px; margin-bottom:25px; padding:5px; border-bottom:1px solid var(--line); } .tab { padding:10px 13px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:800; } .tab.active { background:var(--accent); color:var(--surface); }
     .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:25px; } .stat { padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); } .stat-label { color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; } .stat-value { margin-top:6px; font-size:27px; font-weight:800; letter-spacing:-.055em; font-variant-numeric:tabular-nums; } .stat-note { margin-top:4px; color:var(--muted); font-size:12px; }
     .panel { margin-bottom:22px; padding:22px; border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:0 8px 28px oklch(35% .04 45 / .045); } .panel-head { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:17px; } h2 { margin:0; font-size:21px; letter-spacing:-.045em; } h3 { margin:0; font-size:16px; letter-spacing:-.03em; } .muted { color:var(--muted); font-size:13px; } .toolbar { display:flex; flex-wrap:wrap; gap:9px; } .toolbar input,.toolbar select { width:auto; min-width:175px; }
@@ -106,17 +106,17 @@
 </head>
 <body>
   <section id="loginShell" class="login-shell">
-    <div class="login-box"><a class="brand" href="/"><img src="/static/logo.png" alt="B-Lens logo" style="height:48px;width:auto;display:block"><span>control room</span></a><h1>Backstage access.</h1><p>Manage reservations, money in the door, and the supplies that keep the studio moving.</p><form id="loginForm"><div class="field"><label for="adminPassword">Admin password</label><input id="adminPassword" type="password" autocomplete="current-password" required></div><p id="loginError" class="error-text"></p><button class="btn primary" style="width:100%" type="submit">Enter dashboard</button></form></div>
+    <div class="login-box"><a class="brand" href="/"><img src="/static/logo.png" alt="B-Lens logo" style="height:64px;width:auto;display:block"><span>control room</span></a><h1>Backstage access.</h1><p>Manage reservations, money in the door, and the supplies that keep the studio moving.</p><form id="loginForm"><div class="field"><label for="adminPassword">Admin password</label><input id="adminPassword" type="password" autocomplete="current-password" required></div><p id="loginError" class="error-text"></p><button class="btn primary" style="width:100%" type="submit">Enter dashboard</button></form></div>
   </section>
 
   <div id="appShell" hidden>
-    <header class="shell topbar"><a class="brand" href="/"><img src="/static/logo.png" alt="B-Lens logo" style="height:42px;width:auto;display:block"><span>control room</span></a><div class="header-actions"><span class="user-chip">Studio admin</span><button class="btn" id="logoutButton">Log out</button></div></header>
+    <header class="shell topbar"><a class="brand" href="/"><img src="/static/logo.png" alt="B-Lens logo" style="height:56px;width:auto;display:block"><span>control room</span></a><div class="header-actions"><span class="user-chip">Studio admin</span><button class="btn" id="logoutButton">Log out</button></div></header>
     <main class="shell">
       <div class="intro"><div><p class="eyebrow">Studio operations</p><h1>Keep the room ready.</h1><p>One clean view for bookings, cash movement, and inventory. The boring stuff, finally under control.</p></div><button class="btn" id="refreshButton">↻ Refresh</button></div>
       <nav class="tabbar" aria-label="Dashboard sections"><button class="tab active" data-tab="reservations">Reservations</button><button class="tab" data-tab="pos">Point of sale</button><button class="tab" data-tab="inventory">Inventory</button></nav>
       <section id="reservationsTab" class="tab-content">
         <div class="stats"><div class="stat"><div class="stat-label">Active bookings</div><div class="stat-value" id="activeCount">0</div><div class="stat-note">Pending, confirmed, reschedule</div></div><div class="stat"><div class="stat-label">Today</div><div class="stat-value" id="todayCount">0</div><div class="stat-note">Sessions on the calendar</div></div><div class="stat"><div class="stat-label">Awaiting review</div><div class="stat-value" id="pendingCount">0</div><div class="stat-note">Payment proof to check</div></div><div class="stat"><div class="stat-label">Open balance</div><div class="stat-value" id="balanceTotal">₱0</div><div class="stat-note">Across active reservations</div></div></div>
-        <div class="panel"><div class="panel-head"><div><h2>Reservations</h2><span class="muted">Review each submission before confirming.</span></div><div class="toolbar"><input id="bookingSearch" type="search" placeholder="Search name, package…" aria-label="Search bookings"><select id="bookingFilter" aria-label="Filter bookings"><option value="active">Active only</option><option value="all">All reservations</option><option value="Pending">Pending</option><option value="Confirmed">Confirmed</option><option value="Reschedule">Reschedule</option><option value="Done Shoot/Fully Paid">Completed</option><option value="Cancelled">Cancelled</option></select><button class="btn" id="exportBookingsBtn">⬇ Export CSV</button><button class="btn" id="calendarToggle">Calendar</button></div></div><div id="listView"><div class="table-wrap"><table><thead><tr><th>Date / time</th><th>Customer</th><th>Package</th><th>Money</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead><tbody id="bookingsBody"></tbody></table></div></div><div id="calendarView" hidden><div class="calendar-head"><h3 id="calendarTitle">Month</h3><div class="actions"><button class="icon-btn" data-calendar="prev" aria-label="Previous month">‹</button><button class="icon-btn" data-calendar="today">Today</button><button class="icon-btn" data-calendar="next" aria-label="Next month">›</button></div></div><div class="calendar-grid"><div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div><div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div></div><div id="calendarGrid" class="calendar-grid"></div></div></div>
+        <div class="panel"><div class="panel-head"><div><h2>Reservations</h2><span class="muted">Review each submission before confirming.</span></div><div class="toolbar"><input id="bookingSearch" type="search" placeholder="Search name, package…" aria-label="Search bookings"><select id="bookingFilter" aria-label="Filter bookings"><option value="active">Active only</option><option value="all">All reservations</option><option value="Pending">Pending</option><option value="Confirmed">Confirmed</option><option value="Reschedule">Reschedule</option><option value="Done Shoot/Fully Paid">Completed</option><option value="Cancelled">Cancelled</option></select><button class="btn" id="exportBookingsBtn">⬇ Export CSV</button><button class="btn" id="calendarToggle">Calendar</button><button class="btn" id="blockDatesBtn">🚫 Block dates</button><button class="btn primary" id="walkinBtn">+ Walk-in</button></div></div><div id="listView"><div class="table-wrap"><table><thead><tr><th>Date / time</th><th>Customer</th><th>Package</th><th>Money</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead><tbody id="bookingsBody"></tbody></table></div></div><div id="calendarView" hidden><div class="calendar-head"><h3 id="calendarTitle">Month</h3><div class="actions"><button class="icon-btn" data-calendar="prev" aria-label="Previous month">‹</button><button class="icon-btn" data-calendar="today">Today</button><button class="icon-btn" data-calendar="next" aria-label="Next month">›</button></div></div><div class="calendar-grid"><div class="day-name">Sun</div><div class="day-name">Mon</div><div class="day-name">Tue</div><div class="day-name">Wed</div><div class="day-name">Thu</div><div class="day-name">Fri</div><div class="day-name">Sat</div></div><div id="calendarGrid" class="calendar-grid"></div></div></div>
         </div>
       </section>
 
@@ -126,12 +126,80 @@
     </main>
   </div>
 
-  <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+  <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" id="generateReceiptBtn">Generate receipt</button><button class="btn" data-close-dialog>Close</button></div></div></dialog>
   <dialog id="imageDialog"><div class="dialog-body"><img id="proofImage" src="" alt="Payment proof" style="display:block;max-width:100%;max-height:70vh;margin:auto;border-radius:10px"><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+
+  <dialog id="blockedDatesDialog"><div class="dialog-body" style="max-width:480px"><h2>Blocked dates</h2><p class="muted" style="margin:0 0 15px">Dates blocked here cannot be booked by clients on the website.</p><form id="blockDateForm" class="form-grid" style="grid-template-columns:1fr 1fr;margin-bottom:18px"><div class="field"><label for="blockDateInput">Date</label><input id="blockDateInput" type="date" required></div><div class="field"><label for="blockReasonInput">Reason (optional)</label><input id="blockReasonInput" placeholder="Emergency, personal errand…"></div><button class="btn primary wide" type="submit" style="grid-column:span 2">Block this date</button></form><div id="blockedDatesList" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+
+  <dialog id="walkinDialog"><div class="dialog-body" style="max-width:720px;max-height:85vh;overflow:auto">
+    <h2>Register a walk-in</h2><p class="muted" style="margin:0 0 15px">Same pricing rules as the website. Bypasses the 2-hour cutoff so same-day walk-ins can be logged.</p>
+    <form id="walkinForm">
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field wide" style="grid-column:span 2"><label for="wiName">Full name</label><input id="wiName" required></div>
+        <div class="field"><label for="wiContact">Contact number</label><input id="wiContact" required></div>
+        <div class="field"><label for="wiEmail">Email</label><input id="wiEmail" type="email" required></div>
+        <div class="field wide" style="grid-column:span 2"><label for="wiSocial">Social media</label><input id="wiSocial" required></div>
+        <div class="field"><label for="wiDate">Date</label><input id="wiDate" type="date" required></div>
+        <div class="field"><label for="wiSlot">Time slot</label><select id="wiSlot" required><option value="">Select a date first</option></select></div>
+        <div class="field"><label for="wiPackage">Group size</label><select id="wiPackage"><option value="Solo">Solo, 1 pax</option><option value="Duo">Duo, 1 to 2 pax</option><option value="Squad">Squad, 3 to 5 pax</option><option value="Party">Party, 6 to 8 pax</option></select></div>
+        <div class="field"><label for="wiPackageType">Package style</label><select id="wiPackageType"><option value="Starter">Starter</option><option value="Upgraded">Upgraded</option></select></div>
+        <div class="field"><label><input type="checkbox" id="wiStudent"> Student discount</label></div>
+        <div class="field"><label for="wiExtraPax">Extra pax</label><select id="wiExtraPax"></select></div>
+      </div>
+      <div class="field" id="wiBackdropGroup"><label>Preferred backdrop color(s)</label><div id="wiBackdropChoices" style="display:flex;gap:14px;flex-wrap:wrap"></div></div>
+      <div class="field"><label><input type="checkbox" id="wiHasExtraBackdrop"> Add backdrops?</label><div id="wiExtraBackdropGroup" hidden style="margin-top:8px"><select id="wiExtraBackdropColor"><option value="">Select a color</option></select></div></div>
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field"><label><input type="checkbox" id="wiHasPet"> Add pet?</label></div>
+        <div class="field" id="wiPetGroup" hidden><div style="display:flex;gap:8px"><select id="wiPetSize"><option value="Small">Small · max 4</option><option value="Medium">Medium · max 2</option><option value="Large">Large · max 1</option></select><select id="wiExtraPet"></select></div></div>
+        <div class="field"><label for="wiExtraTime">Time extension</label><select id="wiExtraTime"><option value="0">None</option><option value="10">+10 min, ₱99</option><option value="15">+15 min, ₱149</option><option value="20">+20 min, ₱199</option><option value="30">+30 min, ₱299</option></select></div>
+        <div class="field"><label for="wiEnhanced">Enhanced copies</label><select id="wiEnhanced"><option value="0">None</option><option value="1_2">1 to 2, ₱49</option><option value="3_5">3 to 5, ₱99</option><option value="6_10">6 to 10, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select></div>
+        <div class="field" id="wiEnhancedQtyGroup" hidden><label for="wiEnhancedQty">Total enhanced photos</label><input id="wiEnhancedQty" type="number" min="11" value="11"></div>
+        <div class="field"><label><input type="checkbox" id="wiDigitalCopies"> Get Digital Copies</label></div>
+      </div>
+      <div class="field"><label><input type="checkbox" id="wiHasChildren"> Children joining?</label><div id="wiChildrenGroup" hidden style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center"><label><input type="checkbox" id="wiChildInfant" value="Infant"> Infant</label><label><input type="checkbox" id="wiChildToddler" value="Toddler"> Toddler</label><label><input type="checkbox" id="wiChildKid" value="Kid"> Kid</label><input id="wiTotalChildren" type="number" min="1" max="20" value="1" style="width:90px" placeholder="Total"></div></div>
+      <div class="field"><label><input type="checkbox" id="wiHasBalloons"> Number balloons</label><div id="wiBalloonGroup" hidden style="margin-top:8px;display:flex;gap:8px"><input id="wiBalloonQty" type="number" min="1" value="1" style="width:90px"><input id="wiBalloonNumbers" placeholder="18, 7, 25"></div></div>
+      <div class="field"><label for="wiNotes">Notes</label><textarea id="wiNotes" rows="2" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></textarea></div>
+      <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="field"><label>Grand total</label><div id="wiTotalDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
+        <div class="field"><label>Required downpayment</label><div id="wiDpDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
+        <div class="field"><label for="wiActualAmount">Actual amount received</label><input id="wiActualAmount" type="number" min="0" placeholder="Leave blank if exact"></div>
+      </div>
+      <div class="field"><label for="wiProof">Payment screenshot (optional for walk-ins)</label><input id="wiProof" type="file" accept="image/png,image/jpeg,image/webp"></div>
+      <p id="wiError" class="error-text"></p>
+      <div class="dialog-actions"><button type="button" class="btn" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save walk-in booking</button></div>
+    </form>
+  </div></dialog>
+
+  <dialog id="receiptDialog"><div class="dialog-body" style="max-width:460px">
+    <div id="receiptCard" style="background:#fff;border-radius:16px;padding:22px;border:1px solid var(--line)">
+      <img src="/static/logo.png" alt="B-Lens logo" style="height:52px;width:auto;display:block;margin:0 auto 14px">
+      <pre id="receiptText" style="white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.55;margin:0"></pre>
+    </div>
+    <div class="dialog-actions"><button class="btn primary" id="copyReceiptBtn">Copy text</button><button class="btn" data-close-dialog>Close</button></div>
+  </div></dialog>
+
+  <dialog id="sessionReceiptDialog"><div class="dialog-body" style="max-width:440px">
+    <div id="sessionReceiptCard" style="background:#fff;border-radius:16px;padding:26px 24px;border:1px solid var(--line);font-size:13px">
+      <img src="/static/logo.png" alt="B-Lens logo" style="height:50px;width:auto;display:block;margin:0 auto 6px">
+      <div style="text-align:center;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Self Portrait Studio</div>
+      <div style="text-align:center;font-weight:800;font-size:15px;letter-spacing:.03em;margin-bottom:2px">BOOKING RECEIPT</div>
+      <div id="sessionReceiptMeta" style="text-align:center;color:var(--muted);font-size:11.5px;margin-bottom:14px"></div>
+      <div style="border-top:1.5px dashed var(--line);margin:0 0 12px"></div>
+      <div id="sessionReceiptCustomer" class="detail-list" style="margin-bottom:12px"></div>
+      <div style="border-top:1.5px dashed var(--line);margin:0 0 12px"></div>
+      <div id="sessionReceiptItems" style="display:grid;gap:7px;margin-bottom:8px"></div>
+      <div style="border-top:1.5px dashed var(--line);margin:12px 0"></div>
+      <div id="sessionReceiptTotals" style="display:grid;gap:6px"></div>
+      <div style="border-top:1.5px dashed var(--line);margin:14px 0"></div>
+      <div style="text-align:center;color:var(--muted);font-size:11.5px;line-height:1.6">Thank you for booking with B·Lens! 🤍<br>facebook.com/BLensSelfPortraitStudio · ig/tiktok @b.lens_ph</div>
+    </div>
+    <div class="dialog-actions"><button class="btn primary" id="copySessionReceiptBtn">Copy text</button><button class="btn" data-close-dialog>Close</button></div>
+  </div></dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const $ = (id) => document.getElementById(id); const state = { bookings:[], transactions:[], inventory:[], calendarDate:new Date(), activeTab:'reservations' }; let toastTimer;
+    const $ = (id) => document.getElementById(id); const state = { bookings:[], transactions:[], inventory:[], blockedDates:[], selectedBookingId:null, calendarDate:new Date(), activeTab:'reservations' }; let toastTimer;
     const money = (n) => `₱${Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits:2 })}`;
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
     const safeUrl = (value) => /^https?:\/\//i.test(String(value || '')) ? escapeHtml(value) : '';
@@ -147,14 +215,14 @@
     function activeBooking(b) { return !['Done Shoot/Fully Paid','Cancelled'].includes(b.status); }
     function renderBookingStats() { const active=state.bookings.filter(activeBooking), today=new Date().toISOString().slice(0,10); $('activeCount').textContent=active.length; $('todayCount').textContent=active.filter(b=>b.date===today).length; $('pendingCount').textContent=state.bookings.filter(b=>b.status==='Pending').length; $('balanceTotal').textContent=money(active.reduce((sum,b)=>sum+Number(b.balance||0),0)); }
     function filteredBookings() { const query=$('bookingSearch').value.trim().toLowerCase(), filter=$('bookingFilter').value; return state.bookings.filter(b => { const hay=[b.customer_name,b.email,b.package,b.package_type,b.date,b.schedule].join(' ').toLowerCase(); const matchesQuery=!query||hay.includes(query); const matchesFilter=filter==='all'||filter==='active'?filter==='all'?true:activeBooking(b):b.status===filter; return matchesQuery&&matchesFilter; }).sort((a,b)=>`${a.date} ${a.schedule}`.localeCompare(`${b.date} ${b.schedule}`)); }
-    function renderBookings() { const body=$('bookingsBody'), rows=filteredBookings(); if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="empty">No reservations match this view.</td></tr>'; return; } body.innerHTML=rows.map(b=>{ const proof=safeUrl(b.payment_screenshot); return `<tr><td><span class="primary-text">${escapeHtml(b.date)}</span><span class="secondary-text">${escapeHtml(b.schedule)}</span></td><td><span class="primary-text">${escapeHtml(b.customer_name||b.name)}</span><span class="secondary-text">${escapeHtml(b.email||'No email')}<br>${escapeHtml(b.contact_no||'')}</span></td><td><span class="primary-text">${escapeHtml(b.package)} · ${escapeHtml(b.package_type)}</span><span class="secondary-text">Student: ${b.is_student==='true'||b.is_student===true?'Yes':'No'}</span></td><td><span class="primary-text">${money(b.grand_total)}</span><span class="secondary-text">Balance: ${money(b.balance)}</span></td><td>${proof?`<img class="proof" data-action="image" data-src="${proof}" src="${proof}" alt="Payment proof">`:'<span class="muted">None</span>'}</td><td><select class="status-select" data-action="status" data-id="${escapeHtml(b.id)}" aria-label="Booking status"><option ${b.status==='Pending'?'selected':''}>Pending</option><option ${b.status==='Confirmed'?'selected':''}>Confirmed</option><option ${b.status==='Reschedule'?'selected':''}>Reschedule</option><option ${b.status==='Done Shoot/Fully Paid'?'selected':''}>Done Shoot/Fully Paid</option><option ${b.status==='Cancelled'?'selected':''}>Cancelled</option></select><span class="badge ${statusClass(b.status)}" style="margin-top:6px">${escapeHtml(b.status||'Pending')}</span></td><td><div class="actions"><button class="icon-btn" data-action="details" data-id="${escapeHtml(b.id)}" title="View details">View</button><button class="icon-btn danger" data-action="delete-booking" data-id="${escapeHtml(b.id)}" title="Delete reservation">×</button></div></td></tr>`; }).join(''); }
+    function renderBookings() { const body=$('bookingsBody'), rows=filteredBookings(); if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="empty">No reservations match this view.</td></tr>'; return; } body.innerHTML=rows.map(b=>{ const proof=safeUrl(b.payment_screenshot); return `<tr><td><span class="primary-text">${escapeHtml(b.date)}</span><span class="secondary-text">${escapeHtml(b.schedule)}</span></td><td><span class="primary-text">${escapeHtml(b.customer_name||b.name)}</span><span class="secondary-text">${escapeHtml(b.email||'No email')}<br>${escapeHtml(b.contact_no||'')}</span></td><td><span class="primary-text">${escapeHtml(b.package)} · ${escapeHtml(b.package_type)}</span><span class="secondary-text">Student: ${b.is_student==='true'||b.is_student===true?'Yes':'No'}</span></td><td><span class="primary-text">${money(b.grand_total)}</span><span class="secondary-text">Balance: ${money(b.balance)}</span></td><td>${proof?`<img class="proof" data-action="image" data-src="${proof}" src="${proof}" alt="Payment proof">`:'<span class="muted">None</span>'}</td><td><select class="status-select" data-action="status" data-id="${escapeHtml(b.id)}" aria-label="Booking status"><option ${b.status==='Pending'?'selected':''}>Pending</option><option ${b.status==='Confirmed'?'selected':''}>Confirmed</option><option ${b.status==='Reschedule'?'selected':''}>Reschedule</option><option ${b.status==='Done Shoot/Fully Paid'?'selected':''}>Done Shoot/Fully Paid</option><option ${b.status==='Cancelled'?'selected':''}>Cancelled</option></select><span class="badge ${statusClass(b.status)}" style="margin-top:6px">${escapeHtml(b.status||'Pending')}</span></td><td><div class="actions"><button class="icon-btn" data-action="details" data-id="${escapeHtml(b.id)}" title="View details">View</button><button class="icon-btn" data-action="receipt" data-id="${escapeHtml(b.id)}" title="View / copy session receipt">🧾</button><button class="icon-btn" data-action="message" data-id="${escapeHtml(b.id)}" title="Copy thank-you message">💬</button><button class="icon-btn danger" data-action="delete-booking" data-id="${escapeHtml(b.id)}" title="Delete reservation">×</button></div></td></tr>`; }).join(''); }
     function renderCalendar() { const date=state.calendarDate, year=date.getFullYear(), month=date.getMonth(); $('calendarTitle').textContent=date.toLocaleDateString('en-US',{month:'long',year:'numeric'}); const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate(); const cells=[]; for(let i=first-1;i>=0;i--) cells.push(`<div class="calendar-cell other"><div class="date-num">${prevDays-i}</div></div>`); for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const bs=state.bookings.filter(b=>b.date===key&&activeBooking(b)); cells.push(`<div class="calendar-cell"><div class="date-num">${day}</div>${bs.map(b=>`<button class="calendar-booking" data-action="details" data-id="${escapeHtml(b.id)}">${escapeHtml(b.schedule)} · ${escapeHtml(b.customer_name||b.name)}</button>`).join('')}</div>`);} $('calendarGrid').innerHTML=cells.join(''); }
-    function showBooking(id) { const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b)return; const petLine=(b.has_pet==='true'||b.has_pet===true)?`${b.pet_size||''} · ${b.extra_pet||0} pet(s)`:'None'; const childLine=(b.has_children==='true'||b.has_children===true)?`${b.children_types||''} · total ${b.total_children||0}`:'None'; const rows=[['Customer',b.customer_name||b.name],['Email',b.email],['Contact',b.contact_no],['Social',b.social_media],['Date',`${b.date} · ${b.schedule}`],['Package',`${b.package} · ${b.package_type}`],['Preferred backdrop',b.preferred_backdrop],['Additional backdrop',b.additional_backdrop_color||'None'],['Pet',petLine],['Children',childLine],['Notes',b.notes],['Total',money(b.grand_total)],['Downpayment',money(b.downpayment)],['Balance',money(b.balance)],['Status',b.status],['Extras',`Pax ${b.extra_pax||0}`]]; $('bookingDetails').innerHTML=rows.map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join(''); $('bookingDialog').showModal(); }
+    function showBooking(id) { state.selectedBookingId=id; const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b)return; const petLine=(b.has_pet==='true'||b.has_pet===true)?`${b.pet_size||''} · ${b.extra_pet||0} pet(s)`:'None'; const childLine=(b.has_children==='true'||b.has_children===true)?`${b.children_types||''} · total ${b.total_children||0}`:'None'; const enhancedLabels={'1_2':'1 to 2 photos','3_5':'3 to 5 photos','6_10':'6 to 10 photos'}; const enhancedLine=(b.enhanced_copies&&b.enhanced_copies!=='0')?(b.enhanced_copies==='more_10'?`${b.extra_enhanced_qty||11} photos`:(enhancedLabels[b.enhanced_copies]||b.enhanced_copies)):'None'; const digitalLine=(b.has_digital_copies==='true'||b.has_digital_copies===true)?'Yes':'No'; const balloonLine=(b.has_balloons==='true'||b.has_balloons===true)?`${b.balloon_qty||0} pc(s) — ${b.balloon_numbers||'no numbers given'}`:'None'; const timeLine=Number(b.extra_time||0)>0?`+${b.extra_time} min`:'None'; const rows=[['Customer',b.customer_name||b.name],['Email',b.email],['Contact',b.contact_no],['Social',b.social_media],['Date',`${b.date} · ${b.schedule}`],['Package',`${b.package} · ${b.package_type}`],['Student rate',(b.is_student==='true'||b.is_student===true)?'Yes':'No'],['Extra pax',b.extra_pax||0],['Preferred backdrop',b.preferred_backdrop],['Additional backdrop',b.additional_backdrop_color||'None'],['Pet',petLine],['Time extension',timeLine],['Digital copies',digitalLine],['Enhanced copies',enhancedLine],['Balloons',balloonLine],['Children',childLine],['Notes',b.notes],['Total',money(b.grand_total)],['Downpayment',money(b.downpayment)],['Actual amount sent',b.actual_amount_sent?money(b.actual_amount_sent):'Same as required'],['Balance',money(b.balance)],['Status',b.status],['Source',b.source||'Website']]; $('bookingDetails').innerHTML=rows.map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join(''); $('bookingDialog').showModal(); }
     function csvCell(value) { const v=String(value??''); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; }
     function downloadCSV(filename, rows) { const csv=rows.map(row=>row.map(csvCell).join(',')).join('\r\n'); const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
     function exportBookings() { const header=['Date','Time','Customer','Email','Contact','Social','Package','Package Type','Student','Extra Pax','Preferred Backdrop','Additional Backdrop','Pet Size','Pets','Children Types','Total Children','Notes','Grand Total','Downpayment','Balance','Status']; const rows=filteredBookings().map(b=>[b.date,b.schedule,b.customer_name||b.name,b.email,b.contact_no,b.social_media,b.package,b.package_type,(b.is_student==='true'||b.is_student===true)?'Yes':'No',b.extra_pax||0,b.preferred_backdrop||'',b.additional_backdrop_color||'',b.pet_size||'',b.extra_pet||0,b.children_types||'',b.total_children||0,b.notes||'',b.grand_total,b.downpayment,b.balance,b.status]); if(!rows.length){showToast('No bookings to export for this view.',true);return;} downloadCSV(`b-lens-bookings-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Bookings exported.'); }
     function exportTransactions() { const header=['Date','Type','Category','Description','Account','Amount']; const rows=state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>[t.date,t.type,t.category,t.description,t.account||'Cash',t.amount]); if(!rows.length){showToast('No transactions to export.',true);return;} downloadCSV(`b-lens-transactions-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Transactions exported.'); }
-    async function updateStatus(id,status,select) { select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})}); showToast('Booking status updated.'); await loadBookings(); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { select.disabled=false; } }
+    async function updateStatus(id,status,select) { select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})}); showToast('Booking status updated.'); await loadBookings(); if(status==='Confirmed') openSessionReceipt(id); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { select.disabled=false; } }
     async function deleteBooking(id) { if(!confirm('Delete this reservation permanently?'))return; try { await api('/api/admin/delete-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Reservation deleted.'); await loadBookings(); } catch(error){showToast(error.message,true);} }
     async function loadTransactions() { const data=await api('/api/admin/transactions'); state.transactions=data.transactions||[]; const inc=state.transactions.filter(t=>t.type==='Incoming').reduce((s,t)=>s+Number(t.amount||0),0), out=state.transactions.filter(t=>t.type!=='Incoming').reduce((s,t)=>s+Number(t.amount||0),0); $('totalIncoming').textContent=money(inc); $('totalOutgoing').textContent=money(out); $('currentBalance').textContent=money(inc-out); $('transactionCount').textContent=state.transactions.length; $('transactionsBody').innerHTML=state.transactions.length?state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>`<tr><td>${escapeHtml(t.date)}</td><td><span class="badge ${t.type==='Incoming'?'confirmed':'cancelled'}">${escapeHtml(t.type)}</span></td><td>${escapeHtml(t.category)}</td><td>${escapeHtml(t.description)}</td><td>${escapeHtml(t.account||'Cash')}</td><td class="${t.type==='Incoming'?'amount-in':'amount-out'}">${money(t.amount)}</td><td><button class="icon-btn danger" data-action="delete-transaction" data-id="${escapeHtml(t.id)}">×</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No transactions yet.</td></tr>'; }
     async function addTransaction(event) { event.preventDefault(); const payload={date:$('txDate').value,type:$('txType').value,category:$('txCategory').value.trim(),description:$('txDescription').value.trim(),account:$('txAccount').value,amount:$('txAmount').value}; try { await api('/api/admin/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); event.target.reset(); $('txDate').value=new Date().toISOString().slice(0,10); showToast('Transaction added.'); await loadTransactions(); } catch(error){showToast(error.message,true);} }
@@ -164,9 +232,228 @@
     async function updateStock(id,change) { const qty=prompt(change>0?'How many to add?':'How many to subtract?','1'); if(qty===null||!/^\d+$/.test(qty)||Number(qty)<1)return; try { await api('/api/admin/inventory/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,quantity_change:change*Number(qty)})}); showToast('Stock updated.'); await loadInventory(); } catch(error){showToast(error.message,true);} }
     async function deleteInventory(id) { if(!confirm('Remove this inventory item?'))return; try { await api('/api/admin/inventory/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Inventory item removed.'); await loadInventory(); } catch(error){showToast(error.message,true);} }
     function setTab(tab) { state.activeTab=tab; document.querySelectorAll('.tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab)); document.querySelectorAll('.tab-content').forEach(section=>section.hidden=!section.id.startsWith(tab)); if(tab==='reservations')loadBookings(); if(tab==='pos')loadTransactions(); if(tab==='inventory')loadInventory(); }
-    document.addEventListener('click',(event)=>{ const action=event.target.closest('[data-action]')?.dataset.action; if(action==='details')showBooking(event.target.closest('[data-action]').dataset.id); if(action==='image'){ $('proofImage').src=event.target.closest('[data-action]').dataset.src; $('imageDialog').showModal(); } if(action==='delete-booking')deleteBooking(event.target.closest('[data-action]').dataset.id); if(action==='delete-transaction')deleteTransaction(event.target.closest('[data-action]').dataset.id); if(action==='delete-inventory')deleteInventory(event.target.closest('[data-action]').dataset.id); if(action==='stock')updateStock(event.target.closest('[data-action]').dataset.id,Number(event.target.closest('[data-action]').dataset.change)); if(event.target.matches('[data-close-dialog]'))event.target.closest('dialog').close(); });
+
+    // ---- Receipt generator ----
+    function buildReceiptText(b) {
+      const addOns = [];
+      if (Number(b.extra_pax)>0) addOns.push(`Extra pax × ${b.extra_pax}`);
+      if (b.has_pet==='true'||b.has_pet===true) addOns.push(`Pet (${b.pet_size}) × ${b.extra_pet}`);
+      if (Number(b.extra_backdrop)>0) addOns.push(`Additional backdrop (${b.additional_backdrop_color})`);
+      if (Number(b.extra_time)>0) addOns.push(`Time extension +${b.extra_time} min`);
+      if (b.has_digital_copies==='true'||b.has_digital_copies===true) addOns.push(`Get Digital Copies`);
+      if (b.enhanced_copies && b.enhanced_copies!=='0') addOns.push(`Enhanced copies (${b.enhanced_copies==='more_10'?`${b.extra_enhanced_qty} photos`:b.enhanced_copies.replace('_',' to ')})`);
+      if (b.has_balloons==='true'||b.has_balloons===true) addOns.push(`Number balloons × ${b.balloon_qty} (${b.balloon_numbers})`);
+      if (b.has_children==='true'||b.has_children===true) addOns.push(`Children: ${b.children_types} · total ${b.total_children}`);
+      const addOnsText = addOns.length ? addOns.map(a=>`• ${a}`).join('\n') : '• None';
+      const downpaymentPaid = Number(b.actual_amount_sent) > 0 ? Number(b.actual_amount_sent) : Number(b.downpayment);
+      const balance = Number(b.grand_total) - downpaymentPaid;
+      return `Booking Confirmed! 🤍
+Thank you for booking with us! We're excited to welcome you to our self-portrait studio. ✨
+Session Details:
+👤 Client Name: ${b.customer_name||b.name}
+📅 Date: ${b.date}
+⏰ Time: ${b.schedule}
+📸 Package: ${b.package} (${b.package_type})
+Add-ons:
+${addOnsText}
+Payment Details:
+💳 Total Amount: ₱${Number(b.grand_total).toLocaleString('en-PH')}
+✅ Downpayment Paid: ₱${downpaymentPaid.toLocaleString('en-PH')}
+💰 Remaining Balance: ₱${balance.toLocaleString('en-PH')}
+Balance must be settled on or before your scheduled session.
+Session Reminders:
+• Please arrive on time to maximize your session. Late arrival may affect your shooting time.
+• Please bring your valid Student ID if you apply for Student Rate on the day of session.
+• This is a self-portrait experience. Clients will take their own photos using the camera and remote provided.
+• Please ask for assistance before moving or adjusting backdrops, furniture, or any studio setup.
+• Children and pets are welcome but must be guided and supervised at all times.
+• Any damage caused by improper use of studio equipment or setup may be subject to additional charges.
+We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
+    }
+    function generateReceipt(id) { const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b){showToast('Booking not found.',true);return;} $('receiptText').textContent=buildReceiptText(b); $('receiptDialog').showModal(); }
+    async function copyReceipt() { try { await navigator.clipboard.writeText($('receiptText').textContent); showToast('Receipt copied to clipboard.'); } catch { showToast('Could not copy automatically — please select and copy manually.',true); } }
+
+    // ---- Session receipt (itemized, shown when a booking is Confirmed) ----
+    const RECEIPT_BASE_RATES = { Solo: { Starter: { reg:249, stu:199, dur:10 }, Upgraded: { reg:449, stu:399, dur:20 } }, Duo: { Starter: { reg:399, stu:349, dur:15 }, Upgraded: { reg:599, stu:549, dur:25 } }, Squad: { Starter: { reg:599, stu:499, dur:20 }, Upgraded: { reg:799, stu:699, dur:30 } }, Party: { Starter: { reg:899, stu:799, dur:30 }, Upgraded: { reg:1099, stu:999, dur:40 } } };
+    const RECEIPT_TIME_PRICES = { 10:99, 15:149, 20:199, 30:299 };
+    const RECEIPT_ENHANCED_PRICES = { '1_2':49, '3_5':99, '6_10':199 };
+    const RECEIPT_ENHANCED_LABELS = { '1_2':'1 to 2 enhanced softcopies', '3_5':'3 to 5 enhanced softcopies', '6_10':'6 to 10 enhanced softcopies' };
+    function buildSessionReceiptItems(b) {
+      const isStudent = b.is_student==='true'||b.is_student===true;
+      const pkgRates = (RECEIPT_BASE_RATES[b.package]||{})[b.package_type] || { reg:0, stu:0, dur:0 };
+      const items = [];
+      items.push({ label:`${b.package} · ${b.package_type} package${isStudent?' (Student rate)':''}`, price: isStudent?pkgRates.stu:pkgRates.reg });
+      const extraPax = Number(b.extra_pax||0);
+      if (extraPax>0) items.push({ label:`Extra pax × ${extraPax}`, price: extraPax*99 });
+      if (b.has_pet==='true'||b.has_pet===true) { const extraPet=Number(b.extra_pet||0); items.push({ label:`Pet add-on (${b.pet_size}) × ${extraPet}`, price: extraPet*99 }); }
+      if (Number(b.extra_backdrop||0)>0) items.push({ label:`Additional backdrop (${b.additional_backdrop_color})`, price: 99 });
+      const extraTime = Number(b.extra_time||0);
+      if (extraTime>0) items.push({ label:`Time extension +${extraTime} min`, price: RECEIPT_TIME_PRICES[extraTime]||0 });
+      if (b.has_digital_copies==='true'||b.has_digital_copies===true) { const mins=pkgRates.dur+extraTime; const price = mins<=15?99:mins<=25?149:199; items.push({ label:'Digital copies', price }); }
+      if (b.enhanced_copies && b.enhanced_copies!=='0') {
+        if (b.enhanced_copies==='more_10') { const qty=Number(b.extra_enhanced_qty||11); items.push({ label:`Enhanced photos × ${qty} (₱25 each)`, price: qty*25 }); }
+        else items.push({ label: RECEIPT_ENHANCED_LABELS[b.enhanced_copies]||'Enhanced copies', price: RECEIPT_ENHANCED_PRICES[b.enhanced_copies]||0 });
+      }
+      if (b.has_balloons==='true'||b.has_balloons===true) { const qty=Number(b.balloon_qty||0); items.push({ label:`Number balloons × ${qty} (${b.balloon_numbers||''})`, price: qty*39 }); }
+      const notes = [];
+      if (b.has_children==='true'||b.has_children===true) notes.push(`Children joining: ${b.children_types||''} · total ${b.total_children||0} (no extra charge)`);
+      return { items, notes };
+    }
+    function renderSessionReceipt(b) {
+      const { items, notes } = buildSessionReceiptItems(b);
+      $('sessionReceiptMeta').textContent = `Receipt No. ${b.id} · Issued ${new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}`;
+      $('sessionReceiptCustomer').innerHTML = [['Client', b.customer_name||b.name],['Contact', b.contact_no],['Session date', `${b.date} · ${b.schedule}`]].map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join('');
+      $('sessionReceiptItems').innerHTML = items.map(item=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${escapeHtml(item.label)}</span><strong>${money(item.price)}</strong></div>`).join('') + (notes.length?`<div style="margin-top:4px;color:var(--muted);font-size:11.5px">${notes.map(n=>escapeHtml(n)).join('<br>')}</div>`:'');
+      const downpaymentPaid = Number(b.actual_amount_sent)>0 ? Number(b.actual_amount_sent) : Number(b.downpayment);
+      const balance = Number(b.grand_total) - downpaymentPaid;
+      $('sessionReceiptTotals').innerHTML = `<div style="display:flex;justify-content:space-between;font-weight:800;font-size:15px"><span>Grand total</span><span>${money(b.grand_total)}</span></div><div style="display:flex;justify-content:space-between;color:var(--success)"><span>Downpayment paid</span><span>${money(downpaymentPaid)}</span></div><div style="display:flex;justify-content:space-between;font-weight:800"><span>Balance due</span><span>${money(balance)}</span></div>`;
+    }
+    function buildSessionReceiptText(b) {
+      const { items, notes } = buildSessionReceiptItems(b);
+      const downpaymentPaid = Number(b.actual_amount_sent)>0 ? Number(b.actual_amount_sent) : Number(b.downpayment);
+      const balance = Number(b.grand_total) - downpaymentPaid;
+      const lines = [
+        'B·LENS SELF PORTRAIT STUDIO', 'BOOKING RECEIPT',
+        `Receipt No. ${b.id} · Issued ${new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}`,
+        '------------------------------',
+        `Client: ${b.customer_name||b.name}`, `Contact: ${b.contact_no||''}`, `Session: ${b.date} · ${b.schedule}`,
+        '------------------------------',
+        ...items.map(item=>`${item.label} — ${money(item.price)}`),
+        ...notes,
+        '------------------------------',
+        `Grand total: ${money(b.grand_total)}`, `Downpayment paid: ${money(downpaymentPaid)}`, `Balance due: ${money(balance)}`,
+        '------------------------------',
+        'Thank you for booking with B·Lens! 🤍',
+        'facebook.com/BLensSelfPortraitStudio · ig/tiktok @b.lens_ph',
+      ];
+      return lines.join('\n');
+    }
+    function openSessionReceipt(id) { const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b){showToast('Booking not found.',true);return;} renderSessionReceipt(b); $('sessionReceiptDialog').dataset.bookingId=id; $('sessionReceiptDialog').showModal(); }
+    async function copySessionReceipt() { const b=state.bookings.find(item=>String(item.id)===String($('sessionReceiptDialog').dataset.bookingId)); if(!b)return; try { await navigator.clipboard.writeText(buildSessionReceiptText(b)); showToast('Receipt copied to clipboard.'); } catch { showToast('Could not copy automatically — please select and copy manually.',true); } }
+
+    // ---- Blocked dates ----
+    async function loadBlockedDates() { try { const data=await api('/api/admin/blocked-dates'); state.blockedDates=data.blocked_dates||[]; renderBlockedDates(); } catch(error){showToast(error.message,true);} }
+    function renderBlockedDates() { const list=state.blockedDates||[]; $('blockedDatesList').innerHTML=list.length?list.map(d=>`<div class="detail-row"><span>${escapeHtml(d.date)}${d.reason?` — ${escapeHtml(d.reason)}`:''}</span><button class="icon-btn danger" data-action="unblock-date" data-date="${escapeHtml(d.date)}">Unblock</button></div>`).join(''):'<p class="muted">No blocked dates yet.</p>'; }
+    async function addBlockedDate(event) { event.preventDefault(); try { await api('/api/admin/blocked-dates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('blockDateInput').value,reason:$('blockReasonInput').value.trim()})}); $('blockDateForm').reset(); showToast('Date blocked.'); await loadBlockedDates(); } catch(error){showToast(error.message,true);} }
+    async function removeBlockedDate(dateStr) { try { await api('/api/admin/blocked-dates/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:dateStr})}); showToast('Date unblocked.'); await loadBlockedDates(); } catch(error){showToast(error.message,true);} }
+
+    // ---- Walk-in booking ----
+    const WI_RATES = { Solo: { Starter: { reg:249, stu:199, dur:10, baseBd:1 }, Upgraded: { reg:449, stu:399, dur:20, baseBd:1 } }, Duo: { Starter: { reg:399, stu:349, dur:15, baseBd:1 }, Upgraded: { reg:599, stu:549, dur:25, baseBd:1 } }, Squad: { Starter: { reg:599, stu:499, dur:20, baseBd:2 }, Upgraded: { reg:799, stu:699, dur:30, baseBd:2 } }, Party: { Starter: { reg:899, stu:799, dur:30, baseBd:2 }, Upgraded: { reg:1099, stu:999, dur:40, baseBd:3 } } };
+    const WI_TIME_PRICES = { 10:99, 15:149, 20:199, 30:299 };
+    const WI_PAX_MAX = { Solo:9, Duo:8, Squad:5, Party:2 };
+    const WI_PET_MAX = { Small:4, Medium:2, Large:1 };
+    const WI_COLORS = ['Beige','White','Pink','Gray'];
+    let wiTotals = { total:0, dp:0, bal:0, digitalCopies:'0' };
+
+    function wiRequiredBackdrops() { return WI_RATES[$('wiPackage').value][$('wiPackageType').value].baseBd; }
+    function wiRenderBackdropChoices() {
+      const required = wiRequiredBackdrops();
+      const container = $('wiBackdropChoices');
+      const previouslyChecked = Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
+      container.innerHTML = WI_COLORS.map(c=>`<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="wi-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label>`).join('');
+      wiEnforceBackdropLimit();
+      container.querySelectorAll('.wi-backdrop').forEach(box=>box.addEventListener('change', ()=>{ wiEnforceBackdropLimit(); wiUpdateExtraBackdropOptions(); wiCalculateTotal(); }));
+      wiUpdateExtraBackdropOptions();
+    }
+    function wiEnforceBackdropLimit() {
+      const required = wiRequiredBackdrops();
+      const boxes = Array.from(document.querySelectorAll('.wi-backdrop'));
+      let checked = boxes.filter(b=>b.checked);
+      if (checked.length > required) { checked.slice(required).forEach(b=>b.checked=false); checked = checked.slice(0, required); }
+      boxes.forEach(b=>{ b.disabled = !b.checked && checked.length >= required; });
+    }
+    function wiUpdateExtraBackdropOptions() {
+      const preferred = Array.from(document.querySelectorAll('.wi-backdrop:checked')).map(b=>b.value);
+      const available = WI_COLORS.filter(c=>!preferred.includes(c));
+      const select = $('wiExtraBackdropColor'), current = select.value;
+      select.innerHTML = '<option value="">Select a color</option>' + available.map(c=>`<option value="${c}">${c}</option>`).join('');
+      if (available.includes(current)) select.value = current;
+      $('wiExtraBackdropGroup').hidden = !$('wiHasExtraBackdrop').checked;
+    }
+    function wiPopulateExtraPax() { const max=WI_PAX_MAX[$('wiPackage').value]||0; $('wiExtraPax').innerHTML=Array.from({length:max+1},(_,i)=>`<option value="${i}">${i}</option>`).join(''); }
+    function wiUpdatePetOptions() { const max=WI_PET_MAX[$('wiPetSize').value]||1; $('wiExtraPet').innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); }
+    async function wiFetchSlots() {
+      const dateVal=$('wiDate').value, select=$('wiSlot'); select.innerHTML='<option value="">Loading…</option>';
+      if(!dateVal){ select.innerHTML='<option value="">Select a date first</option>'; return; }
+      try { const data=await api(`/api/admin/walkin-slots?date=${encodeURIComponent(dateVal)}`); select.innerHTML='<option value="">Select a slot</option>'+(data.slots||[]).map(s=>`<option value="${s.time}" ${s.disabled?'disabled':''}>${s.time}${s.disabled?` · ${s.reason}`:''}</option>`).join(''); } catch(error){ select.innerHTML='<option value="">Could not load slots</option>'; showToast(error.message,true); }
+    }
+    function wiCalculateTotal() {
+      const cat=$('wiPackage').value, type=$('wiPackageType').value, pkg=WI_RATES[cat][type];
+      let total = $('wiStudent').checked ? pkg.stu : pkg.reg;
+      total += (Number($('wiExtraPax').value)||0) * 99;
+      if ($('wiHasPet').checked) total += (Number($('wiExtraPet').value)||1) * 99;
+      const extraTime = Number($('wiExtraTime').value)||0; total += WI_TIME_PRICES[extraTime]||0;
+      const sessionMinutes = pkg.dur + extraTime;
+      wiTotals.digitalCopies = '0';
+      if ($('wiDigitalCopies').checked) { const price = sessionMinutes<=15?99:sessionMinutes<=25?149:199; wiTotals.digitalCopies = sessionMinutes<=15?'10_15':sessionMinutes<=25?'20_25':'30_40'; total += price; }
+      const enhanced=$('wiEnhanced').value, enhancedPrices={'1_2':49,'3_5':99,'6_10':199};
+      if (enhancedPrices[enhanced]) total += enhancedPrices[enhanced];
+      if (enhanced==='more_10') { $('wiEnhancedQtyGroup').hidden=false; total += Math.max(11, Number($('wiEnhancedQty').value)||11) * 25; } else $('wiEnhancedQtyGroup').hidden=true;
+      if ($('wiHasExtraBackdrop').checked && $('wiExtraBackdropColor').value) total += 99;
+      if ($('wiHasBalloons').checked) { $('wiBalloonGroup').hidden=false; total += (Number($('wiBalloonQty').value)||1) * 39; } else $('wiBalloonGroup').hidden=true;
+      $('wiPetGroup').hidden = !$('wiHasPet').checked;
+      $('wiChildrenGroup').hidden = !$('wiHasChildren').checked;
+      wiTotals.total=total; wiTotals.dp=Math.ceil(total*.5); wiTotals.bal=total-wiTotals.dp;
+      $('wiTotalDisplay').textContent=money(wiTotals.total); $('wiDpDisplay').textContent=money(wiTotals.dp);
+    }
+    function wiResetForm() {
+      $('walkinForm').reset(); $('wiError').textContent=''; $('wiSlot').innerHTML='<option value="">Select a date first</option>';
+      wiPopulateExtraPax(); wiRenderBackdropChoices(); wiUpdatePetOptions(); $('wiPetGroup').hidden=true; $('wiChildrenGroup').hidden=true; $('wiBalloonGroup').hidden=true; $('wiExtraBackdropGroup').hidden=true; $('wiEnhancedQtyGroup').hidden=true;
+      wiCalculateTotal();
+    }
+    async function wiSubmit(event) {
+      event.preventDefault(); $('wiError').textContent='';
+      const required=wiRequiredBackdrops(); const checkedColors=Array.from(document.querySelectorAll('.wi-backdrop:checked'));
+      if (checkedColors.length!==required) { $('wiError').textContent=`Please choose exactly ${required} preferred backdrop color(s).`; return; }
+      if ($('wiHasExtraBackdrop').checked && !$('wiExtraBackdropColor').value) { $('wiError').textContent='Please choose an additional backdrop color.'; return; }
+      if ($('wiHasPet').checked && !$('wiPetSize').value) { $('wiError').textContent='Please select a pet size.'; return; }
+      const childTypes=['wiChildInfant','wiChildToddler','wiChildKid'].filter(id=>$(id).checked).map(id=>$(id).value);
+      if ($('wiHasChildren').checked && !childTypes.length) { $('wiError').textContent='Please select at least one child age group.'; return; }
+      const button=event.submitter||document.querySelector('#walkinForm button[type=submit]'); if(button) button.disabled=true;
+      const formData = new FormData();
+      formData.set('customer_name',$('wiName').value.trim()); formData.set('contact_no',$('wiContact').value.trim()); formData.set('email',$('wiEmail').value.trim()); formData.set('social_media',$('wiSocial').value.trim());
+      formData.set('date',$('wiDate').value); formData.set('schedule',$('wiSlot').value);
+      formData.set('package',$('wiPackage').value); formData.set('package_type',$('wiPackageType').value);
+      formData.set('is_student',$('wiStudent').checked);
+      checkedColors.forEach(c=>formData.append('preferred_backdrop', c.value));
+      formData.set('has_additional_backdrop',$('wiHasExtraBackdrop').checked); formData.set('additional_backdrop_color',$('wiExtraBackdropColor').value);
+      formData.set('extra_pax',$('wiExtraPax').value);
+      formData.set('has_pet',$('wiHasPet').checked); formData.set('pet_size',$('wiPetSize').value); formData.set('extra_pet',$('wiExtraPet').value||'1');
+      formData.set('extra_time',$('wiExtraTime').value);
+      formData.set('enhanced_copies',$('wiEnhanced').value); formData.set('extra_enhanced_qty',$('wiEnhancedQty').value||'11');
+      formData.set('has_digital_copies',$('wiDigitalCopies').checked); formData.set('digital_copies',wiTotals.digitalCopies);
+      formData.set('has_children',$('wiHasChildren').checked); childTypes.forEach(t=>formData.append('children_types',t)); formData.set('total_children',$('wiTotalChildren').value||'1');
+      formData.set('has_balloons',$('wiHasBalloons').checked); formData.set('balloon_qty',$('wiBalloonQty').value||'1'); formData.set('balloon_numbers',$('wiBalloonNumbers').value.trim());
+      formData.set('backdrop_order',$('wiNotes').value.trim());
+      formData.set('actual_amount_sent',$('wiActualAmount').value||'');
+      if ($('wiProof').files[0]) formData.set('payment_screenshot',$('wiProof').files[0]);
+      try {
+        const response = await fetch('/api/admin/walkin-booking',{method:'POST',body:formData});
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message||'Could not save the walk-in booking.');
+        showToast('Walk-in booking saved.'); $('walkinDialog').close(); await loadBookings();
+      } catch(error) { $('wiError').textContent = error.message; }
+      finally { if(button) button.disabled=false; }
+    }
+
+    document.addEventListener('click',(event)=>{ const action=event.target.closest('[data-action]')?.dataset.action; if(action==='details')showBooking(event.target.closest('[data-action]').dataset.id); if(action==='receipt')openSessionReceipt(event.target.closest('[data-action]').dataset.id); if(action==='message')generateReceipt(event.target.closest('[data-action]').dataset.id); if(action==='image'){ $('proofImage').src=event.target.closest('[data-action]').dataset.src; $('imageDialog').showModal(); } if(action==='delete-booking')deleteBooking(event.target.closest('[data-action]').dataset.id); if(action==='delete-transaction')deleteTransaction(event.target.closest('[data-action]').dataset.id); if(action==='delete-inventory')deleteInventory(event.target.closest('[data-action]').dataset.id); if(action==='stock')updateStock(event.target.closest('[data-action]').dataset.id,Number(event.target.closest('[data-action]').dataset.change)); if(action==='unblock-date')removeBlockedDate(event.target.closest('[data-action]').dataset.date); if(event.target.matches('[data-close-dialog]'))event.target.closest('dialog').close(); });
     document.addEventListener('change',(event)=>{ if(event.target.matches('[data-action="status"]'))updateStatus(event.target.dataset.id,event.target.value,event.target); });
-    document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab))); $('bookingSearch').addEventListener('input',renderBookings); $('bookingFilter').addEventListener('change',renderBookings); $('calendarToggle').addEventListener('click',()=>{const calendar=$('calendarView');calendar.hidden=!calendar.hidden;$('listView').hidden=!calendar.hidden;$('calendarToggle').textContent=calendar.hidden?'Calendar':'List';}); document.querySelectorAll('[data-calendar]').forEach(btn=>btn.addEventListener('click',()=>{const action=btn.dataset.calendar;if(action==='today')state.calendarDate=new Date();else state.calendarDate.setMonth(state.calendarDate.getMonth()+(action==='next'?1:-1));renderCalendar();})); $('transactionForm').addEventListener('submit',addTransaction); $('inventoryForm').addEventListener('submit',addInventory); $('refreshButton').addEventListener('click',()=>loadAll().catch(e=>showToast(e.message,true))); $('exportBookingsBtn').addEventListener('click',exportBookings); $('exportTransactionsBtn').addEventListener('click',exportTransactions); $('logoutButton').addEventListener('click',async()=>{await fetch('/api/admin/logout',{method:'POST'});showLogin();}); $('loginForm').addEventListener('submit',login); $('txDate').value=new Date().toISOString().slice(0,10); checkSession();
+    document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab))); $('bookingSearch').addEventListener('input',renderBookings); $('bookingFilter').addEventListener('change',renderBookings); $('calendarToggle').addEventListener('click',()=>{const calendar=$('calendarView');calendar.hidden=!calendar.hidden;$('listView').hidden=!calendar.hidden;$('calendarToggle').textContent=calendar.hidden?'Calendar':'List';}); document.querySelectorAll('[data-calendar]').forEach(btn=>btn.addEventListener('click',()=>{const action=btn.dataset.calendar;if(action==='today')state.calendarDate=new Date();else state.calendarDate.setMonth(state.calendarDate.getMonth()+(action==='next'?1:-1));renderCalendar();})); $('transactionForm').addEventListener('submit',addTransaction); $('inventoryForm').addEventListener('submit',addInventory); $('refreshButton').addEventListener('click',()=>loadAll().catch(e=>showToast(e.message,true))); $('exportBookingsBtn').addEventListener('click',exportBookings); $('exportTransactionsBtn').addEventListener('click',exportTransactions); $('logoutButton').addEventListener('click',async()=>{await fetch('/api/admin/logout',{method:'POST'});showLogin();}); $('loginForm').addEventListener('submit',login); $('txDate').value=new Date().toISOString().slice(0,10);
+    $('generateReceiptBtn').addEventListener('click',()=>generateReceipt(state.selectedBookingId));
+    $('copyReceiptBtn').addEventListener('click',copyReceipt);
+    $('copySessionReceiptBtn').addEventListener('click',copySessionReceipt);
+    $('blockDatesBtn').addEventListener('click',()=>{ $('blockedDatesDialog').showModal(); loadBlockedDates(); });
+    $('blockDateForm').addEventListener('submit',addBlockedDate);
+    $('walkinBtn').addEventListener('click',()=>{ wiResetForm(); $('walkinDialog').showModal(); });
+    $('walkinForm').addEventListener('submit',wiSubmit);
+    $('wiDate').addEventListener('change',wiFetchSlots);
+    $('wiPackage').addEventListener('change',()=>{ wiPopulateExtraPax(); wiRenderBackdropChoices(); wiCalculateTotal(); });
+    $('wiPackageType').addEventListener('change',()=>{ wiRenderBackdropChoices(); wiCalculateTotal(); });
+    $('wiPetSize').addEventListener('change',()=>{ wiUpdatePetOptions(); wiCalculateTotal(); });
+    $('wiHasExtraBackdrop').addEventListener('change',()=>{ wiUpdateExtraBackdropOptions(); wiCalculateTotal(); });
+    $('walkinForm').addEventListener('input',wiCalculateTotal);
+    $('walkinForm').addEventListener('change',wiCalculateTotal);
+    checkSession();
   </script>
 </body>
 </html>
