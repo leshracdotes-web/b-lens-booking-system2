@@ -97,7 +97,7 @@
     .table-wrap { overflow:auto; } table { width:100%; border-collapse:collapse; font-size:13px; } th { padding:12px 10px; border-bottom:1px solid var(--line); color:var(--muted); font-size:11px; letter-spacing:.08em; text-align:left; text-transform:uppercase; white-space:nowrap; } td { padding:14px 10px; border-bottom:1px solid var(--line); vertical-align:top; } tbody tr:hover { background:var(--surface-soft); } .primary-text { font-weight:800; } .secondary-text { display:block; margin-top:3px; color:var(--muted); font-size:11px; } .badge { display:inline-flex; align-items:center; padding:5px 8px; border-radius:999px; background:var(--surface-soft); color:var(--muted); font-size:11px; font-weight:800; white-space:nowrap; } .badge.pending { background:oklch(93% .08 88); color:oklch(42% .09 78); } .badge.confirmed { background:oklch(91% .075 150); color:oklch(35% .08 150); } .badge.reschedule { background:oklch(91% .045 230); color:oklch(38% .08 230); } .badge.cancelled { background:oklch(92% .065 28); color:var(--danger); } .badge.done { background:oklch(91% .04 280); color:oklch(38% .08 280); } .status-select { min-height:33px; padding:5px 8px; font-size:11px; font-weight:800; }
     .actions { display:flex; flex-wrap:wrap; gap:6px; } .icon-btn { min-width:34px; min-height:34px; padding:0 8px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font-weight:800; } .icon-btn:hover { background:var(--surface-soft); } .icon-btn.danger { color:var(--danger); } .proof { width:48px; height:48px; border:1px solid var(--line); border-radius:8px; object-fit:cover; cursor:pointer; }
     .calendar-head { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:18px; } .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(92px,1fr)); gap:8px; overflow:auto; } .day-name { padding:7px; color:var(--accent); font-size:11px; font-weight:800; text-align:center; text-transform:uppercase; } .calendar-cell { min-height:128px; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--surface); } .calendar-cell.other { opacity:.42; background:var(--surface-soft); } .date-num { margin-bottom:8px; color:var(--muted); font-size:12px; font-weight:800; } .calendar-booking { display:block; width:100%; margin-bottom:5px; padding:6px 7px; overflow:hidden; border:0; border-radius:7px; background:var(--accent-soft); color:var(--accent-dark); font-size:11px; font-weight:800; text-align:left; text-overflow:ellipsis; white-space:nowrap; }
-    .split { display:grid; grid-template-columns:1fr 1fr; gap:22px; } .form-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:11px; align-items:end; } .form-grid .field { grid-column:span 1; margin:0; } .form-grid .wide { grid-column:span 2; } .empty { padding:28px 10px; color:var(--muted); text-align:center; } .low { background:oklch(95% .05 80); } .amount-in { color:var(--success); font-weight:800; } .amount-out { color:var(--danger); font-weight:800; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:22px; } .form-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:11px 14px; align-items:end; margin-bottom:16px; } .form-grid .field { grid-column:span 1; margin:0; } .form-grid .wide { grid-column:span 2; } .block-times-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px 16px; margin-bottom:16px; padding:14px; background:var(--surface-soft); border-radius:12px; } .block-times-grid[hidden] { display:none; } .block-times-grid label { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; } .empty { padding:28px 10px; color:var(--muted); text-align:center; } .low { background:oklch(95% .05 80); } .amount-in { color:var(--success); font-weight:800; } .amount-out { color:var(--danger); font-weight:800; }
     dialog { width:min(560px,calc(100% - 28px)); padding:0; border:0; border-radius:18px; box-shadow:0 25px 90px oklch(20% .04 45 / .28); color:var(--ink); } dialog::backdrop { background:oklch(22% .03 45 / .55); } .dialog-body { padding:25px; } .dialog-body h2 { margin-bottom:15px; } .detail-list { display:grid; gap:9px; } .detail-row { display:flex; justify-content:space-between; gap:20px; padding-bottom:9px; border-bottom:1px solid var(--line); font-size:13px; } .detail-row span { color:var(--muted); } .dialog-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:20px; }
     .toast { position:fixed; right:20px; bottom:20px; z-index:10; max-width:360px; padding:13px 16px; border:1px solid var(--line); border-radius:11px; background:var(--surface); box-shadow:var(--shadow); transform:translateY(20px); opacity:0; pointer-events:none; transition:transform .25s var(--ease),opacity .25s var(--ease); font-size:13px; } .toast.show { transform:translateY(0); opacity:1; } .toast.error { color:var(--danger); border-color:oklch(75% .12 28); }
     @media (max-width:900px) { .stats { grid-template-columns:repeat(2,1fr); } .split { grid-template-columns:1fr; } .form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .form-grid .field,.form-grid .wide { grid-column:span 1; } }
@@ -126,12 +126,12 @@
     </main>
   </div>
 
-  <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" id="generateReceiptBtn">Generate receipt</button><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+  <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" id="editBookingBtn">Edit add-ons</button><button class="btn" id="generateReceiptBtn">Generate receipt</button><button class="btn" data-close-dialog>Close</button></div></div></dialog>
   <dialog id="imageDialog"><div class="dialog-body"><img id="proofImage" src="" alt="Payment proof" style="display:block;max-width:100%;max-height:70vh;margin:auto;border-radius:10px"><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
 
-  <dialog id="blockedDatesDialog"><div class="dialog-body" style="max-width:480px"><h2>Blocked dates</h2><p class="muted" style="margin:0 0 15px">Dates blocked here cannot be booked by clients on the website.</p><form id="blockDateForm" class="form-grid" style="grid-template-columns:1fr 1fr;margin-bottom:18px"><div class="field"><label for="blockDateInput">Date</label><input id="blockDateInput" type="date" required></div><div class="field"><label for="blockReasonInput">Reason (optional)</label><input id="blockReasonInput" placeholder="Emergency, personal errand…"></div><button class="btn primary wide" type="submit" style="grid-column:span 2">Block this date</button></form><div id="blockedDatesList" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+  <dialog id="blockedDatesDialog"><div class="dialog-body" style="max-width:520px"><h2>Blocked dates</h2><p class="muted" style="margin:0 0 15px">Dates blocked here cannot be booked by clients on the website. Leave "Block entire day" checked for a full-day block, or uncheck it to block only specific times (e.g. a half-day errand).</p><form id="blockDateForm" style="margin-bottom:18px"><div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="blockDateInput">Date</label><input id="blockDateInput" type="date" required></div><div class="field"><label for="blockReasonInput">Reason (optional)</label><input id="blockReasonInput" placeholder="Emergency, personal errand…"></div></div><label style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-weight:700"><input type="checkbox" id="blockEntireDay" checked> Block entire day</label><div id="blockTimesGroup" class="block-times-grid" hidden></div><button class="btn primary wide" type="submit" style="display:block;width:100%">Block this date</button></form><div id="blockedDatesList" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
 
-  <dialog id="walkinDialog"><div class="dialog-body" style="max-width:720px;max-height:85vh;overflow:auto">
+  <dialog id="walkinDialog" style="width:min(820px,calc(100% - 28px))"><div class="dialog-body" style="max-width:none;max-height:85vh;overflow:auto">
     <h2>Register a walk-in</h2><p class="muted" style="margin:0 0 15px">Same pricing rules as the website. Bypasses the 2-hour cutoff so same-day walk-ins can be logged.</p>
     <form id="walkinForm">
       <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
@@ -146,27 +146,61 @@
         <div class="field"><label><input type="checkbox" id="wiStudent"> Student discount</label></div>
         <div class="field"><label for="wiExtraPax">Extra pax</label><select id="wiExtraPax"></select></div>
       </div>
-      <div class="field" id="wiBackdropGroup"><label>Preferred backdrop color(s)</label><div id="wiBackdropChoices" style="display:flex;gap:14px;flex-wrap:wrap"></div></div>
-      <div class="field"><label><input type="checkbox" id="wiHasExtraBackdrop"> Add backdrops?</label><div id="wiExtraBackdropGroup" hidden style="margin-top:8px"><select id="wiExtraBackdropColor"><option value="">Select a color</option></select></div></div>
+      <div class="field" id="wiBackdropGroup"><label>Preferred backdrop color(s)</label><div id="wiBackdropChoices" style="display:flex;gap:14px;flex-wrap:wrap"></div><label style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-weight:600"><input type="checkbox" id="wiBackdropDecideLater"> Will decide on the day of session</label></div>
+      <div class="field" id="wiExtraBackdropField"><label><input type="checkbox" id="wiHasExtraBackdrop"> Add backdrops?</label><div id="wiExtraBackdropGroup" hidden style="margin-top:8px"><select id="wiExtraBackdropColor"><option value="">Select a color</option></select></div></div>
       <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
         <div class="field"><label><input type="checkbox" id="wiHasPet"> Add pet?</label></div>
         <div class="field" id="wiPetGroup" hidden><div style="display:flex;gap:8px"><select id="wiPetSize"><option value="Small">Small · max 4</option><option value="Medium">Medium · max 2</option><option value="Large">Large · max 1</option></select><select id="wiExtraPet"></select></div></div>
         <div class="field"><label for="wiExtraTime">Time extension</label><select id="wiExtraTime"><option value="0">None</option><option value="10">+10 min, ₱99</option><option value="15">+15 min, ₱149</option><option value="20">+20 min, ₱199</option><option value="30">+30 min, ₱299</option></select></div>
         <div class="field"><label for="wiEnhanced">Enhanced copies</label><select id="wiEnhanced"><option value="0">None</option><option value="1_2">1 to 2, ₱49</option><option value="3_5">3 to 5, ₱99</option><option value="6_10">6 to 10, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select></div>
-        <div class="field" id="wiEnhancedQtyGroup" hidden><label for="wiEnhancedQty">Total enhanced photos</label><input id="wiEnhancedQty" type="number" min="11" value="11"></div>
+        <div class="field" id="wiEnhancedQtyGroup" hidden><label for="wiEnhancedQty">Total enhanced photos</label><input id="wiEnhancedQty" type="number" min="11" placeholder="e.g. 15"></div>
         <div class="field"><label><input type="checkbox" id="wiDigitalCopies"> Get Digital Copies</label></div>
       </div>
-      <div class="field"><label><input type="checkbox" id="wiHasChildren"> Children joining?</label><div id="wiChildrenGroup" hidden style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center"><label><input type="checkbox" id="wiChildInfant" value="Infant"> Infant</label><label><input type="checkbox" id="wiChildToddler" value="Toddler"> Toddler</label><label><input type="checkbox" id="wiChildKid" value="Kid"> Kid</label><input id="wiTotalChildren" type="number" min="1" max="20" value="1" style="width:90px" placeholder="Total"></div></div>
-      <div class="field"><label><input type="checkbox" id="wiHasBalloons"> Number balloons</label><div id="wiBalloonGroup" hidden style="margin-top:8px;display:flex;gap:8px"><input id="wiBalloonQty" type="number" min="1" value="1" style="width:90px"><input id="wiBalloonNumbers" placeholder="18, 7, 25"></div></div>
+      <div class="field"><label><input type="checkbox" id="wiHasChildren"> Children joining?</label><div id="wiChildrenGroup" hidden style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center"><label><input type="checkbox" id="wiChildInfant" value="Infant"> Infant</label><label><input type="checkbox" id="wiChildToddler" value="Toddler"> Toddler</label><label><input type="checkbox" id="wiChildKid" value="Kid"> Kid</label><input id="wiTotalChildren" type="number" min="1" max="20" style="width:90px" placeholder="Total"></div></div>
+      <div class="field"><label><input type="checkbox" id="wiHasBalloons"> Number balloons</label><div id="wiBalloonGroup" hidden style="margin-top:14px;display:flex;gap:12px"><input id="wiBalloonQty" type="number" min="1" style="width:90px" placeholder="Qty"><input id="wiBalloonNumbers" placeholder="18, 7, 25"></div></div>
       <div class="field"><label for="wiNotes">Notes</label><textarea id="wiNotes" rows="2" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></textarea></div>
-      <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
         <div class="field"><label>Grand total</label><div id="wiTotalDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
         <div class="field"><label>Required downpayment</label><div id="wiDpDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field"><label>Mode of payment</label><div style="display:flex;gap:18px;padding-top:8px"><label style="display:inline-flex;align-items:center;gap:6px;font-weight:600"><input type="radio" name="wiPaymentMode" id="wiPayCash" value="Cash" checked> Cash</label><label style="display:inline-flex;align-items:center;gap:6px;font-weight:600"><input type="radio" name="wiPaymentMode" id="wiPayOnline" value="Online"> Online payment</label></div></div>
         <div class="field"><label for="wiActualAmount">Actual amount received</label><input id="wiActualAmount" type="number" min="0" placeholder="Leave blank if exact"></div>
       </div>
-      <div class="field"><label for="wiProof">Payment screenshot (optional for walk-ins)</label><input id="wiProof" type="file" accept="image/png,image/jpeg,image/webp"></div>
       <p id="wiError" class="error-text"></p>
       <div class="dialog-actions"><button type="button" class="btn" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save walk-in booking</button></div>
+    </form>
+  </div></dialog>
+
+  <dialog id="editBookingDialog" style="width:min(820px,calc(100% - 28px))"><div class="dialog-body" style="max-width:none;max-height:85vh;overflow:auto">
+    <h2>Edit booking add-ons</h2><p class="muted" style="margin:0 0 15px">Use this if the client adds or changes something on the day of the shoot. Date, time, and customer info are not changed here.</p>
+    <form id="editBookingForm">
+      <input type="hidden" id="ebId">
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field"><label for="ebPackage">Group size</label><select id="ebPackage"><option value="Solo">Solo, 1 pax</option><option value="Duo">Duo, 1 to 2 pax</option><option value="Squad">Squad, 3 to 5 pax</option><option value="Party">Party, 6 to 8 pax</option></select></div>
+        <div class="field"><label for="ebPackageType">Package style</label><select id="ebPackageType"><option value="Starter">Starter</option><option value="Upgraded">Upgraded</option></select></div>
+        <div class="field"><label><input type="checkbox" id="ebStudent"> Student discount</label></div>
+        <div class="field"><label for="ebExtraPax">Extra pax</label><select id="ebExtraPax"></select></div>
+      </div>
+      <div class="field" id="ebBackdropGroup"><label>Preferred backdrop color(s)</label><div id="ebBackdropChoices" style="display:flex;gap:14px;flex-wrap:wrap"></div><label style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-weight:600"><input type="checkbox" id="ebBackdropDecideLater"> Will decide on the day of session</label></div>
+      <div class="field" id="ebExtraBackdropField"><label><input type="checkbox" id="ebHasExtraBackdrop"> Add backdrops?</label><div id="ebExtraBackdropGroup" hidden style="margin-top:8px"><select id="ebExtraBackdropColor"><option value="">Select a color</option></select></div></div>
+      <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="field"><label><input type="checkbox" id="ebHasPet"> Add pet?</label></div>
+        <div class="field" id="ebPetGroup" hidden><div style="display:flex;gap:8px"><select id="ebPetSize"><option value="Small">Small · max 4</option><option value="Medium">Medium · max 2</option><option value="Large">Large · max 1</option></select><select id="ebExtraPet"></select></div></div>
+        <div class="field"><label for="ebExtraTime">Time extension</label><select id="ebExtraTime"><option value="0">None</option><option value="10">+10 min, ₱99</option><option value="15">+15 min, ₱149</option><option value="20">+20 min, ₱199</option><option value="30">+30 min, ₱299</option></select></div>
+        <div class="field"><label for="ebEnhanced">Enhanced copies</label><select id="ebEnhanced"><option value="0">None</option><option value="1_2">1 to 2, ₱49</option><option value="3_5">3 to 5, ₱99</option><option value="6_10">6 to 10, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select></div>
+        <div class="field" id="ebEnhancedQtyGroup" hidden><label for="ebEnhancedQty">Total enhanced photos</label><input id="ebEnhancedQty" type="number" min="11" placeholder="e.g. 15"></div>
+        <div class="field"><label><input type="checkbox" id="ebDigitalCopies"> Get Digital Copies</label></div>
+      </div>
+      <div class="field"><label><input type="checkbox" id="ebHasChildren"> Children joining?</label><div id="ebChildrenGroup" hidden style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center"><label><input type="checkbox" id="ebChildInfant" value="Infant"> Infant</label><label><input type="checkbox" id="ebChildToddler" value="Toddler"> Toddler</label><label><input type="checkbox" id="ebChildKid" value="Kid"> Kid</label><input id="ebTotalChildren" type="number" min="1" max="20" style="width:90px" placeholder="Total"></div></div>
+      <div class="field"><label><input type="checkbox" id="ebHasBalloons"> Number balloons</label><div id="ebBalloonGroup" hidden style="margin-top:14px;display:flex;gap:12px"><input id="ebBalloonQty" type="number" min="1" style="width:90px" placeholder="Qty"><input id="ebBalloonNumbers" placeholder="18, 7, 25"></div></div>
+      <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="field"><label>New grand total</label><div id="ebTotalDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
+        <div class="field"><label>Required downpayment</label><div id="ebDpDisplay" style="font-weight:800;font-size:20px">₱0</div></div>
+        <div class="field"><label for="ebActualAmount">Actual amount received</label><input id="ebActualAmount" type="number" min="0" placeholder="Leave blank if exact"></div>
+      </div>
+      <p id="ebError" class="error-text"></p>
+      <div class="dialog-actions"><button type="button" class="btn" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save changes</button></div>
     </form>
   </div></dialog>
 
@@ -191,6 +225,8 @@
       <div style="border-top:1.5px dashed var(--line);margin:12px 0"></div>
       <div id="sessionReceiptTotals" style="display:grid;gap:6px"></div>
       <div style="border-top:1.5px dashed var(--line);margin:14px 0"></div>
+      <div id="sessionReceiptAgreement" style="font-size:10px;line-height:1.5;color:var(--muted);margin-bottom:14px"></div>
+      <div style="border-top:1.5px dashed var(--line);margin:0 0 14px"></div>
       <div style="text-align:center;color:var(--muted);font-size:11.5px;line-height:1.6">Thank you for booking with B·Lens! 🤍<br>facebook.com/BLensSelfPortraitStudio · ig/tiktok @b.lens_ph</div>
     </div>
     <div class="dialog-actions"><button class="btn primary" id="copySessionReceiptBtn">Copy text</button><button class="btn" data-close-dialog>Close</button></div>
@@ -201,6 +237,7 @@
   <script>
     const $ = (id) => document.getElementById(id); const state = { bookings:[], transactions:[], inventory:[], blockedDates:[], selectedBookingId:null, calendarDate:new Date(), activeTab:'reservations' }; let toastTimer;
     const money = (n) => `₱${Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits:2 })}`;
+    const bookingBalance = (b) => { const paid = Number(b.actual_amount_sent) > 0 ? Number(b.actual_amount_sent) : Number(b.downpayment || 0); return Math.max(0, Number(b.grand_total || 0) - paid); };
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
     const safeUrl = (value) => /^https?:\/\//i.test(String(value || '')) ? escapeHtml(value) : '';
     const showToast = (message, error=false) => { const el=$('toast'); el.textContent=message; el.className=`toast show${error?' error':''}`; clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.className='toast',4000); };
@@ -213,14 +250,14 @@
     async function loadBookings() { const data=await api('/api/admin/bookings'); state.bookings=data.bookings||[]; renderBookingStats(); renderBookings(); renderCalendar(); }
     function statusClass(status) { return status==='Pending'?'pending':status==='Confirmed'?'confirmed':status==='Reschedule'?'reschedule':status==='Cancelled'?'cancelled':status==='Done Shoot/Fully Paid'?'done':''; }
     function activeBooking(b) { return !['Done Shoot/Fully Paid','Cancelled'].includes(b.status); }
-    function renderBookingStats() { const active=state.bookings.filter(activeBooking), today=new Date().toISOString().slice(0,10); $('activeCount').textContent=active.length; $('todayCount').textContent=active.filter(b=>b.date===today).length; $('pendingCount').textContent=state.bookings.filter(b=>b.status==='Pending').length; $('balanceTotal').textContent=money(active.reduce((sum,b)=>sum+Number(b.balance||0),0)); }
+    function renderBookingStats() { const active=state.bookings.filter(activeBooking), today=new Date().toISOString().slice(0,10); $('activeCount').textContent=active.length; $('todayCount').textContent=active.filter(b=>b.date===today).length; $('pendingCount').textContent=state.bookings.filter(b=>b.status==='Pending').length; $('balanceTotal').textContent=money(active.reduce((sum,b)=>sum+bookingBalance(b),0)); }
     function filteredBookings() { const query=$('bookingSearch').value.trim().toLowerCase(), filter=$('bookingFilter').value; return state.bookings.filter(b => { const hay=[b.customer_name,b.email,b.package,b.package_type,b.date,b.schedule].join(' ').toLowerCase(); const matchesQuery=!query||hay.includes(query); const matchesFilter=filter==='all'||filter==='active'?filter==='all'?true:activeBooking(b):b.status===filter; return matchesQuery&&matchesFilter; }).sort((a,b)=>`${a.date} ${a.schedule}`.localeCompare(`${b.date} ${b.schedule}`)); }
-    function renderBookings() { const body=$('bookingsBody'), rows=filteredBookings(); if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="empty">No reservations match this view.</td></tr>'; return; } body.innerHTML=rows.map(b=>{ const proof=safeUrl(b.payment_screenshot); return `<tr><td><span class="primary-text">${escapeHtml(b.date)}</span><span class="secondary-text">${escapeHtml(b.schedule)}</span></td><td><span class="primary-text">${escapeHtml(b.customer_name||b.name)}</span><span class="secondary-text">${escapeHtml(b.email||'No email')}<br>${escapeHtml(b.contact_no||'')}</span></td><td><span class="primary-text">${escapeHtml(b.package)} · ${escapeHtml(b.package_type)}</span><span class="secondary-text">Student: ${b.is_student==='true'||b.is_student===true?'Yes':'No'}</span></td><td><span class="primary-text">${money(b.grand_total)}</span><span class="secondary-text">Balance: ${money(b.balance)}</span></td><td>${proof?`<img class="proof" data-action="image" data-src="${proof}" src="${proof}" alt="Payment proof">`:'<span class="muted">None</span>'}</td><td><select class="status-select" data-action="status" data-id="${escapeHtml(b.id)}" aria-label="Booking status"><option ${b.status==='Pending'?'selected':''}>Pending</option><option ${b.status==='Confirmed'?'selected':''}>Confirmed</option><option ${b.status==='Reschedule'?'selected':''}>Reschedule</option><option ${b.status==='Done Shoot/Fully Paid'?'selected':''}>Done Shoot/Fully Paid</option><option ${b.status==='Cancelled'?'selected':''}>Cancelled</option></select><span class="badge ${statusClass(b.status)}" style="margin-top:6px">${escapeHtml(b.status||'Pending')}</span></td><td><div class="actions"><button class="icon-btn" data-action="details" data-id="${escapeHtml(b.id)}" title="View details">View</button><button class="icon-btn" data-action="receipt" data-id="${escapeHtml(b.id)}" title="View / copy session receipt">🧾</button><button class="icon-btn" data-action="message" data-id="${escapeHtml(b.id)}" title="Copy thank-you message">💬</button><button class="icon-btn danger" data-action="delete-booking" data-id="${escapeHtml(b.id)}" title="Delete reservation">×</button></div></td></tr>`; }).join(''); }
-    function renderCalendar() { const date=state.calendarDate, year=date.getFullYear(), month=date.getMonth(); $('calendarTitle').textContent=date.toLocaleDateString('en-US',{month:'long',year:'numeric'}); const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate(); const cells=[]; for(let i=first-1;i>=0;i--) cells.push(`<div class="calendar-cell other"><div class="date-num">${prevDays-i}</div></div>`); for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const bs=state.bookings.filter(b=>b.date===key&&activeBooking(b)); cells.push(`<div class="calendar-cell"><div class="date-num">${day}</div>${bs.map(b=>`<button class="calendar-booking" data-action="details" data-id="${escapeHtml(b.id)}">${escapeHtml(b.schedule)} · ${escapeHtml(b.customer_name||b.name)}</button>`).join('')}</div>`);} $('calendarGrid').innerHTML=cells.join(''); }
-    function showBooking(id) { state.selectedBookingId=id; const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b)return; const petLine=(b.has_pet==='true'||b.has_pet===true)?`${b.pet_size||''} · ${b.extra_pet||0} pet(s)`:'None'; const childLine=(b.has_children==='true'||b.has_children===true)?`${b.children_types||''} · total ${b.total_children||0}`:'None'; const enhancedLabels={'1_2':'1 to 2 photos','3_5':'3 to 5 photos','6_10':'6 to 10 photos'}; const enhancedLine=(b.enhanced_copies&&b.enhanced_copies!=='0')?(b.enhanced_copies==='more_10'?`${b.extra_enhanced_qty||11} photos`:(enhancedLabels[b.enhanced_copies]||b.enhanced_copies)):'None'; const digitalLine=(b.has_digital_copies==='true'||b.has_digital_copies===true)?'Yes':'No'; const balloonLine=(b.has_balloons==='true'||b.has_balloons===true)?`${b.balloon_qty||0} pc(s) — ${b.balloon_numbers||'no numbers given'}`:'None'; const timeLine=Number(b.extra_time||0)>0?`+${b.extra_time} min`:'None'; const rows=[['Customer',b.customer_name||b.name],['Email',b.email],['Contact',b.contact_no],['Social',b.social_media],['Date',`${b.date} · ${b.schedule}`],['Package',`${b.package} · ${b.package_type}`],['Student rate',(b.is_student==='true'||b.is_student===true)?'Yes':'No'],['Extra pax',b.extra_pax||0],['Preferred backdrop',b.preferred_backdrop],['Additional backdrop',b.additional_backdrop_color||'None'],['Pet',petLine],['Time extension',timeLine],['Digital copies',digitalLine],['Enhanced copies',enhancedLine],['Balloons',balloonLine],['Children',childLine],['Notes',b.notes],['Total',money(b.grand_total)],['Downpayment',money(b.downpayment)],['Actual amount sent',b.actual_amount_sent?money(b.actual_amount_sent):'Same as required'],['Balance',money(b.balance)],['Status',b.status],['Source',b.source||'Website']]; $('bookingDetails').innerHTML=rows.map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join(''); $('bookingDialog').showModal(); }
+    function renderBookings() { const body=$('bookingsBody'), rows=filteredBookings(); if(!rows.length) { body.innerHTML='<tr><td colspan="7" class="empty">No reservations match this view.</td></tr>'; return; } body.innerHTML=rows.map(b=>{ const proof=safeUrl(b.payment_screenshot); return `<tr><td><span class="primary-text">${escapeHtml(b.date)}</span><span class="secondary-text">${escapeHtml(b.schedule)}</span></td><td><span class="primary-text">${escapeHtml(b.customer_name||b.name)}</span><span class="secondary-text">${escapeHtml(b.email||'No email')}<br>${escapeHtml(b.contact_no||'')}</span></td><td><span class="primary-text">${escapeHtml(b.package)} · ${escapeHtml(b.package_type)}</span><span class="secondary-text">Student: ${b.is_student==='true'||b.is_student===true?'Yes':'No'}</span></td><td><span class="primary-text">${money(b.grand_total)}</span><span class="secondary-text">Balance: ${money(bookingBalance(b))}</span></td><td>${proof?`<img class="proof" data-action="image" data-src="${proof}" src="${proof}" alt="Payment proof">`:`<span class="muted">${escapeHtml(b.payment_mode||'No proof')}</span>`}</td><td><select class="status-select" data-action="status" data-id="${escapeHtml(b.id)}" aria-label="Booking status"><option ${b.status==='Pending'?'selected':''}>Pending</option><option ${b.status==='Confirmed'?'selected':''}>Confirmed</option><option ${b.status==='Reschedule'?'selected':''}>Reschedule</option><option ${b.status==='Done Shoot/Fully Paid'?'selected':''}>Done Shoot/Fully Paid</option><option ${b.status==='Cancelled'?'selected':''}>Cancelled</option></select><span class="badge ${statusClass(b.status)}" style="margin-top:6px">${escapeHtml(b.status||'Pending')}</span></td><td><div class="actions"><button class="icon-btn" data-action="details" data-id="${escapeHtml(b.id)}" title="View details">View</button><button class="icon-btn" data-action="receipt" data-id="${escapeHtml(b.id)}" title="View / copy session receipt">🧾</button><button class="icon-btn" data-action="message" data-id="${escapeHtml(b.id)}" title="Copy thank-you message">💬</button><button class="icon-btn danger" data-action="delete-booking" data-id="${escapeHtml(b.id)}" title="Delete reservation">×</button></div></td></tr>`; }).join(''); }
+    function renderCalendar() { const date=state.calendarDate, year=date.getFullYear(), month=date.getMonth(); const todayKey=new Date().toISOString().slice(0,10); $('calendarTitle').textContent=date.toLocaleDateString('en-US',{month:'long',year:'numeric'}); const first=new Date(year,month,1).getDay(), days=new Date(year,month+1,0).getDate(), prevDays=new Date(year,month,0).getDate(); const cells=[]; for(let i=first-1;i>=0;i--) cells.push(`<div class="calendar-cell other"><div class="date-num">${prevDays-i}</div></div>`); for(let day=1;day<=days;day++){const key=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const isPast=key<todayKey; const bs=state.bookings.filter(b=>b.date===key&&(isPast||activeBooking(b))); cells.push(`<div class="calendar-cell"><div class="date-num">${day}</div>${bs.map(b=>`<button class="calendar-booking" data-action="details" data-id="${escapeHtml(b.id)}">${escapeHtml(b.schedule)} · ${escapeHtml(b.customer_name||b.name)}</button>`).join('')}</div>`);} $('calendarGrid').innerHTML=cells.join(''); }
+    function showBooking(id) { state.selectedBookingId=id; const b=state.bookings.find(item=>String(item.id)===String(id)); if(!b)return; const petLine=(b.has_pet==='true'||b.has_pet===true)?`${b.pet_size||''} · ${b.extra_pet||0} pet(s)`:'None'; const childLine=(b.has_children==='true'||b.has_children===true)?`${b.children_types||''} · total ${b.total_children||0}`:'None'; const enhancedLabels={'1_2':'1 to 2 photos','3_5':'3 to 5 photos','6_10':'6 to 10 photos'}; const enhancedLine=(b.enhanced_copies&&b.enhanced_copies!=='0')?(b.enhanced_copies==='more_10'?`${b.extra_enhanced_qty||11} photos`:(enhancedLabels[b.enhanced_copies]||b.enhanced_copies)):'None'; const digitalLine=(b.has_digital_copies==='true'||b.has_digital_copies===true)?'Yes':'No'; const balloonLine=(b.has_balloons==='true'||b.has_balloons===true)?`${b.balloon_qty||0} pc(s) — ${b.balloon_numbers||'no numbers given'}`:'None'; const timeLine=Number(b.extra_time||0)>0?`+${b.extra_time} min`:'None'; const downpaymentPaid=Number(b.actual_amount_sent)>0?Number(b.actual_amount_sent):Number(b.downpayment); const adjustedBalance=bookingBalance(b); const rows=[['Customer',b.customer_name||b.name],['Email',b.email],['Contact',b.contact_no],['Social',b.social_media],['Date',`${b.date} · ${b.schedule}`],['Package',`${b.package} · ${b.package_type}`],['Student rate',(b.is_student==='true'||b.is_student===true)?'Yes':'No'],['Extra pax',b.extra_pax||0],['Preferred backdrop',b.preferred_backdrop],['Additional backdrop',b.additional_backdrop_color||'None'],['Pet',petLine],['Time extension',timeLine],['Digital copies',digitalLine],['Enhanced copies',enhancedLine],['Balloons',balloonLine],['Children',childLine],['Notes',b.notes],['Total',money(b.grand_total)],['Required downpayment',money(b.downpayment)],['Actual amount sent',b.actual_amount_sent?money(b.actual_amount_sent):'Same as required'],['Remaining balance',money(adjustedBalance)],['Payment mode',b.payment_mode||'Online'],['Agreement on file',(b.agreed_to_terms==='true'||b.agreed_to_terms===true)?'Yes':'Not confirmed'],['Status',b.status],['Source',b.source||'Website']]; $('bookingDetails').innerHTML=rows.map(([label,value])=>`<div class="detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value||'N/A')}</strong></div>`).join(''); $('bookingDialog').showModal(); }
     function csvCell(value) { const v=String(value??''); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; }
     function downloadCSV(filename, rows) { const csv=rows.map(row=>row.map(csvCell).join(',')).join('\r\n'); const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportBookings() { const header=['Date','Time','Customer','Email','Contact','Social','Package','Package Type','Student','Extra Pax','Preferred Backdrop','Additional Backdrop','Pet Size','Pets','Children Types','Total Children','Notes','Grand Total','Downpayment','Balance','Status']; const rows=filteredBookings().map(b=>[b.date,b.schedule,b.customer_name||b.name,b.email,b.contact_no,b.social_media,b.package,b.package_type,(b.is_student==='true'||b.is_student===true)?'Yes':'No',b.extra_pax||0,b.preferred_backdrop||'',b.additional_backdrop_color||'',b.pet_size||'',b.extra_pet||0,b.children_types||'',b.total_children||0,b.notes||'',b.grand_total,b.downpayment,b.balance,b.status]); if(!rows.length){showToast('No bookings to export for this view.',true);return;} downloadCSV(`b-lens-bookings-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Bookings exported.'); }
+    function exportBookings() { const header=['Date','Time','Customer','Email','Contact','Social','Package','Package Type','Student','Extra Pax','Preferred Backdrop','Additional Backdrop','Pet Size','Pets','Children Types','Total Children','Notes','Grand Total','Required Downpayment','Actual Amount Sent','Remaining Balance','Status']; const rows=filteredBookings().map(b=>[b.date,b.schedule,b.customer_name||b.name,b.email,b.contact_no,b.social_media,b.package,b.package_type,(b.is_student==='true'||b.is_student===true)?'Yes':'No',b.extra_pax||0,b.preferred_backdrop||'',b.additional_backdrop_color||'',b.pet_size||'',b.extra_pet||0,b.children_types||'',b.total_children||0,b.notes||'',b.grand_total,b.downpayment,b.actual_amount_sent||b.downpayment,bookingBalance(b),b.status]); if(!rows.length){showToast('No bookings to export for this view.',true);return;} downloadCSV(`b-lens-bookings-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Bookings exported.'); }
     function exportTransactions() { const header=['Date','Type','Category','Description','Account','Amount']; const rows=state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>[t.date,t.type,t.category,t.description,t.account||'Cash',t.amount]); if(!rows.length){showToast('No transactions to export.',true);return;} downloadCSV(`b-lens-transactions-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Transactions exported.'); }
     async function updateStatus(id,status,select) { select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})}); showToast('Booking status updated.'); await loadBookings(); if(status==='Confirmed') openSessionReceipt(id); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { select.disabled=false; } }
     async function deleteBooking(id) { if(!confirm('Delete this reservation permanently?'))return; try { await api('/api/admin/delete-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Reservation deleted.'); await loadBookings(); } catch(error){showToast(error.message,true);} }
@@ -299,6 +336,20 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       if (b.has_children==='true'||b.has_children===true) notes.push(`Children joining: ${b.children_types||''} · total ${b.total_children||0} (no extra charge)`);
       return { items, notes };
     }
+    const CUSTOMER_AGREEMENT_TEXT = `Customer Agreement
+1. I agree to follow all studio rules and staff instructions.
+2. My session starts and ends at the scheduled booking time. Late arrival may shorten my session.
+3. Children must be supervised. Pets are welcome under the owner's supervision. Pet diapers are recommended whenever possible.
+4. I will handle all equipment, props and furniture with care.
+5. I am responsible for intentional or negligent damage caused by me or my companions and agree to pay the reasonable repair or replacement cost after supporting proof is provided.
+6. I am responsible for my personal belongings.
+7. I agree to the studio's booking, cancellation, rescheduling and refund policies.
+8. The studio uses CCTV for safety, security and incident investigation. Recordings are confidential and accessed only by authorized personnel or as required by law.
+9. My photos remain private unless I provide optional consent below.
+
+Data Privacy Consent
+I authorize B-Lens Self Portrait Studio to collect and process my personal information solely for booking, payment, customer service, and legal/business record purposes. My information will not be sold or shared with third parties except when required by law.`;
+    const CUSTOMER_AGREEMENT_HTML = CUSTOMER_AGREEMENT_TEXT.split('\n').map(line => line.trim() ? `<div>${escapeHtml(line)}</div>` : '<div>&nbsp;</div>').join('');
     function renderSessionReceipt(b) {
       const { items, notes } = buildSessionReceiptItems(b);
       $('sessionReceiptMeta').textContent = `Receipt No. ${b.id} · Issued ${new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}`;
@@ -307,11 +358,14 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       const downpaymentPaid = Number(b.actual_amount_sent)>0 ? Number(b.actual_amount_sent) : Number(b.downpayment);
       const balance = Number(b.grand_total) - downpaymentPaid;
       $('sessionReceiptTotals').innerHTML = `<div style="display:flex;justify-content:space-between;font-weight:800;font-size:15px"><span>Grand total</span><span>${money(b.grand_total)}</span></div><div style="display:flex;justify-content:space-between;color:var(--success)"><span>Downpayment paid</span><span>${money(downpaymentPaid)}</span></div><div style="display:flex;justify-content:space-between;font-weight:800"><span>Balance due</span><span>${money(balance)}</span></div>`;
+      const agreed = b.agreed_to_terms==='true'||b.agreed_to_terms===true;
+      $('sessionReceiptAgreement').innerHTML = CUSTOMER_AGREEMENT_HTML + `<div style="margin-top:8px;font-weight:700;color:var(--ink)">Client agreement on file: ${agreed ? 'Yes, agreed at booking' : 'Not yet confirmed'}</div>`;
     }
     function buildSessionReceiptText(b) {
       const { items, notes } = buildSessionReceiptItems(b);
       const downpaymentPaid = Number(b.actual_amount_sent)>0 ? Number(b.actual_amount_sent) : Number(b.downpayment);
       const balance = Number(b.grand_total) - downpaymentPaid;
+      const agreed = b.agreed_to_terms==='true'||b.agreed_to_terms===true;
       const lines = [
         'B·LENS SELF PORTRAIT STUDIO', 'BOOKING RECEIPT',
         `Receipt No. ${b.id} · Issued ${new Date().toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}`,
@@ -323,6 +377,9 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
         '------------------------------',
         `Grand total: ${money(b.grand_total)}`, `Downpayment paid: ${money(downpaymentPaid)}`, `Balance due: ${money(balance)}`,
         '------------------------------',
+        CUSTOMER_AGREEMENT_TEXT,
+        `Client agreement on file: ${agreed ? 'Yes, agreed at booking' : 'Not yet confirmed'}`,
+        '------------------------------',
         'Thank you for booking with B·Lens! 🤍',
         'facebook.com/BLensSelfPortraitStudio · ig/tiktok @b.lens_ph',
       ];
@@ -332,9 +389,11 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
     async function copySessionReceipt() { const b=state.bookings.find(item=>String(item.id)===String($('sessionReceiptDialog').dataset.bookingId)); if(!b)return; try { await navigator.clipboard.writeText(buildSessionReceiptText(b)); showToast('Receipt copied to clipboard.'); } catch { showToast('Could not copy automatically — please select and copy manually.',true); } }
 
     // ---- Blocked dates ----
+    const BLOCK_TIME_SLOTS = ["10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM","05:00 PM","06:00 PM","07:00 PM"];
+    function renderBlockTimeChoices() { $('blockTimesGroup').innerHTML = BLOCK_TIME_SLOTS.map(t=>`<label><input type="checkbox" class="block-time" value="${t}"> ${t}</label>`).join(''); document.querySelectorAll('.block-time').forEach(box=>box.addEventListener('change',()=>{ if(box.checked){ $('blockEntireDay').checked=false; $('blockTimesGroup').hidden=false; } })); }
     async function loadBlockedDates() { try { const data=await api('/api/admin/blocked-dates'); state.blockedDates=data.blocked_dates||[]; renderBlockedDates(); } catch(error){showToast(error.message,true);} }
-    function renderBlockedDates() { const list=state.blockedDates||[]; $('blockedDatesList').innerHTML=list.length?list.map(d=>`<div class="detail-row"><span>${escapeHtml(d.date)}${d.reason?` — ${escapeHtml(d.reason)}`:''}</span><button class="icon-btn danger" data-action="unblock-date" data-date="${escapeHtml(d.date)}">Unblock</button></div>`).join(''):'<p class="muted">No blocked dates yet.</p>'; }
-    async function addBlockedDate(event) { event.preventDefault(); try { await api('/api/admin/blocked-dates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('blockDateInput').value,reason:$('blockReasonInput').value.trim()})}); $('blockDateForm').reset(); showToast('Date blocked.'); await loadBlockedDates(); } catch(error){showToast(error.message,true);} }
+    function renderBlockedDates() { const list=state.blockedDates||[]; $('blockedDatesList').innerHTML=list.length?list.map(d=>{ const times=String(d.times||'').split(',').map(t=>t.trim()).filter(Boolean); const scope=times.length?`Half day — ${times.join(', ')}`:'Full day'; return `<div class="detail-row"><span>${escapeHtml(d.date)} — ${escapeHtml(scope)}${d.reason?` — ${escapeHtml(d.reason)}`:''}</span><button class="icon-btn danger" data-action="unblock-date" data-date="${escapeHtml(d.date)}">Unblock</button></div>`; }).join(''):'<p class="muted">No blocked dates yet.</p>'; }
+    async function addBlockedDate(event) { event.preventDefault(); const entireDay=$('blockEntireDay').checked; const times=entireDay?[]:Array.from(document.querySelectorAll('.block-time:checked')).map(b=>b.value); if(!entireDay && !times.length){ showToast('Please select at least one time slot, or check "Block entire day".', true); return; } try { await api('/api/admin/blocked-dates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:$('blockDateInput').value,reason:$('blockReasonInput').value.trim(),times})}); $('blockDateForm').reset(); $('blockEntireDay').checked=true; $('blockTimesGroup').hidden=true; renderBlockTimeChoices(); showToast('Date blocked.'); await loadBlockedDates(); } catch(error){showToast(error.message,true);} }
     async function removeBlockedDate(dateStr) { try { await api('/api/admin/blocked-dates/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:dateStr})}); showToast('Date unblocked.'); await loadBlockedDates(); } catch(error){showToast(error.message,true);} }
 
     // ---- Walk-in booking ----
@@ -346,6 +405,13 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
     let wiTotals = { total:0, dp:0, bal:0, digitalCopies:'0' };
 
     function wiRequiredBackdrops() { return WI_RATES[$('wiPackage').value][$('wiPackageType').value].baseBd; }
+    function wiApplyBackdropDecideLater() {
+      const decideLater = $('wiBackdropDecideLater').checked;
+      $('wiBackdropChoices').style.opacity = decideLater ? '0.45' : '1';
+      document.querySelectorAll('.wi-backdrop').forEach(b=>{ b.disabled = decideLater; if (decideLater) b.checked = false; });
+      $('wiExtraBackdropField').style.display = decideLater ? 'none' : '';
+      if (decideLater) { $('wiHasExtraBackdrop').checked = false; $('wiExtraBackdropGroup').hidden = true; }
+    }
     function wiRenderBackdropChoices() {
       const required = wiRequiredBackdrops();
       const container = $('wiBackdropChoices');
@@ -354,6 +420,7 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       wiEnforceBackdropLimit();
       container.querySelectorAll('.wi-backdrop').forEach(box=>box.addEventListener('change', ()=>{ wiEnforceBackdropLimit(); wiUpdateExtraBackdropOptions(); wiCalculateTotal(); }));
       wiUpdateExtraBackdropOptions();
+      wiApplyBackdropDecideLater();
     }
     function wiEnforceBackdropLimit() {
       const required = wiRequiredBackdrops();
@@ -389,7 +456,7 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       const enhanced=$('wiEnhanced').value, enhancedPrices={'1_2':49,'3_5':99,'6_10':199};
       if (enhancedPrices[enhanced]) total += enhancedPrices[enhanced];
       if (enhanced==='more_10') { $('wiEnhancedQtyGroup').hidden=false; total += Math.max(11, Number($('wiEnhancedQty').value)||11) * 25; } else $('wiEnhancedQtyGroup').hidden=true;
-      if ($('wiHasExtraBackdrop').checked && $('wiExtraBackdropColor').value) total += 99;
+      if ($('wiHasExtraBackdrop').checked && $('wiExtraBackdropColor').value && !$('wiBackdropDecideLater').checked) total += 99;
       if ($('wiHasBalloons').checked) { $('wiBalloonGroup').hidden=false; total += (Number($('wiBalloonQty').value)||1) * 39; } else $('wiBalloonGroup').hidden=true;
       $('wiPetGroup').hidden = !$('wiHasPet').checked;
       $('wiChildrenGroup').hidden = !$('wiHasChildren').checked;
@@ -399,16 +466,21 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
     function wiResetForm() {
       $('walkinForm').reset(); $('wiError').textContent=''; $('wiSlot').innerHTML='<option value="">Select a date first</option>';
       wiPopulateExtraPax(); wiRenderBackdropChoices(); wiUpdatePetOptions(); $('wiPetGroup').hidden=true; $('wiChildrenGroup').hidden=true; $('wiBalloonGroup').hidden=true; $('wiExtraBackdropGroup').hidden=true; $('wiEnhancedQtyGroup').hidden=true;
+      wiApplyBackdropDecideLater();
       wiCalculateTotal();
     }
     async function wiSubmit(event) {
       event.preventDefault(); $('wiError').textContent='';
       const required=wiRequiredBackdrops(); const checkedColors=Array.from(document.querySelectorAll('.wi-backdrop:checked'));
-      if (checkedColors.length!==required) { $('wiError').textContent=`Please choose exactly ${required} preferred backdrop color(s).`; return; }
-      if ($('wiHasExtraBackdrop').checked && !$('wiExtraBackdropColor').value) { $('wiError').textContent='Please choose an additional backdrop color.'; return; }
+      const decideLater = $('wiBackdropDecideLater').checked;
+      if (!decideLater && checkedColors.length!==required) { $('wiError').textContent=`Please choose exactly ${required} preferred backdrop color(s), or check "Will decide on the day".`; return; }
+      if (!decideLater && $('wiHasExtraBackdrop').checked && !$('wiExtraBackdropColor').value) { $('wiError').textContent='Please choose an additional backdrop color.'; return; }
       if ($('wiHasPet').checked && !$('wiPetSize').value) { $('wiError').textContent='Please select a pet size.'; return; }
       const childTypes=['wiChildInfant','wiChildToddler','wiChildKid'].filter(id=>$(id).checked).map(id=>$(id).value);
       if ($('wiHasChildren').checked && !childTypes.length) { $('wiError').textContent='Please select at least one child age group.'; return; }
+      if ($('wiHasChildren').checked && (!$('wiTotalChildren').value || Number($('wiTotalChildren').value) < 1)) { $('wiError').textContent='Please enter the total number of children.'; return; }
+      if ($('wiEnhanced').value === 'more_10' && (!$('wiEnhancedQty').value || Number($('wiEnhancedQty').value) < 11)) { $('wiError').textContent='Please enter the total number of enhanced photos (11 or more).'; return; }
+      if ($('wiHasBalloons').checked && (!$('wiBalloonQty').value || Number($('wiBalloonQty').value) < 1)) { $('wiError').textContent='Please enter the number of balloons.'; return; }
       const button=event.submitter||document.querySelector('#walkinForm button[type=submit]'); if(button) button.disabled=true;
       const formData = new FormData();
       formData.set('customer_name',$('wiName').value.trim()); formData.set('contact_no',$('wiContact').value.trim()); formData.set('email',$('wiEmail').value.trim()); formData.set('social_media',$('wiSocial').value.trim());
@@ -416,7 +488,8 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       formData.set('package',$('wiPackage').value); formData.set('package_type',$('wiPackageType').value);
       formData.set('is_student',$('wiStudent').checked);
       checkedColors.forEach(c=>formData.append('preferred_backdrop', c.value));
-      formData.set('has_additional_backdrop',$('wiHasExtraBackdrop').checked); formData.set('additional_backdrop_color',$('wiExtraBackdropColor').value);
+      formData.set('backdrop_decide_later', decideLater);
+      formData.set('has_additional_backdrop',$('wiHasExtraBackdrop').checked && !decideLater); formData.set('additional_backdrop_color',$('wiExtraBackdropColor').value);
       formData.set('extra_pax',$('wiExtraPax').value);
       formData.set('has_pet',$('wiHasPet').checked); formData.set('pet_size',$('wiPetSize').value); formData.set('extra_pet',$('wiExtraPet').value||'1');
       formData.set('extra_time',$('wiExtraTime').value);
@@ -426,7 +499,7 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       formData.set('has_balloons',$('wiHasBalloons').checked); formData.set('balloon_qty',$('wiBalloonQty').value||'1'); formData.set('balloon_numbers',$('wiBalloonNumbers').value.trim());
       formData.set('backdrop_order',$('wiNotes').value.trim());
       formData.set('actual_amount_sent',$('wiActualAmount').value||'');
-      if ($('wiProof').files[0]) formData.set('payment_screenshot',$('wiProof').files[0]);
+      formData.set('payment_mode', document.querySelector('input[name="wiPaymentMode"]:checked').value);
       try {
         const response = await fetch('/api/admin/walkin-booking',{method:'POST',body:formData});
         const data = await response.json();
@@ -436,14 +509,155 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
       finally { if(button) button.disabled=false; }
     }
 
+    // ---- Edit booking add-ons ----
+    let ebTotals = { total:0, dp:0, bal:0, digitalCopies:'0' };
+    function ebRequiredBackdrops() { return WI_RATES[$('ebPackage').value][$('ebPackageType').value].baseBd; }
+    function ebApplyBackdropDecideLater() {
+      const decideLater = $('ebBackdropDecideLater').checked;
+      $('ebBackdropChoices').style.opacity = decideLater ? '0.45' : '1';
+      document.querySelectorAll('.eb-backdrop').forEach(b=>{ b.disabled = decideLater; if (decideLater) b.checked = false; });
+      $('ebExtraBackdropField').style.display = decideLater ? 'none' : '';
+      if (decideLater) { $('ebHasExtraBackdrop').checked = false; $('ebExtraBackdropGroup').hidden = true; }
+    }
+    function ebRenderBackdropChoices(preselect) {
+      const container = $('ebBackdropChoices');
+      const previouslyChecked = preselect || Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
+      container.innerHTML = WI_COLORS.map(c=>`<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="eb-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label>`).join('');
+      ebEnforceBackdropLimit();
+      container.querySelectorAll('.eb-backdrop').forEach(box=>box.addEventListener('change', ()=>{ ebEnforceBackdropLimit(); ebUpdateExtraBackdropOptions(); ebCalculateTotal(); }));
+      ebUpdateExtraBackdropOptions();
+      ebApplyBackdropDecideLater();
+    }
+    function ebEnforceBackdropLimit() {
+      const required = ebRequiredBackdrops();
+      const boxes = Array.from(document.querySelectorAll('.eb-backdrop'));
+      let checked = boxes.filter(b=>b.checked);
+      if (checked.length > required) { checked.slice(required).forEach(b=>b.checked=false); checked = checked.slice(0, required); }
+      boxes.forEach(b=>{ b.disabled = !b.checked && checked.length >= required; });
+    }
+    function ebUpdateExtraBackdropOptions() {
+      const preferred = Array.from(document.querySelectorAll('.eb-backdrop:checked')).map(b=>b.value);
+      const available = WI_COLORS.filter(c=>!preferred.includes(c));
+      const select = $('ebExtraBackdropColor'), current = select.value;
+      select.innerHTML = '<option value="">Select a color</option>' + available.map(c=>`<option value="${c}">${c}</option>`).join('');
+      if (available.includes(current)) select.value = current;
+      $('ebExtraBackdropGroup').hidden = !$('ebHasExtraBackdrop').checked;
+    }
+    function ebPopulateExtraPax(selected) { const max=WI_PAX_MAX[$('ebPackage').value]||0; $('ebExtraPax').innerHTML=Array.from({length:max+1},(_,i)=>`<option value="${i}">${i}</option>`).join(''); if(selected!==undefined) $('ebExtraPax').value=Math.min(Number(selected)||0,max); }
+    function ebUpdatePetOptions(selected) { const max=WI_PET_MAX[$('ebPetSize').value]||1; $('ebExtraPet').innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); if(selected!==undefined) $('ebExtraPet').value=Math.min(Number(selected)||1,max); }
+    function ebCalculateTotal() {
+      const cat=$('ebPackage').value, type=$('ebPackageType').value, pkg=WI_RATES[cat][type];
+      let total = $('ebStudent').checked ? pkg.stu : pkg.reg;
+      total += (Number($('ebExtraPax').value)||0) * 99;
+      if ($('ebHasPet').checked) total += (Number($('ebExtraPet').value)||1) * 99;
+      const extraTime = Number($('ebExtraTime').value)||0; total += WI_TIME_PRICES[extraTime]||0;
+      const sessionMinutes = pkg.dur + extraTime;
+      ebTotals.digitalCopies = '0';
+      if ($('ebDigitalCopies').checked) { const price = sessionMinutes<=15?99:sessionMinutes<=25?149:199; ebTotals.digitalCopies = sessionMinutes<=15?'10_15':sessionMinutes<=25?'20_25':'30_40'; total += price; }
+      const enhanced=$('ebEnhanced').value, enhancedPrices={'1_2':49,'3_5':99,'6_10':199};
+      if (enhancedPrices[enhanced]) total += enhancedPrices[enhanced];
+      if (enhanced==='more_10') { $('ebEnhancedQtyGroup').hidden=false; total += Math.max(11, Number($('ebEnhancedQty').value)||11) * 25; } else $('ebEnhancedQtyGroup').hidden=true;
+      if ($('ebHasExtraBackdrop').checked && $('ebExtraBackdropColor').value && !$('ebBackdropDecideLater').checked) total += 99;
+      if ($('ebHasBalloons').checked) { $('ebBalloonGroup').hidden=false; total += (Number($('ebBalloonQty').value)||1) * 39; } else $('ebBalloonGroup').hidden=true;
+      $('ebPetGroup').hidden = !$('ebHasPet').checked;
+      $('ebChildrenGroup').hidden = !$('ebHasChildren').checked;
+      ebTotals.total=total; ebTotals.dp=Math.ceil(total*.5); ebTotals.bal=total-ebTotals.dp;
+      $('ebTotalDisplay').textContent=money(ebTotals.total); $('ebDpDisplay').textContent=money(ebTotals.dp);
+    }
+    function openEditBooking(id) {
+      const b = state.bookings.find(item=>String(item.id)===String(id));
+      if (!b) { showToast('Booking not found.', true); return; }
+      $('ebError').textContent = '';
+      $('ebId').value = b.id;
+      $('ebPackage').value = b.package; $('ebPackageType').value = b.package_type;
+      $('ebStudent').checked = b.is_student==='true'||b.is_student===true;
+      ebPopulateExtraPax(b.extra_pax);
+      const decideLater = b.preferred_backdrop === 'Decide on the day of session';
+      $('ebBackdropDecideLater').checked = decideLater;
+      const preselect = decideLater ? [] : String(b.preferred_backdrop||'').split(',').map(c=>c.trim()).filter(Boolean);
+      ebRenderBackdropChoices(preselect);
+      $('ebHasExtraBackdrop').checked = Number(b.extra_backdrop||0) > 0;
+      ebUpdateExtraBackdropOptions();
+      $('ebExtraBackdropColor').value = b.additional_backdrop_color || '';
+      $('ebHasPet').checked = b.has_pet==='true'||b.has_pet===true;
+      $('ebPetSize').value = b.pet_size || 'Small';
+      ebUpdatePetOptions(b.extra_pet);
+      $('ebPetGroup').hidden = !$('ebHasPet').checked;
+      $('ebExtraTime').value = b.extra_time || '0';
+      $('ebEnhanced').value = b.enhanced_copies || '0';
+      $('ebEnhancedQty').value = b.extra_enhanced_qty || '';
+      $('ebDigitalCopies').checked = b.has_digital_copies==='true'||b.has_digital_copies===true;
+      $('ebHasChildren').checked = b.has_children==='true'||b.has_children===true;
+      const childTypes = String(b.children_types||'').split(',').map(c=>c.trim());
+      $('ebChildInfant').checked = childTypes.includes('Infant'); $('ebChildToddler').checked = childTypes.includes('Toddler'); $('ebChildKid').checked = childTypes.includes('Kid');
+      $('ebTotalChildren').value = b.total_children || '';
+      $('ebChildrenGroup').hidden = !$('ebHasChildren').checked;
+      $('ebHasBalloons').checked = b.has_balloons==='true'||b.has_balloons===true;
+      $('ebBalloonQty').value = b.balloon_qty || '';
+      $('ebBalloonNumbers').value = b.balloon_numbers || '';
+      $('ebBalloonGroup').hidden = !$('ebHasBalloons').checked;
+      $('ebActualAmount').value = b.actual_amount_sent || '';
+      ebApplyBackdropDecideLater();
+      ebCalculateTotal();
+      $('bookingDialog').close();
+      $('editBookingDialog').showModal();
+    }
+    async function ebSubmit(event) {
+      event.preventDefault(); $('ebError').textContent='';
+      const required=ebRequiredBackdrops(); const checkedColors=Array.from(document.querySelectorAll('.eb-backdrop:checked'));
+      const decideLater = $('ebBackdropDecideLater').checked;
+      if (!decideLater && checkedColors.length!==required) { $('ebError').textContent=`Please choose exactly ${required} preferred backdrop color(s), or check "Will decide on the day".`; return; }
+      if (!decideLater && $('ebHasExtraBackdrop').checked && !$('ebExtraBackdropColor').value) { $('ebError').textContent='Please choose an additional backdrop color.'; return; }
+      if ($('ebHasPet').checked && !$('ebPetSize').value) { $('ebError').textContent='Please select a pet size.'; return; }
+      const childTypes=['ebChildInfant','ebChildToddler','ebChildKid'].filter(id=>$(id).checked).map(id=>$(id).value);
+      if ($('ebHasChildren').checked && !childTypes.length) { $('ebError').textContent='Please select at least one child age group.'; return; }
+      if ($('ebHasChildren').checked && (!$('ebTotalChildren').value || Number($('ebTotalChildren').value) < 1)) { $('ebError').textContent='Please enter the total number of children.'; return; }
+      if ($('ebEnhanced').value === 'more_10' && (!$('ebEnhancedQty').value || Number($('ebEnhancedQty').value) < 11)) { $('ebError').textContent='Please enter the total number of enhanced photos (11 or more).'; return; }
+      if ($('ebHasBalloons').checked && (!$('ebBalloonQty').value || Number($('ebBalloonQty').value) < 1)) { $('ebError').textContent='Please enter the number of balloons.'; return; }
+      const button=event.submitter||document.querySelector('#editBookingForm button[type=submit]'); if(button) button.disabled=true;
+      const formData = new FormData();
+      formData.set('id', $('ebId').value);
+      formData.set('package',$('ebPackage').value); formData.set('package_type',$('ebPackageType').value);
+      formData.set('is_student',$('ebStudent').checked);
+      checkedColors.forEach(c=>formData.append('preferred_backdrop', c.value));
+      formData.set('backdrop_decide_later', decideLater);
+      formData.set('has_additional_backdrop',$('ebHasExtraBackdrop').checked && !decideLater); formData.set('additional_backdrop_color',$('ebExtraBackdropColor').value);
+      formData.set('extra_pax',$('ebExtraPax').value);
+      formData.set('has_pet',$('ebHasPet').checked); formData.set('pet_size',$('ebPetSize').value); formData.set('extra_pet',$('ebExtraPet').value||'1');
+      formData.set('extra_time',$('ebExtraTime').value);
+      formData.set('enhanced_copies',$('ebEnhanced').value); formData.set('extra_enhanced_qty',$('ebEnhancedQty').value||'11');
+      formData.set('has_digital_copies',$('ebDigitalCopies').checked); formData.set('digital_copies',ebTotals.digitalCopies);
+      formData.set('has_children',$('ebHasChildren').checked); childTypes.forEach(t=>formData.append('children_types',t)); formData.set('total_children',$('ebTotalChildren').value||'1');
+      formData.set('has_balloons',$('ebHasBalloons').checked); formData.set('balloon_qty',$('ebBalloonQty').value||'1'); formData.set('balloon_numbers',$('ebBalloonNumbers').value.trim());
+      formData.set('actual_amount_sent',$('ebActualAmount').value||'');
+      try {
+        const response = await fetch('/api/admin/update-booking',{method:'POST',body:formData});
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message||'Could not update this booking.');
+        showToast('Booking updated.'); $('editBookingDialog').close(); await loadBookings();
+      } catch(error) { $('ebError').textContent = error.message; }
+      finally { if(button) button.disabled=false; }
+    }
+
     document.addEventListener('click',(event)=>{ const action=event.target.closest('[data-action]')?.dataset.action; if(action==='details')showBooking(event.target.closest('[data-action]').dataset.id); if(action==='receipt')openSessionReceipt(event.target.closest('[data-action]').dataset.id); if(action==='message')generateReceipt(event.target.closest('[data-action]').dataset.id); if(action==='image'){ $('proofImage').src=event.target.closest('[data-action]').dataset.src; $('imageDialog').showModal(); } if(action==='delete-booking')deleteBooking(event.target.closest('[data-action]').dataset.id); if(action==='delete-transaction')deleteTransaction(event.target.closest('[data-action]').dataset.id); if(action==='delete-inventory')deleteInventory(event.target.closest('[data-action]').dataset.id); if(action==='stock')updateStock(event.target.closest('[data-action]').dataset.id,Number(event.target.closest('[data-action]').dataset.change)); if(action==='unblock-date')removeBlockedDate(event.target.closest('[data-action]').dataset.date); if(event.target.matches('[data-close-dialog]'))event.target.closest('dialog').close(); });
     document.addEventListener('change',(event)=>{ if(event.target.matches('[data-action="status"]'))updateStatus(event.target.dataset.id,event.target.value,event.target); });
     document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab))); $('bookingSearch').addEventListener('input',renderBookings); $('bookingFilter').addEventListener('change',renderBookings); $('calendarToggle').addEventListener('click',()=>{const calendar=$('calendarView');calendar.hidden=!calendar.hidden;$('listView').hidden=!calendar.hidden;$('calendarToggle').textContent=calendar.hidden?'Calendar':'List';}); document.querySelectorAll('[data-calendar]').forEach(btn=>btn.addEventListener('click',()=>{const action=btn.dataset.calendar;if(action==='today')state.calendarDate=new Date();else state.calendarDate.setMonth(state.calendarDate.getMonth()+(action==='next'?1:-1));renderCalendar();})); $('transactionForm').addEventListener('submit',addTransaction); $('inventoryForm').addEventListener('submit',addInventory); $('refreshButton').addEventListener('click',()=>loadAll().catch(e=>showToast(e.message,true))); $('exportBookingsBtn').addEventListener('click',exportBookings); $('exportTransactionsBtn').addEventListener('click',exportTransactions); $('logoutButton').addEventListener('click',async()=>{await fetch('/api/admin/logout',{method:'POST'});showLogin();}); $('loginForm').addEventListener('submit',login); $('txDate').value=new Date().toISOString().slice(0,10);
     $('generateReceiptBtn').addEventListener('click',()=>generateReceipt(state.selectedBookingId));
+    $('editBookingBtn').addEventListener('click',()=>openEditBooking(state.selectedBookingId));
+    $('editBookingForm').addEventListener('submit',ebSubmit);
+    $('ebPackage').addEventListener('change',()=>{ ebPopulateExtraPax(); ebRenderBackdropChoices(); ebCalculateTotal(); });
+    $('ebPackageType').addEventListener('change',()=>{ ebRenderBackdropChoices(); ebCalculateTotal(); });
+    $('ebPetSize').addEventListener('change',()=>{ ebUpdatePetOptions(); ebCalculateTotal(); });
+    $('ebHasExtraBackdrop').addEventListener('change',()=>{ ebUpdateExtraBackdropOptions(); ebCalculateTotal(); });
+    $('ebBackdropDecideLater').addEventListener('change',()=>{ ebApplyBackdropDecideLater(); ebCalculateTotal(); });
+    $('editBookingForm').addEventListener('input',ebCalculateTotal);
+    $('editBookingForm').addEventListener('change',ebCalculateTotal);
     $('copyReceiptBtn').addEventListener('click',copyReceipt);
     $('copySessionReceiptBtn').addEventListener('click',copySessionReceipt);
     $('blockDatesBtn').addEventListener('click',()=>{ $('blockedDatesDialog').showModal(); loadBlockedDates(); });
     $('blockDateForm').addEventListener('submit',addBlockedDate);
+    $('blockEntireDay').addEventListener('change',()=>{ const entireDay=$('blockEntireDay').checked; $('blockTimesGroup').hidden=entireDay; if(entireDay) document.querySelectorAll('.block-time:checked').forEach(box=>box.checked=false); });
+    renderBlockTimeChoices();
     $('walkinBtn').addEventListener('click',()=>{ wiResetForm(); $('walkinDialog').showModal(); });
     $('walkinForm').addEventListener('submit',wiSubmit);
     $('wiDate').addEventListener('change',wiFetchSlots);
@@ -451,6 +665,7 @@ We can't wait to welcome you and create beautiful memories with you! 🤍✨`;
     $('wiPackageType').addEventListener('change',()=>{ wiRenderBackdropChoices(); wiCalculateTotal(); });
     $('wiPetSize').addEventListener('change',()=>{ wiUpdatePetOptions(); wiCalculateTotal(); });
     $('wiHasExtraBackdrop').addEventListener('change',()=>{ wiUpdateExtraBackdropOptions(); wiCalculateTotal(); });
+    $('wiBackdropDecideLater').addEventListener('change',()=>{ wiApplyBackdropDecideLater(); wiCalculateTotal(); });
     $('walkinForm').addEventListener('input',wiCalculateTotal);
     $('walkinForm').addEventListener('change',wiCalculateTotal);
     checkSession();

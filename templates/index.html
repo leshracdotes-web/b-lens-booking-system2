@@ -200,6 +200,7 @@
     .payment-note { display: grid; gap: 7px; margin: 0 0 20px; padding: 14px; border-radius: 13px; background: var(--surface-soft); color: var(--muted); font-size: 12px; }
     .payment-note strong { color: var(--ink); font-size: 13px; }
     .qr-wrap { display: grid; place-items: center; min-height: 148px; margin: 0 0 20px; padding: 12px; border: 1px dashed var(--line); border-radius: 15px; background: var(--surface-soft); }
+    .qr-wrap[hidden] { display: none; }
     .qr-wrap img { max-width: 100%; max-height: 250px; border-radius: 9px; }
     .file-label { display: grid; gap: 8px; margin-bottom: 18px; }
     .file-label input { padding: 10px; font-size: 12px; }
@@ -268,21 +269,22 @@
             <div class="field full"><div class="check-row"><input type="checkbox" id="isStudent" name="is_student"><label for="isStudent">Apply student discount<small>All guests must present a valid student ID.</small></label></div></div>
             <div class="field full">
               <label id="backdropColorLabel">Preferred backdrop color <span class="required">*</span></label>
-              <div class="choice-grid">
+              <div class="choice-grid" id="backdropChoiceGrid">
                 <div class="choice"><input type="checkbox" id="backdropBeige" name="preferred_backdrop" value="Beige"><label for="backdropBeige"><span class="swatch" style="background:#E3D2B8"></span><span class="choice-title">Beige</span></label></div>
                 <div class="choice"><input type="checkbox" id="backdropWhite" name="preferred_backdrop" value="White"><label for="backdropWhite"><span class="swatch" style="background:#FFFFFF"></span><span class="choice-title">White</span></label></div>
                 <div class="choice"><input type="checkbox" id="backdropPink" name="preferred_backdrop" value="Pink"><label for="backdropPink"><span class="swatch" style="background:#F0D3DA"></span><span class="choice-title">Pink</span></label></div>
                 <div class="choice"><input type="checkbox" id="backdropGray" name="preferred_backdrop" value="Gray"><label for="backdropGray"><span class="swatch" style="background:#C7C7C7"></span><span class="choice-title">Gray</span></label></div>
               </div>
+              <div class="check-row" style="margin-top:10px"><input type="checkbox" id="backdropDecideLater" name="backdrop_decide_later"><label for="backdropDecideLater">We'll decide on the day of the session<small>Skip color selection for now — you can choose on-site.</small></label></div>
             </div>
-            <div class="field full"><div class="check-row"><input type="checkbox" id="hasAdditionalBackdrop" name="has_additional_backdrop"><label for="hasAdditionalBackdrop">Add backdrops?<small>₱99 for one additional backdrop color.</small></label></div><div id="additionalBackdropGroup" class="conditional" hidden><label for="additionalBackdropColor">Choose additional backdrop</label><select id="additionalBackdropColor" name="additional_backdrop_color"><option value="">Select a color</option></select></div></div>
+            <div class="field full" id="additionalBackdropField"><div class="check-row"><input type="checkbox" id="hasAdditionalBackdrop" name="has_additional_backdrop"><label for="hasAdditionalBackdrop">Add backdrops?<small>₱99 for one additional backdrop color.</small></label></div><div id="additionalBackdropGroup" class="conditional" hidden><label for="additionalBackdropColor">Choose additional backdrop</label><select id="additionalBackdropColor" name="additional_backdrop_color"><option value="">Select a color</option></select></div></div>
             <div class="field"><label for="extraPax">Extra pax <span class="helper" id="extraPaxHelper">₱99 each</span></label><select id="extraPax" name="extra_pax"></select></div>
             <div class="field full"><div class="check-row"><input type="checkbox" id="hasPet" name="has_pet"><label for="hasPet">Add pet?<small>₱99 per pet, limits depend on breed size.</small></label></div><div id="petDetailsGroup" class="conditional" hidden><div class="grid"><div class="field"><label for="petSize">Pet size</label><select id="petSize" name="pet_size"><option value="Small">Small breed · max 4</option><option value="Medium">Medium breed · max 2</option><option value="Large">Large breed · max 1</option></select></div><div class="field"><label for="extraPet" id="extraPetLabel">Number of pets <span class="helper">₱99 each</span></label><select id="extraPet" name="extra_pet"><option value="1">1</option></select></div></div></div></div>
             <div class="field"><label for="extraTime">Time extension</label><select id="extraTime" name="extra_time"><option value="0">None</option><option value="10">+10 minutes, ₱99</option><option value="15">+15 minutes, ₱149</option><option value="20">+20 minutes, ₱199</option><option value="30">+30 minutes, ₱299</option></select></div>
-            <div class="field"><label for="enhancedCopies">Enhanced copies</label><select id="enhancedCopies" name="enhanced_copies"><option value="0">None</option><option value="1_2">1 to 2 photos, ₱49</option><option value="3_5">3 to 5 photos, ₱99</option><option value="6_10">6 to 10 photos, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select><div id="extraEnhancedGroup" class="conditional" hidden><label for="extraEnhancedQty">Total enhanced photos</label><input type="number" id="extraEnhancedQty" name="extra_enhanced_qty" min="11" value="11"></div></div>
+            <div class="field"><label for="enhancedCopies">Get Additional Enhanced Copies</label><select id="enhancedCopies" name="enhanced_copies"><option value="0">None</option><option value="1_2">1 to 2 photos, ₱49</option><option value="3_5">3 to 5 photos, ₱99</option><option value="6_10">6 to 10 photos, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select><div id="extraEnhancedGroup" class="conditional" hidden><label for="extraEnhancedQty">Total enhanced photos</label><input type="number" id="extraEnhancedQty" name="extra_enhanced_qty" min="11" placeholder="e.g. 15"></div></div>
             <div class="field"><div class="check-row"><input type="checkbox" id="hasDigitalCopies" name="has_digital_copies"><label for="hasDigitalCopies">Get Digital Copies<small id="digitalCopiesText">Rate based on your session length.</small></label></div></div>
-            <div class="field full"><div class="check-row"><input type="checkbox" id="hasChildren" name="has_children"><label for="hasChildren">Will there be any children joining the session?<small>Helps us prepare the room and props.</small></label></div><div id="childrenDetailsGroup" class="conditional" hidden><div class="choice-grid"><div class="choice"><input type="checkbox" id="childInfant" name="children_types" value="Infant"><label for="childInfant"><span class="choice-title">Infant</span><span class="choice-meta">0 – 11 months old</span></label></div><div class="choice"><input type="checkbox" id="childToddler" name="children_types" value="Toddler"><label for="childToddler"><span class="choice-title">Toddler</span><span class="choice-meta">1 – 3 years old</span></label></div><div class="choice"><input type="checkbox" id="childKid" name="children_types" value="Kid"><label for="childKid"><span class="choice-title">Kid</span><span class="choice-meta">4 – 12 years old</span></label></div></div><label for="totalChildren">Total number of children</label><input type="number" id="totalChildren" name="total_children" min="1" max="20" value="1"></div></div>
-            <div class="field full"><div class="check-row"><input type="checkbox" id="hasBalloons" name="has_balloons"><label for="hasBalloons">Number balloons, cream white 32&quot;<small>₱39 each. Add the digit or number below.</small></label></div><div id="balloonInputsGroup" class="conditional" hidden><div class="grid"><div class="field"><label for="balloonQty">Quantity</label><input type="number" id="balloonQty" name="balloon_qty" min="1" value="1"></div><div class="field"><label for="balloonNumbers">Digits / numbers</label><input type="text" id="balloonNumbers" name="balloon_numbers" placeholder="18, 7, 25"></div></div></div></div>
+            <div class="field full"><div class="check-row"><input type="checkbox" id="hasChildren" name="has_children"><label for="hasChildren">Will there be any children joining the session?<small>Helps us prepare the room and props.</small></label></div><div id="childrenDetailsGroup" class="conditional" hidden><div class="choice-grid"><div class="choice"><input type="checkbox" id="childInfant" name="children_types" value="Infant"><label for="childInfant"><span class="choice-title">Infant</span><span class="choice-meta">0 – 11 months old</span></label></div><div class="choice"><input type="checkbox" id="childToddler" name="children_types" value="Toddler"><label for="childToddler"><span class="choice-title">Toddler</span><span class="choice-meta">1 – 3 years old</span></label></div><div class="choice"><input type="checkbox" id="childKid" name="children_types" value="Kid"><label for="childKid"><span class="choice-title">Kid</span><span class="choice-meta">4 – 12 years old</span></label></div></div><label for="totalChildren">Total number of children</label><input type="number" id="totalChildren" name="total_children" min="1" max="20" placeholder="e.g. 2"></div></div>
+            <div class="field full"><div class="check-row"><input type="checkbox" id="hasBalloons" name="has_balloons"><label for="hasBalloons">Number balloons, cream white 32&quot;<small>₱39 each. Add the digit or number below.</small></label></div><div id="balloonInputsGroup" class="conditional" hidden><div class="grid"><div class="field"><label for="balloonQty">Quantity</label><input type="number" id="balloonQty" name="balloon_qty" min="1" placeholder="e.g. 3"></div><div class="field"><label for="balloonNumbers">Digits / numbers</label><input type="text" id="balloonNumbers" name="balloon_numbers" placeholder="18, 7, 25"></div></div></div></div>
             <div class="field full"><label for="backdropOrder">Notes</label><textarea id="backdropOrder" name="backdrop_order" placeholder="Anything else the studio should know."></textarea></div>
           </div>
         </section>
@@ -295,14 +297,45 @@
         <div id="summaryLines" class="summary-lines" aria-live="polite"></div>
         <div class="total-block"><div class="total-label">Grand total</div><div id="grandTotalDisplay" class="total">₱0</div></div>
         <div class="payment-note"><strong>50% downpayment required</strong><span>Downpayment: <b id="downpaymentDisplay">₱0</b></span><span>Remaining balance: <b id="balanceDisplay">₱0</b></span></div>
-        <div class="field full"><label for="actualAmountSent">Actual amount sent <span class="helper">Optional — fill this in if you sent more or less than the required downpayment</span></label><input type="number" id="actualAmountSent" name="actual_amount_sent" min="0" step="1" placeholder="Leave blank if exact"></div>
-        <div class="qr-wrap"><img src="/static/uploads/mode_of_payment.jpg" alt="Mode of payment QR code" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span class=\"empty\">Payment QR is unavailable. Please contact the studio.</span>');"></div>
+        <div class="field full" style="margin-bottom:18px"><label for="actualAmountSent">Actual amount sent <span class="helper">Optional — fill this in if you sent more or less than the required downpayment</span></label><input type="number" id="actualAmountSent" name="actual_amount_sent" min="0" step="1" placeholder="Leave blank if exact"></div>
+        <div class="field full" style="margin-bottom:16px">
+          <label>Mode of payment</label>
+          <div class="choice-grid" style="grid-template-columns:repeat(2,1fr)">
+            <div class="choice"><input type="radio" id="payGcash" name="payment_mode_choice" value="GCash" checked><label for="payGcash"><span class="choice-title">GCash</span></label></div>
+            <div class="choice"><input type="radio" id="payBank" name="payment_mode_choice" value="Bank Transfer"><label for="payBank"><span class="choice-title">Bank (Maribank)</span></label></div>
+          </div>
+        </div>
+        <div class="qr-wrap" id="qrGcashWrap"><img id="qrGcashImg" src="/static/uploads/qr_gcash.png" alt="GCash QR code" style="cursor:zoom-in" onclick="openQrZoom(this.src)" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span class=\'empty\'>GCash QR is unavailable. Please contact the studio.</span>')"></div>
+        <div class="qr-wrap" id="qrBankWrap" hidden><img id="qrBankImg" src="/static/uploads/qr_maribank.png" alt="Maribank QR code" style="cursor:zoom-in" onclick="openQrZoom(this.src)" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span class=\'empty\'>Bank QR is unavailable. Please contact the studio.</span>')"></div>
+        <p class="helper" style="margin:-12px 0 16px">Tap the QR code to enlarge — easier to screenshot for your payment app.</p>
         <label class="file-label" for="paymentScreenshot"><span>Payment screenshot <span class="required">*</span></span><input type="file" id="paymentScreenshot" name="payment_screenshot" accept="image/png,image/jpeg,image/webp" required><small class="helper">PNG, JPG, or WEBP, maximum 8 MB.</small></label>
-        <button class="primary" type="submit" id="reviewButton">Review booking</button>
+        <div class="field full">
+          <label>Customer Agreement &amp; Data Privacy Consent <span class="required">*</span></label>
+          <div style="max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--muted);background:var(--surface-soft)">
+            <strong style="color:var(--ink)">Customer Agreement</strong>
+            <ol style="margin:6px 0 12px;padding-left:18px">
+              <li>I agree to follow all studio rules and staff instructions.</li>
+              <li>My session starts and ends at the scheduled booking time. Late arrival may shorten my session.</li>
+              <li>Children must be supervised. Pets are welcome under the owner's supervision. Pet diapers are recommended whenever possible.</li>
+              <li>I will handle all equipment, props and furniture with care.</li>
+              <li>I am responsible for intentional or negligent damage caused by me or my companions and agree to pay the reasonable repair or replacement cost after supporting proof is provided.</li>
+              <li>I am responsible for my personal belongings.</li>
+              <li>I agree to the studio's booking, cancellation, rescheduling and refund policies.</li>
+              <li>The studio uses CCTV for safety, security and incident investigation. Recordings are confidential and accessed only by authorized personnel or as required by law.</li>
+              <li>My photos remain private unless I provide optional consent below.</li>
+            </ol>
+            <strong style="color:var(--ink)">Data Privacy Consent</strong>
+            <p style="margin:6px 0 0">I authorize B-Lens Self Portrait Studio to collect and process my personal information solely for booking, payment, customer service, and legal/business record purposes. My information will not be sold or shared with third parties except when required by law.</p>
+          </div>
+          <div class="check-row" style="margin-top:10px"><input type="checkbox" id="agreedToTerms" name="agreed_to_terms" required><label for="agreedToTerms">I have read and agree to the Customer Agreement and Data Privacy Consent above <span class="required">*</span><small>Required before we can confirm your booking.</small></label></div>
+        </div>
+        <button class="primary" type="submit" id="reviewButton" style="margin-top:22px">Review booking</button>
       </aside>
     </form>
   </main>
   <footer class="shell">B-Lens Self Portrait Studio · Please arrive 5 to 10 minutes early.</footer>
+
+  <dialog id="qrZoomDialog" style="width:min(480px,calc(100% - 28px))"><div class="dialog-body" style="text-align:center;padding:18px"><img id="qrZoomImg" src="" alt="Enlarged QR code" style="width:100%;border-radius:12px"><button class="secondary" type="button" style="margin-top:16px" data-close-dialog>Close</button></div></dialog>
 
   <dialog id="reviewModal" aria-labelledby="reviewTitle"><div class="dialog-body"><h2 id="reviewTitle">One last look</h2><p class="dialog-copy">Check the details below before sending your reservation to the studio.</p><div id="reviewContent" class="review-grid"></div><div class="dialog-actions"><button class="secondary" type="button" id="editButton">Edit details</button><button class="primary" style="width:auto;padding:0 22px" type="button" id="finalConfirmBtn">Send reservation</button></div></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -344,13 +377,21 @@
     function backdropCheckboxes() { return Array.from(document.querySelectorAll('input[name="preferred_backdrop"]')); }
     function requiredBackdropCount() { return RATES[$('pkgCategory').value][$('pkgType').value].baseBd; }
 
+    function applyBackdropDecideLater() {
+      const decideLater = $('backdropDecideLater').checked;
+      $('backdropChoiceGrid').style.opacity = decideLater ? '0.45' : '1';
+      backdropCheckboxes().forEach(b => { b.disabled = decideLater; if (decideLater) b.checked = false; });
+      $('additionalBackdropField').style.display = decideLater ? 'none' : '';
+      if (decideLater) { $('hasAdditionalBackdrop').checked = false; $('additionalBackdropGroup').hidden = true; }
+    }
+
     function updateBackdropChoices() {
       const required = requiredBackdropCount();
       const boxes = backdropCheckboxes();
       let checked = boxes.filter(b => b.checked);
       if (checked.length > required) { checked.slice(required).forEach(b => b.checked = false); checked = checked.slice(0, required); }
-      boxes.forEach(b => { b.disabled = !b.checked && checked.length >= required; });
-      $('backdropColorLabel').innerHTML = `Preferred backdrop color <span class="required">*</span> <span class="helper">Choose exactly ${required}</span>`;
+      boxes.forEach(b => { b.disabled = $('backdropDecideLater').checked || (!b.checked && checked.length >= required); });
+      $('backdropColorLabel').innerHTML = `Preferred backdrop color <span class="required">*</span> <span class="helper">Choose exactly ${required}, or skip below</span>`;
       updateAdditionalBackdropOptions();
     }
 
@@ -411,30 +452,33 @@
       if (file.size > 8 * 1024 * 1024) { showToast('Payment screenshot must be 8 MB or smaller.', true); return false; }
       if (!['image/png','image/jpeg','image/webp'].includes(file.type)) { showToast('Use a PNG, JPG, or WEBP screenshot.', true); return false; }
       const required = requiredBackdropCount();
-      if (backdropCheckboxes().filter(b => b.checked).length !== required) { showToast(`Please choose exactly ${required} preferred backdrop color(s).`, true); return false; }
-      if ($('hasAdditionalBackdrop').checked && !$('additionalBackdropColor').value) { showToast('Please choose an additional backdrop color, or uncheck Add backdrops.', true); return false; }
+      if (!$('backdropDecideLater').checked && backdropCheckboxes().filter(b => b.checked).length !== required) { showToast(`Please choose exactly ${required} preferred backdrop color(s), or check "We'll decide on the day".`, true); return false; }
+      if (!$('backdropDecideLater').checked && $('hasAdditionalBackdrop').checked && !$('additionalBackdropColor').value) { showToast('Please choose an additional backdrop color, or uncheck Add backdrops.', true); return false; }
       if ($('hasPet').checked && !$('petSize').value) { showToast('Please select a pet size.', true); return false; }
       if ($('hasChildren').checked) {
         const childTypesChecked = Array.from(document.querySelectorAll('input[name="children_types"]:checked'));
         if (!childTypesChecked.length) { showToast('Please select at least one child age group.', true); return false; }
         if (!$('totalChildren').value || Number($('totalChildren').value) < 1) { showToast('Please enter the total number of children.', true); return false; }
       }
+      if ($('enhancedCopies').value === 'more_10' && (!$('extraEnhancedQty').value || Number($('extraEnhancedQty').value) < 11)) { showToast('Please enter the total number of enhanced photos (11 or more).', true); return false; }
       if ($('hasBalloons').checked) {
+        if (!$('balloonQty').value || Number($('balloonQty').value) < 1) { showToast('Please enter the number of balloons.', true); return false; }
         const balloonQtyValue = Math.max(1, number('balloonQty', 1));
         const enteredNumbers = $('balloonNumbers').value.split(',').map(n => n.trim()).filter(n => n.length > 0);
         if (!enteredNumbers.length) { showToast('Please add the balloon digit or number.', true); return false; }
         if (enteredNumbers.length !== balloonQtyValue) { showToast(`Please enter exactly ${balloonQtyValue} number${balloonQtyValue > 1 ? 's' : ''} (separated by commas) to match the quantity.`, true); return false; }
       }
+      if (!$('agreedToTerms').checked) { showToast('Please read and agree to the Customer Agreement and Data Privacy Consent to proceed.', true); return false; }
       return true;
     }
 
     function openReview() {
       if (!validateBooking()) return;
-      const preferredColors = backdropCheckboxes().filter(b => b.checked).map(b => b.value).join(', ');
+      const preferredColors = $('backdropDecideLater').checked ? "We'll decide on the day" : backdropCheckboxes().filter(b => b.checked).map(b => b.value).join(', ');
       const rows = [['Name', $('custName').value.trim()], ['Date', formatDate($('bookDate').value)], ['Time', $('bookSlot').value], ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}${$('isStudent').checked ? ' (Student rate)' : ''}`], ['Preferred backdrop', preferredColors || 'Not selected']];
       summaryLineItems.slice(1).forEach(line => rows.push([line.label, money(line.value)]));
       if ($('hasChildren').checked) { const types = Array.from(document.querySelectorAll('input[name="children_types"]:checked')).map(c => c.value).join(', '); rows.push(['Children', `${types || 'Not specified'} · total ${$('totalChildren').value} (no extra charge)`]); }
-      rows.push(['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Payment proof', $('paymentScreenshot').files[0].name], ['Grand total', money(totals.total)], ['Required downpayment', money(totals.dp)]);
+      rows.push(['Email', $('custEmail').value.trim()], ['Contact', $('contactNo').value.trim()], ['Mode of payment', document.querySelector('input[name="payment_mode_choice"]:checked').value], ['Payment proof', $('paymentScreenshot').files[0].name], ['Agreement & privacy consent', 'Agreed'], ['Grand total', money(totals.total)], ['Required downpayment', money(totals.dp)]);
       const actualSentValue = parseFloat($('actualAmountSent').value);
       if (actualSentValue > 0) {
         rows.push(['Actual amount sent', money(actualSentValue)]);
@@ -455,8 +499,11 @@
       formData.set('digital_copies', totals.digitalCopies);
       formData.set('has_pet', $('hasPet').checked);
       formData.set('has_additional_backdrop', $('hasAdditionalBackdrop').checked);
+      formData.set('backdrop_decide_later', $('backdropDecideLater').checked);
       formData.set('has_children', $('hasChildren').checked);
       formData.set('has_balloons', $('hasBalloons').checked);
+      formData.set('agreed_to_terms', $('agreedToTerms').checked);
+      formData.set('payment_mode', document.querySelector('input[name="payment_mode_choice"]:checked').value);
       formData.set('grand_total', totals.total); formData.set('downpayment', totals.dp); formData.set('balance', totals.bal);
       try {
         const res = await fetch('/save-booking', { method:'POST', body:formData });
@@ -484,9 +531,16 @@
     $('pkgType').addEventListener('change', updateBackdropChoices);
     backdropCheckboxes().forEach(b => b.addEventListener('change', updateBackdropChoices));
     $('hasAdditionalBackdrop').addEventListener('change', updateAdditionalBackdropOptions);
+    $('backdropDecideLater').addEventListener('change', () => { applyBackdropDecideLater(); updateBackdropChoices(); calculateTotal(); });
     $('hasPet').addEventListener('change', updatePetVisibility);
     $('petSize').addEventListener('change', updatePetOptions);
     $('hasChildren').addEventListener('change', updateChildrenVisibility);
+    function updatePaymentModeVisibility() { const isBank = $('payBank').checked; $('qrGcashWrap').hidden = isBank; $('qrBankWrap').hidden = !isBank; }
+    $('payGcash').addEventListener('change', updatePaymentModeVisibility);
+    $('payBank').addEventListener('change', updatePaymentModeVisibility);
+    function openQrZoom(src) { $('qrZoomImg').src = src; $('qrZoomDialog').showModal(); }
+    $('qrZoomDialog').addEventListener('click', (event) => { if (event.target === $('qrZoomDialog')) $('qrZoomDialog').close(); });
+    document.querySelectorAll('[data-close-dialog]').forEach(btn => btn.addEventListener('click', () => btn.closest('dialog').close()));
     $('bookingForm').addEventListener('input', calculateTotal);
     $('bookingForm').addEventListener('change', calculateTotal);
     $('bookingForm').addEventListener('submit', (event) => { event.preventDefault(); openReview(); });
