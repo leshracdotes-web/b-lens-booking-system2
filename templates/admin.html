@@ -556,7 +556,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       if ($('ebDigitalCopies').checked) { const price = sessionMinutes<=15?99:sessionMinutes<=25?149:199; ebTotals.digitalCopies = sessionMinutes<=15?'10_15':sessionMinutes<=25?'20_25':'30_40'; total += price; }
       const enhanced=$('ebEnhanced').value, enhancedPrices={'1_2':49,'3_5':99,'6_10':199};
       if (enhancedPrices[enhanced]) total += enhancedPrices[enhanced];
-      if (enhanced==='more_10') { $('ebEnhancedQtyGroup').hidden=false; total += Math.max(11, Number($('ebEnhancedQty').value)||11) * 25; } else $('ebEnhancedQtyGroup').hidden=true;
+      if (enhanced==='more_10') { $('ebEnhancedQtyGroup').hidden=false; total += Math.max(0, Number($('ebEnhancedQty').value)||0) * 25; } else $('ebEnhancedQtyGroup').hidden=true;
       if ($('ebHasExtraBackdrop').checked && $('ebExtraBackdropColor').value && !$('ebBackdropDecideLater').checked) total += 99;
       if ($('ebHasBalloons').checked) { $('ebBalloonGroup').hidden=false; total += (Number($('ebBalloonQty').value)||1) * 39; } else $('ebBalloonGroup').hidden=true;
       $('ebPetGroup').hidden = !$('ebHasPet').checked;
@@ -604,16 +604,9 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
     }
     async function ebSubmit(event) {
       event.preventDefault(); $('ebError').textContent='';
-      const required=ebRequiredBackdrops(); const checkedColors=Array.from(document.querySelectorAll('.eb-backdrop:checked'));
+      const checkedColors=Array.from(document.querySelectorAll('.eb-backdrop:checked'));
       const decideLater = $('ebBackdropDecideLater').checked;
-      if (!decideLater && checkedColors.length!==required) { $('ebError').textContent=`Please choose exactly ${required} preferred backdrop color(s), or check "Will decide on the day".`; return; }
-      if (!decideLater && $('ebHasExtraBackdrop').checked && !$('ebExtraBackdropColor').value) { $('ebError').textContent='Please choose an additional backdrop color.'; return; }
-      if ($('ebHasPet').checked && !$('ebPetSize').value) { $('ebError').textContent='Please select a pet size.'; return; }
       const childTypes=['ebChildInfant','ebChildToddler','ebChildKid'].filter(id=>$(id).checked).map(id=>$(id).value);
-      if ($('ebHasChildren').checked && !childTypes.length) { $('ebError').textContent='Please select at least one child age group.'; return; }
-      if ($('ebHasChildren').checked && (!$('ebTotalChildren').value || Number($('ebTotalChildren').value) < 1)) { $('ebError').textContent='Please enter the total number of children.'; return; }
-      if ($('ebEnhanced').value === 'more_10' && (!$('ebEnhancedQty').value || Number($('ebEnhancedQty').value) < 11)) { $('ebError').textContent='Please enter the total number of enhanced photos (11 or more).'; return; }
-      if ($('ebHasBalloons').checked && (!$('ebBalloonQty').value || Number($('ebBalloonQty').value) < 1)) { $('ebError').textContent='Please enter the number of balloons.'; return; }
       const button=event.submitter||document.querySelector('#editBookingForm button[type=submit]'); if(button) button.disabled=true;
       const formData = new FormData();
       formData.set('id', $('ebId').value);
@@ -623,12 +616,12 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       formData.set('backdrop_decide_later', decideLater);
       formData.set('has_additional_backdrop',$('ebHasExtraBackdrop').checked && !decideLater); formData.set('additional_backdrop_color',$('ebExtraBackdropColor').value);
       formData.set('extra_pax',$('ebExtraPax').value);
-      formData.set('has_pet',$('ebHasPet').checked); formData.set('pet_size',$('ebPetSize').value); formData.set('extra_pet',$('ebExtraPet').value||'1');
+      formData.set('has_pet',$('ebHasPet').checked); formData.set('pet_size',$('ebPetSize').value); formData.set('extra_pet',$('ebExtraPet').value||'');
       formData.set('extra_time',$('ebExtraTime').value);
-      formData.set('enhanced_copies',$('ebEnhanced').value); formData.set('extra_enhanced_qty',$('ebEnhancedQty').value||'11');
+      formData.set('enhanced_copies',$('ebEnhanced').value); formData.set('extra_enhanced_qty',$('ebEnhancedQty').value||'');
       formData.set('has_digital_copies',$('ebDigitalCopies').checked); formData.set('digital_copies',ebTotals.digitalCopies);
-      formData.set('has_children',$('ebHasChildren').checked); childTypes.forEach(t=>formData.append('children_types',t)); formData.set('total_children',$('ebTotalChildren').value||'1');
-      formData.set('has_balloons',$('ebHasBalloons').checked); formData.set('balloon_qty',$('ebBalloonQty').value||'1'); formData.set('balloon_numbers',$('ebBalloonNumbers').value.trim());
+      formData.set('has_children',$('ebHasChildren').checked); childTypes.forEach(t=>formData.append('children_types',t)); formData.set('total_children',$('ebTotalChildren').value||'');
+      formData.set('has_balloons',$('ebHasBalloons').checked); formData.set('balloon_qty',$('ebBalloonQty').value||''); formData.set('balloon_numbers',$('ebBalloonNumbers').value.trim());
       formData.set('actual_amount_sent',$('ebActualAmount').value||'');
       try {
         const response = await fetch('/api/admin/update-booking',{method:'POST',body:formData});

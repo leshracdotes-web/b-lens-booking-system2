@@ -154,7 +154,7 @@ def as_bool(value):
     return str(value).lower() in {"true", "1", "yes", "on"}
 
 
-def calculate_totals(form):
+def calculate_totals(form, strict=True):
     category = form.get("package", "")
     package_type = form.get("package_type", "")
     if category not in RATES or package_type not in RATES[category]:
@@ -171,34 +171,47 @@ def calculate_totals(form):
     backdrop_decide_later = as_bool(form.get("backdrop_decide_later", False))
     extra_time = int(form.get("extra_time", 0) or 0)
     enhanced = form.get("enhanced_copies", "0")
-    enhanced_qty = int(form.get("extra_enhanced_qty", 11) or 11)
+    enhanced_qty = int(form.get("extra_enhanced_qty", 0) or 0)
     balloon_qty = int(form.get("balloon_qty", 0) or 0)
     preferred_backdrop_list = [c.strip() for c in form.getlist("preferred_backdrop") if c.strip()]
     pax_max = PAX_MAX.get(category, 0)
-    if not 0 <= extra_pax <= pax_max:
-        raise ValueError(f"{category} packages allow up to {pax_max} extra pax.")
+    if strict:
+        if not 0 <= extra_pax <= pax_max:
+            raise ValueError(f"{category} packages allow up to {pax_max} extra pax.")
+    else:
+        extra_pax = max(0, min(extra_pax, pax_max))
     if has_pet:
-        if pet_size not in PET_SIZE_MAX:
-            raise ValueError("Please select a pet size (Small, Medium, or Large).")
-        if not 1 <= extra_pet <= PET_SIZE_MAX[pet_size]:
-            raise ValueError(f"{pet_size} breed pets are limited to {PET_SIZE_MAX[pet_size]} per session.")
+        if strict:
+            if pet_size not in PET_SIZE_MAX:
+                raise ValueError("Please select a pet size (Small, Medium, or Large).")
+            if not 1 <= extra_pet <= PET_SIZE_MAX[pet_size]:
+                raise ValueError(f"{pet_size} breed pets are limited to {PET_SIZE_MAX[pet_size]} per session.")
+        else:
+            if pet_size not in PET_SIZE_MAX:
+                pet_size = "Small"
+            extra_pet = max(1, min(extra_pet or 1, PET_SIZE_MAX[pet_size]))
     required_backdrops = package["baseBd"]
     if backdrop_decide_later:
         preferred_backdrop_list = []
-    else:
+    elif strict:
         if len(preferred_backdrop_list) != required_backdrops or len(set(preferred_backdrop_list)) != required_backdrops:
             raise ValueError(f"Please choose exactly {required_backdrops} preferred backdrop color(s).")
         if any(color not in BACKDROP_COLORS for color in preferred_backdrop_list):
             raise ValueError("Please select a valid preferred backdrop color.")
+    else:
+        preferred_backdrop_list = list(dict.fromkeys(c for c in preferred_backdrop_list if c in BACKDROP_COLORS))[:required_backdrops]
     extra_backdrop = 0
     if has_extra_backdrop and not backdrop_decide_later:
-        if additional_backdrop_color not in BACKDROP_COLORS:
-            raise ValueError("Please choose a valid additional backdrop color.")
-        if additional_backdrop_color in preferred_backdrop_list:
-            raise ValueError("The additional backdrop color must be different from your preferred backdrop colors.")
+        if strict:
+            if additional_backdrop_color not in BACKDROP_COLORS:
+                raise ValueError("Please choose a valid additional backdrop color.")
+            if additional_backdrop_color in preferred_backdrop_list:
+                raise ValueError("The additional backdrop color must be different from your preferred backdrop colors.")
         extra_backdrop = 1
     if extra_time not in {0, 10, 15, 20, 30}:
-        raise ValueError("Please select a valid time extension.")
+        if strict:
+            raise ValueError("Please select a valid time extension.")
+        extra_time = 0
     total += extra_pax * 99 + extra_pet * 99 + TIME_PRICES.get(extra_time, 0) + extra_backdrop * 99
     session_minutes = package["dur"] + extra_time
     digital_copies = "0"
@@ -209,29 +222,42 @@ def calculate_totals(form):
     if enhanced in ENHANCED_PRICES:
         total += ENHANCED_PRICES[enhanced]
     elif enhanced == "more_10":
-        if enhanced_qty < 11 or enhanced_qty > 100:
-            raise ValueError("Enhanced photo quantity must be between 11 and 100.")
+        if strict:
+            if enhanced_qty < 11 or enhanced_qty > 100:
+                raise ValueError("Enhanced photo quantity must be between 11 and 100.")
+        else:
+            enhanced_qty = max(11, min(enhanced_qty or 11, 100))
         total += enhanced_qty * 25
     elif enhanced != "0":
-        raise ValueError("Please select a valid enhanced copy option.")
+        if strict:
+            raise ValueError("Please select a valid enhanced copy option.")
+        enhanced = "0"
     if as_bool(form.get("has_balloons", False)):
-        if not 1 <= balloon_qty <= 30:
-            raise ValueError("Balloon quantity must be between 1 and 30.")
-        balloon_numbers = [n.strip() for n in form.get("balloon_numbers", "").split(",") if n.strip()]
-        if not balloon_numbers:
-            raise ValueError("Please provide the balloon digit(s) or number(s).")
-        if len(balloon_numbers) != balloon_qty:
-            raise ValueError(f"Please provide exactly {balloon_qty} number(s) for the balloon quantity, separated by commas.")
+        if strict:
+            if not 1 <= balloon_qty <= 30:
+                raise ValueError("Balloon quantity must be between 1 and 30.")
+            balloon_numbers = [n.strip() for n in form.get("balloon_numbers", "").split(",") if n.strip()]
+            if not balloon_numbers:
+                raise ValueError("Please provide the balloon digit(s) or number(s).")
+            if len(balloon_numbers) != balloon_qty:
+                raise ValueError(f"Please provide exactly {balloon_qty} number(s) for the balloon quantity, separated by commas.")
+        else:
+            balloon_qty = max(1, min(balloon_qty or 1, 30))
         total += balloon_qty * 39
     elif balloon_qty != 0:
         balloon_qty = 0
     if as_bool(form.get("has_children", False)):
         child_types = [c.strip() for c in form.getlist("children_types") if c.strip()]
-        if not child_types or any(c not in CHILD_TYPES for c in child_types):
-            raise ValueError("Please select at least one child age group.")
-        total_children = int(form.get("total_children", 0) or 0)
-        if not 1 <= total_children <= 20:
-            raise ValueError("Please enter a valid total number of children.")
+        if strict:
+            if not child_types or any(c not in CHILD_TYPES for c in child_types):
+                raise ValueError("Please select at least one child age group.")
+            total_children = int(form.get("total_children", 0) or 0)
+            if not 1 <= total_children <= 20:
+                raise ValueError("Please enter a valid total number of children.")
+        else:
+            child_types = [c for c in child_types if c in CHILD_TYPES]
+            total_children = int(form.get("total_children", 0) or 0)
+            total_children = max(1, min(total_children or 1, 20)) if child_types else 0
     downpayment = (total + 1) // 2
     return {"total": total, "downpayment": downpayment, "balance": total - downpayment, "digital_copies": digital_copies}
 
@@ -433,7 +459,7 @@ def create_booking_record(bypass_cutoff=False, require_proof=True, default_statu
             "preferred_backdrop": "Decide on the day of session" if backdrop_decide_later else ",".join(request.form.getlist("preferred_backdrop")),
             "extra_time": form_int("extra_time"), "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
             "digital_copies": totals["digital_copies"], "enhanced_copies": request.form.get("enhanced_copies", "0"),
-            "extra_enhanced_qty": form_int("extra_enhanced_qty", 11, 100),
+            "extra_enhanced_qty": form_int("extra_enhanced_qty", 11 if request.form.get("enhanced_copies") == "more_10" else 0, 100),
             "extra_backdrop": 1 if (as_bool(request.form.get("has_additional_backdrop")) and not backdrop_decide_later) else 0,
             "additional_backdrop_color": request.form.get("additional_backdrop_color", "").strip() if (as_bool(request.form.get("has_additional_backdrop")) and not backdrop_decide_later) else "",
             "notes": request.form.get("backdrop_order", "").strip(),
@@ -607,10 +633,12 @@ def api_admin_update_booking():
         existing = next((booking for booking in supabase_bookings() if str(booking.get("id")) == str(booking_id)), None)
         if not existing:
             return jsonify({"success": False, "message": "Booking not found."}), 404
-        totals = calculate_totals(request.form)
+        totals = calculate_totals(request.form, strict=False)
         backdrop_decide_later = as_bool(request.form.get("backdrop_decide_later"))
         has_extra_backdrop = as_bool(request.form.get("has_additional_backdrop")) and not backdrop_decide_later
         actual_amount_sent = form_int("actual_amount_sent", default=0, maximum=1_000_000) or totals["downpayment"]
+        enhanced_copies_value = request.form.get("enhanced_copies", "0")
+        enhanced_qty_default = 11 if enhanced_copies_value == "more_10" else 0
         updates = {
             "package": request.form.get("package"), "package_type": request.form.get("package_type"),
             "is_student": str(as_bool(request.form.get("is_student"))).lower(),
@@ -620,8 +648,8 @@ def api_admin_update_booking():
             "pet_size": request.form.get("pet_size", "").strip() if as_bool(request.form.get("has_pet")) else "",
             "preferred_backdrop": "Decide on the day of session" if backdrop_decide_later else ",".join(request.form.getlist("preferred_backdrop")),
             "extra_time": form_int("extra_time"), "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
-            "digital_copies": totals["digital_copies"], "enhanced_copies": request.form.get("enhanced_copies", "0"),
-            "extra_enhanced_qty": form_int("extra_enhanced_qty", 11, 100),
+            "digital_copies": totals["digital_copies"], "enhanced_copies": enhanced_copies_value,
+            "extra_enhanced_qty": form_int("extra_enhanced_qty", enhanced_qty_default, 100),
             "extra_backdrop": 1 if has_extra_backdrop else 0,
             "additional_backdrop_color": request.form.get("additional_backdrop_color", "").strip() if has_extra_backdrop else "",
             "has_children": str(as_bool(request.form.get("has_children"))).lower(),

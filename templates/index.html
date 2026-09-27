@@ -338,6 +338,21 @@
   <dialog id="qrZoomDialog" style="width:min(480px,calc(100% - 28px))"><div class="dialog-body" style="text-align:center;padding:18px"><img id="qrZoomImg" src="" alt="Enlarged QR code" style="width:100%;border-radius:12px"><button class="secondary" type="button" style="margin-top:16px" data-close-dialog>Close</button></div></dialog>
 
   <dialog id="reviewModal" aria-labelledby="reviewTitle"><div class="dialog-body"><h2 id="reviewTitle">One last look</h2><p class="dialog-copy">Check the details below before sending your reservation to the studio.</p><div id="reviewContent" class="review-grid"></div><div class="dialog-actions"><button class="secondary" type="button" id="editButton">Edit details</button><button class="primary" style="width:auto;padding:0 22px" type="button" id="finalConfirmBtn">Send reservation</button></div></div></dialog>
+
+  <dialog id="confirmationDialog" style="width:min(460px,calc(100% - 24px))"><div class="dialog-body" style="padding:0">
+    <div id="confirmationCard" style="background:#fff;padding:28px 26px;border-radius:16px">
+      <img src="/static/logo.png" alt="B-Lens logo" style="height:48px;width:auto;display:block;margin:0 auto 14px">
+      <div style="text-align:center;font-size:38px;line-height:1;margin-bottom:10px">✅</div>
+      <h2 style="text-align:center;margin:0 0 4px;font-size:21px">Booking Successfully Submitted</h2>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin:0 0 18px">Please save this receipt for your records.</p>
+      <div id="confirmationDetails" class="review-grid" style="margin-bottom:6px"></div>
+    </div>
+    <div style="padding:18px 26px 24px;display:grid;gap:10px">
+      <button class="primary" type="button" id="saveConfirmationBtn">💾 Save receipt (JPEG)</button>
+      <button class="secondary" type="button" id="closeConfirmationBtn">Done</button>
+      <p class="helper" style="text-align:center;margin:0">Saves as a JPEG image you can send directly on Messenger.</p>
+    </div>
+  </div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -491,6 +506,86 @@
       $('reviewModal').showModal();
     }
 
+    function resetBookingForm() {
+      $('bookingForm').reset();
+      $('bookSlot').disabled = true; $('bookSlot').innerHTML = '<option value="">Select a date first</option>';
+      updatePackagePreview(); populateExtraPax(); updateBackdropChoices(); updatePetVisibility(); updateChildrenVisibility();
+      calculateTotal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    let lastConfirmationRows = [];
+    function openConfirmation(bookingId) {
+      const actualSent = parseFloat($('actualAmountSent').value);
+      const amountPaid = actualSent > 0 ? actualSent : totals.dp;
+      const remainingBalance = Math.max(0, totals.total - amountPaid);
+      const rows = [
+        ['Reference no.', bookingId ? `#${bookingId}` : 'Pending'],
+        ['Name', $('custName').value.trim()],
+        ['Date', formatDate($('bookDate').value)],
+        ['Time', $('bookSlot').value],
+        ['Package', `${$('pkgCategory').value} · ${$('pkgType').value}`],
+        ['Grand total', money(totals.total)],
+        ['Required downpayment', money(totals.dp)],
+        ['Actual payment sent', money(amountPaid)],
+        ['Remaining balance', money(remainingBalance)],
+      ];
+      lastConfirmationRows = rows;
+      $('confirmationDetails').innerHTML = rows.map(([label, value]) => `<div class="review-item"><span>${label}</span><strong>${(value || 'N/A').toString().replace(/</g,'&lt;')}</strong></div>`).join('');
+      $('confirmationDialog').showModal();
+    }
+    function loadImageEl(src) {
+      return new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src; });
+    }
+    async function saveReceiptImage() {
+      const button = $('saveConfirmationBtn'); const originalText = button.textContent;
+      button.disabled = true; button.textContent = 'Preparing…';
+      try {
+        const width = 640, scale = 2, rowHeight = 46;
+        const rows = lastConfirmationRows;
+        const topPad = 210, bottomPad = 60;
+        const height = topPad + rows.length * rowHeight + bottomPad;
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale; canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        ctx.fillStyle = '#fdf9f3'; ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(10, 10, width - 20, height - 20);
+        ctx.strokeStyle = '#e4d9c9'; ctx.lineWidth = 1.5; ctx.strokeRect(10, 10, width - 20, height - 20);
+        let y = 42;
+        try {
+          const logo = await loadImageEl('/static/logo.png');
+          const logoW = 150, logoH = logo.height * (logoW / logo.width);
+          ctx.drawImage(logo, (width - logoW) / 2, y, logoW, logoH);
+          y += logoH + 20;
+        } catch { y += 10; }
+        ctx.textAlign = 'center';
+        ctx.font = '30px Arial, sans-serif';
+        ctx.fillText('✅', width / 2, y + 24);
+        y += 44;
+        ctx.fillStyle = '#2c2420'; ctx.font = 'bold 21px Arial, sans-serif';
+        ctx.fillText('Booking Successfully Submitted', width / 2, y);
+        y += 24;
+        ctx.fillStyle = '#8a7d6f'; ctx.font = '13px Arial, sans-serif';
+        ctx.fillText('Please save this receipt for your records.', width / 2, y);
+        y += 22;
+        ctx.strokeStyle = '#e4d9c9'; ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(width - 30, y); ctx.stroke();
+        y += 32;
+        rows.forEach(([label, value]) => {
+          ctx.textAlign = 'left'; ctx.fillStyle = '#8a7d6f'; ctx.font = '13.5px Arial, sans-serif';
+          ctx.fillText(label, 34, y);
+          ctx.textAlign = 'right'; ctx.fillStyle = '#2c2420'; ctx.font = 'bold 13.5px Arial, sans-serif';
+          ctx.fillText(String(value || 'N/A'), width - 34, y);
+          y += 22;
+          ctx.strokeStyle = '#f0e9dd'; ctx.beginPath(); ctx.moveTo(34, y); ctx.lineTo(width - 34, y); ctx.stroke();
+          y += 24;
+        });
+        const link = document.createElement('a');
+        link.download = `blens-receipt-${Date.now()}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.92);
+        link.click();
+      } catch (error) { showToast('Could not generate the receipt image — please take a manual screenshot instead.', true); }
+      finally { button.disabled = false; button.textContent = originalText; }
+    }
     async function submitBooking() {
       const button = $('finalConfirmBtn'); button.disabled = true; button.textContent = 'Sending…';
       const formData = new FormData($('bookingForm'));
@@ -509,15 +604,14 @@
         const res = await fetch('/save-booking', { method:'POST', body:formData });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || 'Booking could not be saved.');
-        $('reviewModal').close(); $('bookingForm').reset();
-        $('bookSlot').disabled = true; $('bookSlot').innerHTML = '<option value="">Select a date first</option>';
-        updatePackagePreview(); populateExtraPax(); updateBackdropChoices(); updatePetVisibility(); updateChildrenVisibility();
-        calculateTotal();
-        showToast('Booking submitted. The studio will review it shortly.');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('reviewModal').close();
+        openConfirmation(data.booking_id);
       } catch (error) { showToast(error.message, true); }
       finally { button.disabled = false; button.textContent = 'Send reservation'; }
     }
+    $('saveConfirmationBtn').addEventListener('click', saveReceiptImage);
+    $('closeConfirmationBtn').addEventListener('click', () => $('confirmationDialog').close());
+    $('confirmationDialog').addEventListener('close', resetBookingForm);
 
     updatePackagePreview();
     populateExtraPax();
