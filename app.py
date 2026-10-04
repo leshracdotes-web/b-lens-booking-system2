@@ -48,7 +48,8 @@ ALLOWED_STATUSES = ACTIVE_STATUSES | {"Done Shoot/Fully Paid", "Cancelled"}
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 PET_SIZE_MAX = {"Small": 4, "Medium": 2, "Large": 1}
-BACKDROP_COLORS = {"Beige", "White", "Pink", "Gray"}
+BACKDROP_COLORS = {"Beige", "White", "Pink", "Gray", "Mottled"}
+MOTTLED_ALLOWED_PACKAGES = {"Solo", "Duo"}
 PAX_MAX = {"Solo": 9, "Duo": 8, "Squad": 5, "Party": 2}
 CHILD_TYPES = {"Infant", "Toddler", "Kid"}
 CLOSED_WEEKDAYS = {0}  # Monday = 0
@@ -198,8 +199,12 @@ def calculate_totals(form, strict=True):
             raise ValueError(f"Please choose exactly {required_backdrops} preferred backdrop color(s).")
         if any(color not in BACKDROP_COLORS for color in preferred_backdrop_list):
             raise ValueError("Please select a valid preferred backdrop color.")
+        if "Mottled" in preferred_backdrop_list and category not in MOTTLED_ALLOWED_PACKAGES:
+            raise ValueError("Mottled backdrop is only available for Solo and Duo packages.")
     else:
         preferred_backdrop_list = list(dict.fromkeys(c for c in preferred_backdrop_list if c in BACKDROP_COLORS))[:required_backdrops]
+        if category not in MOTTLED_ALLOWED_PACKAGES:
+            preferred_backdrop_list = [c for c in preferred_backdrop_list if c != "Mottled"]
     extra_backdrop = 0
     if has_extra_backdrop and not backdrop_decide_later:
         if strict:
@@ -207,6 +212,10 @@ def calculate_totals(form, strict=True):
                 raise ValueError("Please choose a valid additional backdrop color.")
             if additional_backdrop_color in preferred_backdrop_list:
                 raise ValueError("The additional backdrop color must be different from your preferred backdrop colors.")
+            if additional_backdrop_color == "Mottled" and category not in MOTTLED_ALLOWED_PACKAGES:
+                raise ValueError("Mottled backdrop is only available for Solo and Duo packages.")
+        elif additional_backdrop_color == "Mottled" and category not in MOTTLED_ALLOWED_PACKAGES:
+            additional_backdrop_color = ""
         extra_backdrop = 1
     if extra_time not in {0, 10, 15, 20, 30}:
         if strict:
@@ -246,6 +255,8 @@ def calculate_totals(form, strict=True):
         total += balloon_qty * 39
     elif balloon_qty != 0:
         balloon_qty = 0
+    child_types = []
+    total_children = 0
     if as_bool(form.get("has_children", False)):
         child_types = [c.strip() for c in form.getlist("children_types") if c.strip()]
         if strict:
@@ -259,7 +270,14 @@ def calculate_totals(form, strict=True):
             total_children = int(form.get("total_children", 0) or 0)
             total_children = max(1, min(total_children or 1, 20)) if child_types else 0
     downpayment = (total + 1) // 2
-    return {"total": total, "downpayment": downpayment, "balance": total - downpayment, "digital_copies": digital_copies}
+    return {
+        "total": total, "downpayment": downpayment, "balance": total - downpayment, "digital_copies": digital_copies,
+        "extra_pax": extra_pax, "has_pet": has_pet, "pet_size": pet_size if has_pet else "", "extra_pet": extra_pet,
+        "preferred_backdrop_list": preferred_backdrop_list, "extra_backdrop": extra_backdrop,
+        "additional_backdrop_color": additional_backdrop_color if extra_backdrop else "", "extra_time": extra_time,
+        "enhanced_copies": enhanced, "extra_enhanced_qty": enhanced_qty, "has_balloons": as_bool(form.get("has_balloons", False)),
+        "balloon_qty": balloon_qty, "child_types": child_types, "total_children": total_children,
+    }
 
 
 def parse_booking_date(value):
@@ -616,7 +634,30 @@ def api_admin_update_status():
         existing = next((booking for booking in supabase_bookings() if str(booking.get("id")) == str(booking_id)), None)
         if not existing:
             return jsonify({"success": False, "message": "Booking not found."}), 404
-        require_supabase().table("bookings").update({"status": new_status}).eq("id", booking_id).execute()
+        updates = {"status": new_status}
+        if new_status == "Reschedule" and data.get("new_date") and data.get("new_time"):
+            try:
+                new_date = parse_booking_date(data.get("new_date"))
+            except ValueError as error:
+                return jsonify({"success": False, "message": str(error)}), 400
+            allowed = {label for label, _ in DEFAULT_SLOTS}
+            new_time = data.get("new_time")
+            if new_time not in allowed:
+                return jsonify({"success": False, "message": "Please select a valid time slot."}), 400
+            blocked = get_blocked_dates()
+            info = blocked.get(new_date.isoformat())
+            if info and not info["times"]:
+                reason = info["reason"]
+                return jsonify({"success": False, "message": f"That date is closed{f': {reason}' if reason else '.'}"}), 400
+            manually_blocked = set(info["times"]) if info else set()
+            current_slots = slot_rows(new_date, bypass_cutoff=True, manually_blocked=manually_blocked, block_reason=info["reason"] if info else "")
+            is_same_slot = str(existing.get("date", ""))[:10] == new_date.isoformat() and existing.get("schedule") == new_time
+            slot = next((row for row in current_slots if row["time"] == new_time), None)
+            if slot and slot["disabled"] and not is_same_slot:
+                return jsonify({"success": False, "message": f"That slot is not available: {slot['reason']}."}), 409
+            updates["date"] = new_date.isoformat()
+            updates["schedule"] = new_time
+        require_supabase().table("bookings").update(updates).eq("id", booking_id).execute()
         return jsonify({"success": True})
     except Exception:
         app.logger.exception("Status update failed")
@@ -635,28 +676,25 @@ def api_admin_update_booking():
             return jsonify({"success": False, "message": "Booking not found."}), 404
         totals = calculate_totals(request.form, strict=False)
         backdrop_decide_later = as_bool(request.form.get("backdrop_decide_later"))
-        has_extra_backdrop = as_bool(request.form.get("has_additional_backdrop")) and not backdrop_decide_later
         actual_amount_sent = form_int("actual_amount_sent", default=0, maximum=1_000_000) or totals["downpayment"]
-        enhanced_copies_value = request.form.get("enhanced_copies", "0")
-        enhanced_qty_default = 11 if enhanced_copies_value == "more_10" else 0
         updates = {
             "package": request.form.get("package"), "package_type": request.form.get("package_type"),
             "is_student": str(as_bool(request.form.get("is_student"))).lower(),
-            "extra_pax": form_int("extra_pax", maximum=PAX_MAX.get(request.form.get("package", ""), 9)),
-            "has_pet": str(as_bool(request.form.get("has_pet"))).lower(),
-            "extra_pet": form_int("extra_pet", maximum=4) if as_bool(request.form.get("has_pet")) else 0,
-            "pet_size": request.form.get("pet_size", "").strip() if as_bool(request.form.get("has_pet")) else "",
-            "preferred_backdrop": "Decide on the day of session" if backdrop_decide_later else ",".join(request.form.getlist("preferred_backdrop")),
-            "extra_time": form_int("extra_time"), "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
-            "digital_copies": totals["digital_copies"], "enhanced_copies": enhanced_copies_value,
-            "extra_enhanced_qty": form_int("extra_enhanced_qty", enhanced_qty_default, 100),
-            "extra_backdrop": 1 if has_extra_backdrop else 0,
-            "additional_backdrop_color": request.form.get("additional_backdrop_color", "").strip() if has_extra_backdrop else "",
-            "has_children": str(as_bool(request.form.get("has_children"))).lower(),
-            "children_types": ",".join(request.form.getlist("children_types")) if as_bool(request.form.get("has_children")) else "",
-            "total_children": form_int("total_children", maximum=20) if as_bool(request.form.get("has_children")) else 0,
-            "has_balloons": str(as_bool(request.form.get("has_balloons"))).lower(),
-            "balloon_qty": form_int("balloon_qty"), "balloon_numbers": request.form.get("balloon_numbers", "").strip(),
+            "extra_pax": totals["extra_pax"],
+            "has_pet": str(totals["has_pet"]).lower(),
+            "extra_pet": totals["extra_pet"] if totals["has_pet"] else 0,
+            "pet_size": totals["pet_size"],
+            "preferred_backdrop": "Decide on the day of session" if backdrop_decide_later else ",".join(totals["preferred_backdrop_list"]),
+            "extra_time": totals["extra_time"], "has_digital_copies": str(as_bool(request.form.get("has_digital_copies"))).lower(),
+            "digital_copies": totals["digital_copies"], "enhanced_copies": totals["enhanced_copies"],
+            "extra_enhanced_qty": totals["extra_enhanced_qty"] if totals["enhanced_copies"] == "more_10" else 0,
+            "extra_backdrop": totals["extra_backdrop"],
+            "additional_backdrop_color": totals["additional_backdrop_color"],
+            "has_children": str(bool(totals["child_types"])).lower(),
+            "children_types": ",".join(totals["child_types"]),
+            "total_children": totals["total_children"],
+            "has_balloons": str(totals["has_balloons"]).lower(),
+            "balloon_qty": totals["balloon_qty"], "balloon_numbers": request.form.get("balloon_numbers", "").strip() if totals["has_balloons"] else "",
             "grand_total": totals["total"], "downpayment": totals["downpayment"], "balance": totals["balance"],
             "actual_amount_sent": actual_amount_sent,
         }

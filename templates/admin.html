@@ -129,6 +129,17 @@
   <dialog id="bookingDialog"><div class="dialog-body"><h2>Reservation details</h2><div id="bookingDetails" class="detail-list"></div><div class="dialog-actions"><button class="btn" id="editBookingBtn">Edit add-ons</button><button class="btn" id="generateReceiptBtn">Generate receipt</button><button class="btn" data-close-dialog>Close</button></div></div></dialog>
   <dialog id="imageDialog"><div class="dialog-body"><img id="proofImage" src="" alt="Payment proof" style="display:block;max-width:100%;max-height:70vh;margin:auto;border-radius:10px"><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
 
+  <dialog id="backdropPreviewDialog"><div class="dialog-body"><img id="backdropPreviewImg" src="" alt="Suitable outfit colors" style="display:block;max-width:100%;max-height:70vh;margin:auto;border-radius:10px"><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
+
+  <dialog id="rescheduleDialog"><div class="dialog-body"><h2>Reschedule booking</h2><p class="muted" style="margin:0 0 15px">Pick the new date and time for this session.</p>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="field"><label for="rescheduleDate">New date</label><input id="rescheduleDate" type="date" required></div>
+      <div class="field"><label for="rescheduleSlot">New time</label><select id="rescheduleSlot" required><option value="">Select a date first</option></select></div>
+    </div>
+    <p id="rescheduleError" class="error-text"></p>
+    <div class="dialog-actions"><button class="btn" type="button" id="rescheduleCancelBtn">Cancel</button><button class="btn primary" type="button" id="rescheduleConfirmBtn">Confirm reschedule</button></div>
+  </div></dialog>
+
   <dialog id="blockedDatesDialog"><div class="dialog-body" style="max-width:520px"><h2>Blocked dates</h2><p class="muted" style="margin:0 0 15px">Dates blocked here cannot be booked by clients on the website. Leave "Block entire day" checked for a full-day block, or uncheck it to block only specific times (e.g. a half-day errand).</p><form id="blockDateForm" style="margin-bottom:18px"><div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="blockDateInput">Date</label><input id="blockDateInput" type="date" required></div><div class="field"><label for="blockReasonInput">Reason (optional)</label><input id="blockReasonInput" placeholder="Emergency, personal errand…"></div></div><label style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-weight:700"><input type="checkbox" id="blockEntireDay" checked> Block entire day</label><div id="blockTimesGroup" class="block-times-grid" hidden></div><button class="btn primary wide" type="submit" style="display:block;width:100%">Block this date</button></form><div id="blockedDatesList" class="detail-list"></div><div class="dialog-actions"><button class="btn" data-close-dialog>Close</button></div></div></dialog>
 
   <dialog id="walkinDialog" style="width:min(820px,calc(100% - 28px))"><div class="dialog-body" style="max-width:none;max-height:85vh;overflow:auto">
@@ -174,7 +185,7 @@
 
   <dialog id="editBookingDialog" style="width:min(820px,calc(100% - 28px))"><div class="dialog-body" style="max-width:none;max-height:85vh;overflow:auto">
     <h2>Edit booking add-ons</h2><p class="muted" style="margin:0 0 15px">Use this if the client adds or changes something on the day of the shoot. Date, time, and customer info are not changed here.</p>
-    <form id="editBookingForm">
+    <form id="editBookingForm" novalidate>
       <input type="hidden" id="ebId">
       <div class="form-grid" style="grid-template-columns:repeat(2,1fr)">
         <div class="field"><label for="ebPackage">Group size</label><select id="ebPackage"><option value="Solo">Solo, 1 pax</option><option value="Duo">Duo, 1 to 2 pax</option><option value="Squad">Squad, 3 to 5 pax</option><option value="Party">Party, 6 to 8 pax</option></select></div>
@@ -189,7 +200,6 @@
         <div class="field" id="ebPetGroup" hidden><div style="display:flex;gap:8px"><select id="ebPetSize"><option value="Small">Small · max 4</option><option value="Medium">Medium · max 2</option><option value="Large">Large · max 1</option></select><select id="ebExtraPet"></select></div></div>
         <div class="field"><label for="ebExtraTime">Time extension</label><select id="ebExtraTime"><option value="0">None</option><option value="10">+10 min, ₱99</option><option value="15">+15 min, ₱149</option><option value="20">+20 min, ₱199</option><option value="30">+30 min, ₱299</option></select></div>
         <div class="field"><label for="ebEnhanced">Enhanced copies</label><select id="ebEnhanced"><option value="0">None</option><option value="1_2">1 to 2, ₱49</option><option value="3_5">3 to 5, ₱99</option><option value="6_10">6 to 10, ₱199</option><option value="more_10">More than 10, ₱25 each</option></select></div>
-        <div class="field" id="ebEnhancedQtyGroup" hidden><label for="ebEnhancedQty">Total enhanced photos</label><input id="ebEnhancedQty" type="number" min="11" placeholder="e.g. 15"></div>
         <div class="field"><label><input type="checkbox" id="ebDigitalCopies"> Get Digital Copies</label></div>
       </div>
       <div class="field"><label><input type="checkbox" id="ebHasChildren"> Children joining?</label><div id="ebChildrenGroup" hidden style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center"><label><input type="checkbox" id="ebChildInfant" value="Infant"> Infant</label><label><input type="checkbox" id="ebChildToddler" value="Toddler"> Toddler</label><label><input type="checkbox" id="ebChildKid" value="Kid"> Kid</label><input id="ebTotalChildren" type="number" min="1" max="20" style="width:90px" placeholder="Total"></div></div>
@@ -259,7 +269,32 @@
     function downloadCSV(filename, rows) { const csv=rows.map(row=>row.map(csvCell).join(',')).join('\r\n'); const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
     function exportBookings() { const header=['Date','Time','Customer','Email','Contact','Social','Package','Package Type','Student','Extra Pax','Preferred Backdrop','Additional Backdrop','Pet Size','Pets','Children Types','Total Children','Notes','Grand Total','Required Downpayment','Actual Amount Sent','Remaining Balance','Status']; const rows=filteredBookings().map(b=>[b.date,b.schedule,b.customer_name||b.name,b.email,b.contact_no,b.social_media,b.package,b.package_type,(b.is_student==='true'||b.is_student===true)?'Yes':'No',b.extra_pax||0,b.preferred_backdrop||'',b.additional_backdrop_color||'',b.pet_size||'',b.extra_pet||0,b.children_types||'',b.total_children||0,b.notes||'',b.grand_total,b.downpayment,b.actual_amount_sent||b.downpayment,bookingBalance(b),b.status]); if(!rows.length){showToast('No bookings to export for this view.',true);return;} downloadCSV(`b-lens-bookings-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Bookings exported.'); }
     function exportTransactions() { const header=['Date','Type','Category','Description','Account','Amount']; const rows=state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>[t.date,t.type,t.category,t.description,t.account||'Cash',t.amount]); if(!rows.length){showToast('No transactions to export.',true);return;} downloadCSV(`b-lens-transactions-${new Date().toISOString().slice(0,10)}.csv`,[header,...rows]); showToast('Transactions exported.'); }
-    async function updateStatus(id,status,select) { select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})}); showToast('Booking status updated.'); await loadBookings(); if(status==='Confirmed') openSessionReceipt(id); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { select.disabled=false; } }
+    async function updateStatus(id,status,select,extra) { if(select) select.disabled=true; try { await api('/api/admin/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({id,status},extra||{}))}); showToast('Booking status updated.'); await loadBookings(); if(status==='Confirmed') openSessionReceipt(id); } catch(error) { showToast(error.message,true); await loadBookings(); } finally { if(select) select.disabled=false; } }
+    let rescheduleContext = null;
+    async function rescheduleFetchSlots() {
+      const dateVal=$('rescheduleDate').value, select=$('rescheduleSlot'); select.innerHTML='<option value="">Loading…</option>';
+      if(!dateVal){ select.innerHTML='<option value="">Select a date first</option>'; return; }
+      try { const data=await api(`/api/admin/walkin-slots?date=${encodeURIComponent(dateVal)}`); select.innerHTML='<option value="">Select a slot</option>'+(data.slots||[]).map(s=>`<option value="${s.time}" ${s.disabled?'disabled':''}>${s.time}${s.disabled?` · ${s.reason}`:''}</option>`).join(''); } catch(error){ select.innerHTML='<option value="">Could not load slots</option>'; showToast(error.message,true); }
+    }
+    function openRescheduleDialog(id, select, previousValue) {
+      rescheduleContext = { id, select, previousValue };
+      $('rescheduleError').textContent=''; $('rescheduleDate').value=''; $('rescheduleSlot').innerHTML='<option value="">Select a date first</option>';
+      $('rescheduleDialog').showModal();
+    }
+    async function confirmReschedule() {
+      $('rescheduleError').textContent='';
+      if (!$('rescheduleDate').value || !$('rescheduleSlot').value) { $('rescheduleError').textContent='Please choose both a new date and time.'; return; }
+      const button=$('rescheduleConfirmBtn'); button.disabled=true;
+      try {
+        await updateStatus(rescheduleContext.id, 'Reschedule', rescheduleContext.select, { new_date: $('rescheduleDate').value, new_time: $('rescheduleSlot').value });
+        if (rescheduleContext) rescheduleContext.select.dataset.prevValue = 'Reschedule';
+        rescheduleContext = null;
+        $('rescheduleDialog').close();
+      } catch(error) { $('rescheduleError').textContent = error.message; }
+      finally { button.disabled=false; }
+    }
+    function cancelReschedule() { $('rescheduleDialog').close(); }
+    $('rescheduleDialog').addEventListener('close', () => { if (rescheduleContext) { rescheduleContext.select.value = rescheduleContext.previousValue; rescheduleContext = null; } });
     async function deleteBooking(id) { if(!confirm('Delete this reservation permanently?'))return; try { await api('/api/admin/delete-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); showToast('Reservation deleted.'); await loadBookings(); } catch(error){showToast(error.message,true);} }
     async function loadTransactions() { const data=await api('/api/admin/transactions'); state.transactions=data.transactions||[]; const inc=state.transactions.filter(t=>t.type==='Incoming').reduce((s,t)=>s+Number(t.amount||0),0), out=state.transactions.filter(t=>t.type!=='Incoming').reduce((s,t)=>s+Number(t.amount||0),0); $('totalIncoming').textContent=money(inc); $('totalOutgoing').textContent=money(out); $('currentBalance').textContent=money(inc-out); $('transactionCount').textContent=state.transactions.length; $('transactionsBody').innerHTML=state.transactions.length?state.transactions.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(t=>`<tr><td>${escapeHtml(t.date)}</td><td><span class="badge ${t.type==='Incoming'?'confirmed':'cancelled'}">${escapeHtml(t.type)}</span></td><td>${escapeHtml(t.category)}</td><td>${escapeHtml(t.description)}</td><td>${escapeHtml(t.account||'Cash')}</td><td class="${t.type==='Incoming'?'amount-in':'amount-out'}">${money(t.amount)}</td><td><button class="icon-btn danger" data-action="delete-transaction" data-id="${escapeHtml(t.id)}">×</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No transactions yet.</td></tr>'; }
     async function addTransaction(event) { event.preventDefault(); const payload={date:$('txDate').value,type:$('txType').value,category:$('txCategory').value.trim(),description:$('txDescription').value.trim(),account:$('txAccount').value,amount:$('txAmount').value}; try { await api('/api/admin/transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); event.target.reset(); $('txDate').value=new Date().toISOString().slice(0,10); showToast('Transaction added.'); await loadTransactions(); } catch(error){showToast(error.message,true);} }
@@ -401,7 +436,11 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
     const WI_TIME_PRICES = { 10:99, 15:149, 20:199, 30:299 };
     const WI_PAX_MAX = { Solo:9, Duo:8, Squad:5, Party:2 };
     const WI_PET_MAX = { Small:4, Medium:2, Large:1 };
-    const WI_COLORS = ['Beige','White','Pink','Gray'];
+    const WI_COLORS = ['Beige','White','Pink','Gray','Mottled'];
+    const BACKDROP_PREVIEW_IMAGES = { Beige: '/static/backdrops/wheat_beige.jpg', White: '/static/backdrops/arctic_white.jpg', Pink: '/static/backdrops/baby_pink.jpg', Gray: '/static/backdrops/pursuit_gray.jpg', Mottled: '/static/backdrops/mottled.jpg' };
+    function openBackdropPreview(color) { $('backdropPreviewImg').src = BACKDROP_PREVIEW_IMAGES[color] || ''; $('backdropPreviewDialog').showModal(); }
+    function wiMottledAllowed() { return ['Solo','Duo'].includes($('wiPackage').value); }
+    function wiAvailableColors() { return WI_COLORS.filter(c => c !== 'Mottled' || wiMottledAllowed()); }
     let wiTotals = { total:0, dp:0, bal:0, digitalCopies:'0' };
 
     function wiRequiredBackdrops() { return WI_RATES[$('wiPackage').value][$('wiPackageType').value].baseBd; }
@@ -416,7 +455,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       const required = wiRequiredBackdrops();
       const container = $('wiBackdropChoices');
       const previouslyChecked = Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
-      container.innerHTML = WI_COLORS.map(c=>`<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="wi-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label>`).join('');
+      container.innerHTML = wiAvailableColors().map(c=>`<span style="display:inline-flex;align-items:center;gap:4px"><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="wi-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label><button type="button" class="icon-btn" style="padding:2px 8px" onclick="openBackdropPreview('${c}')" title="Preview ${c}">👁</button></span>`).join('');
       wiEnforceBackdropLimit();
       container.querySelectorAll('.wi-backdrop').forEach(box=>box.addEventListener('change', ()=>{ wiEnforceBackdropLimit(); wiUpdateExtraBackdropOptions(); wiCalculateTotal(); }));
       wiUpdateExtraBackdropOptions();
@@ -431,7 +470,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
     }
     function wiUpdateExtraBackdropOptions() {
       const preferred = Array.from(document.querySelectorAll('.wi-backdrop:checked')).map(b=>b.value);
-      const available = WI_COLORS.filter(c=>!preferred.includes(c));
+      const available = wiAvailableColors().filter(c=>!preferred.includes(c));
       const select = $('wiExtraBackdropColor'), current = select.value;
       select.innerHTML = '<option value="">Select a color</option>' + available.map(c=>`<option value="${c}">${c}</option>`).join('');
       if (available.includes(current)) select.value = current;
@@ -519,10 +558,12 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       $('ebExtraBackdropField').style.display = decideLater ? 'none' : '';
       if (decideLater) { $('ebHasExtraBackdrop').checked = false; $('ebExtraBackdropGroup').hidden = true; }
     }
+    function ebMottledAllowed() { return ['Solo','Duo'].includes($('ebPackage').value); }
+    function ebAvailableColors() { return WI_COLORS.filter(c => c !== 'Mottled' || ebMottledAllowed()); }
     function ebRenderBackdropChoices(preselect) {
       const container = $('ebBackdropChoices');
       const previouslyChecked = preselect || Array.from(container.querySelectorAll('input:checked')).map(i=>i.value);
-      container.innerHTML = WI_COLORS.map(c=>`<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="eb-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label>`).join('');
+      container.innerHTML = ebAvailableColors().map(c=>`<span style="display:inline-flex;align-items:center;gap:4px"><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="eb-backdrop" value="${c}" ${previouslyChecked.includes(c)?'checked':''}> ${c}</label><button type="button" class="icon-btn" style="padding:2px 8px" onclick="openBackdropPreview('${c}')" title="Preview ${c}">👁</button></span>`).join('');
       ebEnforceBackdropLimit();
       container.querySelectorAll('.eb-backdrop').forEach(box=>box.addEventListener('change', ()=>{ ebEnforceBackdropLimit(); ebUpdateExtraBackdropOptions(); ebCalculateTotal(); }));
       ebUpdateExtraBackdropOptions();
@@ -537,7 +578,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
     }
     function ebUpdateExtraBackdropOptions() {
       const preferred = Array.from(document.querySelectorAll('.eb-backdrop:checked')).map(b=>b.value);
-      const available = WI_COLORS.filter(c=>!preferred.includes(c));
+      const available = ebAvailableColors().filter(c=>!preferred.includes(c));
       const select = $('ebExtraBackdropColor'), current = select.value;
       select.innerHTML = '<option value="">Select a color</option>' + available.map(c=>`<option value="${c}">${c}</option>`).join('');
       if (available.includes(current)) select.value = current;
@@ -556,7 +597,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       if ($('ebDigitalCopies').checked) { const price = sessionMinutes<=15?99:sessionMinutes<=25?149:199; ebTotals.digitalCopies = sessionMinutes<=15?'10_15':sessionMinutes<=25?'20_25':'30_40'; total += price; }
       const enhanced=$('ebEnhanced').value, enhancedPrices={'1_2':49,'3_5':99,'6_10':199};
       if (enhancedPrices[enhanced]) total += enhancedPrices[enhanced];
-      if (enhanced==='more_10') { $('ebEnhancedQtyGroup').hidden=false; total += Math.max(0, Number($('ebEnhancedQty').value)||0) * 25; } else $('ebEnhancedQtyGroup').hidden=true;
+      if (enhanced==='more_10') { total += 11 * 25; }
       if ($('ebHasExtraBackdrop').checked && $('ebExtraBackdropColor').value && !$('ebBackdropDecideLater').checked) total += 99;
       if ($('ebHasBalloons').checked) { $('ebBalloonGroup').hidden=false; total += (Number($('ebBalloonQty').value)||1) * 39; } else $('ebBalloonGroup').hidden=true;
       $('ebPetGroup').hidden = !$('ebHasPet').checked;
@@ -585,7 +626,6 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       $('ebPetGroup').hidden = !$('ebHasPet').checked;
       $('ebExtraTime').value = b.extra_time || '0';
       $('ebEnhanced').value = b.enhanced_copies || '0';
-      $('ebEnhancedQty').value = b.extra_enhanced_qty || '';
       $('ebDigitalCopies').checked = b.has_digital_copies==='true'||b.has_digital_copies===true;
       $('ebHasChildren').checked = b.has_children==='true'||b.has_children===true;
       const childTypes = String(b.children_types||'').split(',').map(c=>c.trim());
@@ -618,7 +658,7 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
       formData.set('extra_pax',$('ebExtraPax').value);
       formData.set('has_pet',$('ebHasPet').checked); formData.set('pet_size',$('ebPetSize').value); formData.set('extra_pet',$('ebExtraPet').value||'');
       formData.set('extra_time',$('ebExtraTime').value);
-      formData.set('enhanced_copies',$('ebEnhanced').value); formData.set('extra_enhanced_qty',$('ebEnhancedQty').value||'');
+      formData.set('enhanced_copies',$('ebEnhanced').value); formData.set('extra_enhanced_qty','');
       formData.set('has_digital_copies',$('ebDigitalCopies').checked); formData.set('digital_copies',ebTotals.digitalCopies);
       formData.set('has_children',$('ebHasChildren').checked); childTypes.forEach(t=>formData.append('children_types',t)); formData.set('total_children',$('ebTotalChildren').value||'');
       formData.set('has_balloons',$('ebHasBalloons').checked); formData.set('balloon_qty',$('ebBalloonQty').value||''); formData.set('balloon_numbers',$('ebBalloonNumbers').value.trim());
@@ -633,7 +673,11 @@ I authorize B-Lens Self Portrait Studio to collect and process my personal infor
     }
 
     document.addEventListener('click',(event)=>{ const action=event.target.closest('[data-action]')?.dataset.action; if(action==='details')showBooking(event.target.closest('[data-action]').dataset.id); if(action==='receipt')openSessionReceipt(event.target.closest('[data-action]').dataset.id); if(action==='message')generateReceipt(event.target.closest('[data-action]').dataset.id); if(action==='image'){ $('proofImage').src=event.target.closest('[data-action]').dataset.src; $('imageDialog').showModal(); } if(action==='delete-booking')deleteBooking(event.target.closest('[data-action]').dataset.id); if(action==='delete-transaction')deleteTransaction(event.target.closest('[data-action]').dataset.id); if(action==='delete-inventory')deleteInventory(event.target.closest('[data-action]').dataset.id); if(action==='stock')updateStock(event.target.closest('[data-action]').dataset.id,Number(event.target.closest('[data-action]').dataset.change)); if(action==='unblock-date')removeBlockedDate(event.target.closest('[data-action]').dataset.date); if(event.target.matches('[data-close-dialog]'))event.target.closest('dialog').close(); });
-    document.addEventListener('change',(event)=>{ if(event.target.matches('[data-action="status"]'))updateStatus(event.target.dataset.id,event.target.value,event.target); });
+    document.addEventListener('focus',(event)=>{ if(event.target.matches('[data-action="status"]')) event.target.dataset.prevValue = event.target.value; }, true);
+    document.addEventListener('change',(event)=>{ if(event.target.matches('[data-action="status"]')){ const select=event.target, prev=select.dataset.prevValue!==undefined?select.dataset.prevValue:select.value; if(select.value==='Reschedule'){ openRescheduleDialog(select.dataset.id, select, prev); } else { updateStatus(select.dataset.id,select.value,select); select.dataset.prevValue = select.value; } } });
+    $('rescheduleConfirmBtn').addEventListener('click', confirmReschedule);
+    $('rescheduleCancelBtn').addEventListener('click', cancelReschedule);
+    $('rescheduleDate').addEventListener('change', rescheduleFetchSlots);
     document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab))); $('bookingSearch').addEventListener('input',renderBookings); $('bookingFilter').addEventListener('change',renderBookings); $('calendarToggle').addEventListener('click',()=>{const calendar=$('calendarView');calendar.hidden=!calendar.hidden;$('listView').hidden=!calendar.hidden;$('calendarToggle').textContent=calendar.hidden?'Calendar':'List';}); document.querySelectorAll('[data-calendar]').forEach(btn=>btn.addEventListener('click',()=>{const action=btn.dataset.calendar;if(action==='today')state.calendarDate=new Date();else state.calendarDate.setMonth(state.calendarDate.getMonth()+(action==='next'?1:-1));renderCalendar();})); $('transactionForm').addEventListener('submit',addTransaction); $('inventoryForm').addEventListener('submit',addInventory); $('refreshButton').addEventListener('click',()=>loadAll().catch(e=>showToast(e.message,true))); $('exportBookingsBtn').addEventListener('click',exportBookings); $('exportTransactionsBtn').addEventListener('click',exportTransactions); $('logoutButton').addEventListener('click',async()=>{await fetch('/api/admin/logout',{method:'POST'});showLogin();}); $('loginForm').addEventListener('submit',login); $('txDate').value=new Date().toISOString().slice(0,10);
     $('generateReceiptBtn').addEventListener('click',()=>generateReceipt(state.selectedBookingId));
     $('editBookingBtn').addEventListener('click',()=>openEditBooking(state.selectedBookingId));
